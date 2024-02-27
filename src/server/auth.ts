@@ -257,7 +257,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  adapter: PrismaAdapter(db) as Adapter,
+  // adapter: PrismaAdapter(db) as Adapter,
 };
 
 /**

@@ -25,5 +25,5 @@ model Employee {
 model Category {
     id          String    @id @default(uuid()) @map("_id")
     name        String
-    employees   Employee[] // Adding this line defines the opposite relation
+    employees   Employee[]
 }
