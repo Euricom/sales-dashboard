@@ -1,11 +1,25 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-
 import { api } from "~/utils/api";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const router = useRouter();
+
+  const handleURLReceived = (url: string) => {
+    let code = null;
+    // Extract the refresh token from the redirected URL
+    if (window.location.href != "http://localhost:3000/") {
+      const urlParams = new URLSearchParams(window.location.href.split("?")[1]);
+      code = urlParams.get("code");
+    }
+
+    if (code == null) {
+      router.push(url);
+    }
+  };
 
   return (
     <>
@@ -44,10 +58,8 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
             <AuthShowcase />
+            <GetRedirectionURLShowcase onURLReceived={handleURLReceived} />
           </div>
         </div>
       </main>
@@ -77,4 +89,23 @@ function AuthShowcase() {
       </button>
     </div>
   );
+}
+interface GetRedirectionURLShowcaseProps {
+  onURLReceived: (url: string) => void;
+}
+
+function GetRedirectionURLShowcase({
+  onURLReceived,
+}: GetRedirectionURLShowcaseProps) {
+  const { data: url } = api.teamleader.getRedirectionURL.useQuery(
+    undefined, // no input
+  );
+
+  useEffect(() => {
+    if (url) {
+      onURLReceived(url);
+    }
+  }, [url, onURLReceived]);
+
+  return null;
 }
