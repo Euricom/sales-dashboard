@@ -5,8 +5,15 @@ import Link from "next/link";
 import { api } from "~/utils/api";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const employeesData = api.sharePoint.getEmployeesData.useQuery();
 
+  if (employeesData.error) {
+    console.error(employeesData.error);
+    return <div>Error: {employeesData.error.message}</div>;
+  }
+  if (employeesData.isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
       <Head>
@@ -44,9 +51,6 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
             <AuthShowcase />
           </div>
         </div>
@@ -60,7 +64,7 @@ function AuthShowcase() {
 
   const { data: secretMessage } = api.post.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: sessionData?.user !== undefined }
+    { enabled: sessionData?.user !== undefined },
   );
 
   return (
