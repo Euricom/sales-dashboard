@@ -30,8 +30,6 @@ export const env = createEnv({
     AZURE_AD_CLIENT_ID: z.string().trim(),
     AZURE_AD_CLIENT_SECRET: z.string().trim(),
     AZURE_AD_TENANT_ID: z.string().trim(),
-   TEAMLEADER_EMAIL: z.string().trim(),
-   TEAMLEADER_PASSWORD: z.string().trim(),
    TEAMLEADER_CLIENT_ID: z.string().trim(),
    TEAMLEADER_CLIENT_SECRET: z.string().trim(),
    TEAMLEADER_AUTHORIZATION_URL: z.string().trim(),
@@ -61,8 +59,6 @@ export const env = createEnv({
     AZURE_AD_CLIENT_SECRET: process.env.AZURE_AD_CLIENT_SECRET,
     AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
 
-    TEAMLEADER_EMAIL: process.env.TEAMLEADER_EMAIL,
-    TEAMLEADER_PASSWORD: process.env.TEAMLEADER_PASSWORD,
     TEAMLEADER_CLIENT_ID: process.env.TEAMLEADER_CLIENT_ID,
     TEAMLEADER_CLIENT_SECRET: process.env.TEAMLEADER_CLIENT_SECRET,
     TEAMLEADER_AUTHORIZATION_URL: process.env.TEAMLEADER_AUTHORIZATION_URL,
