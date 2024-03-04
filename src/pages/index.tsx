@@ -14,6 +14,8 @@ export default function Home() {
   if (employeesData.isLoading) {
     return <div>Loading...</div>;
   }
+  // console.log(employeesData.data?.value.map((e) => e.fields.Title));
+
   return (
     <>
       <Head>

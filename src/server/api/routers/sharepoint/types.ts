@@ -16,4 +16,14 @@ export interface SharePointContact {
   lastModifiedDateTime: string;
   webUrl: string;
   createdBy: CreatedBy;
+  value : {
+    fields: {
+      Title: string;
+      City: string;
+      Job_x0020_title: string;
+      Level: string;
+      Status: string;
+      Contract_x0020_Substatus: string;
+    }
+  }[];
 }

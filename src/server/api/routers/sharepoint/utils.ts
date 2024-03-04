@@ -15,12 +15,12 @@ export const getToken = async () => {
   const token = await azureClient.acquireTokenByClientCredential({
     scopes: ["https://graph.microsoft.com/.default"],
   });
-  console.log(token)
+
   return token?.accessToken;
 };
 
 export const getEmployeesData = async (accessToken: string | undefined) => {
-  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items`;
+  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=Title,City,Job_x0020_title,Level,Status,Contract_x0020_Substatus)&top=20`;
 
   const options = {
     method: "GET",
