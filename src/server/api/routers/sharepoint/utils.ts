@@ -15,6 +15,7 @@ export const getToken = async () => {
   const token = await azureClient.acquireTokenByClientCredential({
     scopes: ["https://graph.microsoft.com/.default"],
   });
+  console.log(token)
   return token?.accessToken;
 };
 
@@ -35,7 +36,7 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
     }
     const data: SharePointContact =
       (await response.json()) as unknown as SharePointContact;
-    console.log(data);
+      return data;
   } catch (error) {
     console.error(error);
   }
