@@ -1,6 +1,6 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { env } from "~/env";
-import { SharePointContact } from "./types";
+import { type SharePointContact } from "./types";
 
 const CONTACT_LIST_ID = "dda5396a-4f95-4d63-b9ae-3ce4e6fc0fcf";
 export const azureClient = new ConfidentialClientApplication({
@@ -20,7 +20,7 @@ export const getToken = async () => {
 };
 
 export const getEmployeesData = async (accessToken: string | undefined) => {
-  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=Title,City,Job_x0020_title,Level,Status,Contract_x0020_Substatus)&top=20`;
+  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=Title,City,Job_x0020_title,Level,Status,Contract_x0020_Substatus)`;
 
   const options = {
     method: "GET",
