@@ -4,6 +4,7 @@ import Link from "next/link";
 import { api } from "~/utils/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 export default function Home() {
   const router = useRouter();
@@ -19,8 +20,8 @@ export default function Home() {
     if (code == null) {
       router.push(url);
     }
-
-    return code;
+    if (code) return code;
+    else return "";
   };
 
   return (
@@ -97,11 +98,22 @@ interface GetRedirectionURLShowcaseProps {
   onURLReceived: (url: string) => void;
 }
 
+const AccessTokenComponent = ({ code }: { code: string }) => {
+  const accessToken = useAccessToken(code);
+  //console.log(code, "front-end code");
+  useEffect(() => {
+    if (accessToken) {
+      // Do something with accessToken
+    }
+  }, [accessToken]);
+
+  return null;
+};
+
 const GetRedirectionURLShowcase = ({
   onURLReceived,
 }: GetRedirectionURLShowcaseProps) => {
   const [code, setCode] = useState<string | void | null>(null);
-  const fnCall = useAccessToken(String(code));
   const { data: url } = api.teamleader.getRedirectionURL.useQuery(
     undefined, // no input
   );
@@ -110,23 +122,38 @@ const GetRedirectionURLShowcase = ({
     if (url) {
       // Get the access token from teamleader with the code from the URL
       setCode(onURLReceived(url));
-      console.log(code, "code");
-
-      fnCall();
     }
-  }, [url, onURLReceived, code]);
+  }, [url, onURLReceived]);
 
-  // return null;
-  return <div>{code !== null && GetAccessToken(String(code))}</div>;
+  return code ? <AccessTokenComponent code={String(code)} /> : null;
 };
 
 const useAccessToken = (code: string) => {
-  return () => {
-    const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-    console.log(accessToken, "front-end access token");
-    return accessToken
-  }
-  // const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-  // console.log(accessToken, "front-end access token");
-  // return null;
+  const { data: tokens, isLoading } =
+    api.teamleader.getAccessToken.useQuery(code);
+  useEffect(() => {
+    console.log("isLoading:", isLoading); // Debug log
+    console.log("tokens:", tokens); // Debug log
+    if (!isLoading && tokens && Object.keys(tokens).length > 0) {
+      const tokenData = tokens as unknown as {
+        access_token: string;
+        refresh_token: string;
+        expires_in: number; // assuming expires_in is a number representing seconds
+      };
+      console.log(tokenData);
+      const expirationDate = new Date();
+      expirationDate.setTime(
+        expirationDate.getTime() + tokenData.expires_in * 1000,
+      );
+      Cookies.set("accessToken", tokenData.access_token, {
+        expires: expirationDate,
+      });
+      Cookies.set("refreshToken", tokenData.refresh_token, {
+        expires: expirationDate,
+      });
+      console.log(Cookies.get("accessToken"));
+      console.log(Cookies.get("refreshToken"));
+    }
+  }, [tokens, isLoading]);
+  return tokens;
 };
