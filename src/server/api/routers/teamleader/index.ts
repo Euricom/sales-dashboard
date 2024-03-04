@@ -1,7 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 import z from "zod";
-import { get } from "http";
 
 export const teamleaderRouter = createTRPCRouter({
   getRedirectionURL: protectedProcedure.query(() => {
@@ -9,7 +8,7 @@ export const teamleaderRouter = createTRPCRouter({
   }),
 
   getDeals: protectedProcedure.input(z.string()).query(async (authCode) => {
-    getAccessToken(authCode);
+    // getAccessToken(authCode);
     // const url = `${env.TEAMLEADER_API_URL}/deals`;
     // const options: RequestInit = {
     //   method: "GET",
@@ -39,11 +38,11 @@ export const teamleaderRouter = createTRPCRouter({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          client_id: env.TEAMLEADER_CLIENT_ID,
-          client_secret: env.TEAMLEADER_CLIENT_SECRET,
+          client_id: env.TEAMLEADER_CLIENT_ID ?? "",
+          client_secret: env.TEAMLEADER_CLIENT_SECRET ?? "",
           code: String(authCode), // Convert authCode to string
           grant_type: 'authorization_code',
-          redirect_uri: env.TEAMLEADER_REDIRECT_URL,
+          redirect_uri: env.TEAMLEADER_REDIRECT_URL ?? "",
         }),
       };
       console.log(options);

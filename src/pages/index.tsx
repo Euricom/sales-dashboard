@@ -3,26 +3,21 @@ import Head from "next/head";
 import Link from "next/link";
 import { api } from "~/utils/api";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
-  let code: string | null = null;
-
-  const handleURLReceived = (url: string): string => {
-    // Extract the refresh token from the redirected URL
-    if (window.location.href != "http://localhost:3000/") {
-      const urlParams = new URLSearchParams(window.location.href.split("?")[1]);
-      code = urlParams.get("code") ?? "";
+  const { data: sessionData } = useSession();
+  useEffect(() => {
+    // todo: add check if TL is authenticated already, if not redirect to /teamleader/auth/
+    if (!sessionData?.teamleader) {
+      router.push("/teamleader/auth");
     }
+  }, [router, sessionData]);
 
-    if (code == null) {
-      router.push(url);
-    }
-
-    return code;
-  };
-
+  if (!sessionData) {
+    return null;
+  }
   return (
     <>
       <Head>
@@ -61,8 +56,6 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
-            <GetRedirectionURLShowcase onURLReceived={handleURLReceived} />
-            {/* {code && <GetAccessToken code={String(code)}/>} */}
           </div>
         </div>
       </main>
@@ -93,40 +86,40 @@ function AuthShowcase() {
     </div>
   );
 }
-interface GetRedirectionURLShowcaseProps {
-  onURLReceived: (url: string) => void;
-}
+// interface GetRedirectionURLShowcaseProps {
+//   onURLReceived: (url: string) => void;
+// }
 
-const GetRedirectionURLShowcase = ({
-  onURLReceived,
-}: GetRedirectionURLShowcaseProps) => {
-  const [code, setCode] = useState<string | void | null>(null);
-  const fnCall = useAccessToken(String(code));
-  const { data: url } = api.teamleader.getRedirectionURL.useQuery(
-    undefined, // no input
-  );
+// const GetRedirectionURLShowcase = ({
+//   onURLReceived,
+// }: GetRedirectionURLShowcaseProps) => {
+//   const [code, setCode] = useState<string | void | null>(null);
+//   // const fnCall = useAccessToken(String(code));
+//   const { data: url } = api.teamleader.getRedirectionURL.useQuery(
+//     undefined, // no input
+//   );
 
-  useEffect(() => {
-    if (url) {
-      // Get the access token from teamleader with the code from the URL
-      setCode(onURLReceived(url));
-      console.log(code, "code");
+//   useEffect(() => {
+//     if (url) {
+//       // Get the access token from teamleader with the code from the URL
+//       setCode(onURLReceived(url));
+//       console.log(code, "code");
 
-      fnCall();
-    }
-  }, [url, onURLReceived, code]);
+//       // fnCall();
+//     }
+//   }, [url, onURLReceived, code]);
 
-  // return null;
-  return <div>{code !== null && GetAccessToken(String(code))}</div>;
-};
+//   // return null;
+//   // return <div>{code !== null && GetAccessToken(String(code))}</div>;
+// };
 
-const useAccessToken = (code: string) => {
-  return () => {
-    const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-    console.log(accessToken, "front-end access token");
-    return accessToken
-  }
-  // const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-  // console.log(accessToken, "front-end access token");
-  // return null;
-};
+// const useAccessToken = (code: string) => {
+//   return () => {
+//     const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
+//     console.log(accessToken, "front-end access token");
+//     return accessToken
+//   }
+//   // const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
+//   // console.log(accessToken, "front-end access token");
+//   // return null;
+// };
