@@ -39,6 +39,11 @@ export default {
         900: "#0d4b6d",
         DEFAULT: "#3abef7",
       },
+      'euricom': {
+        primary: "#062A30",
+        secondary: "rgb(6,42,48,0.5)",
+        danger: "#EE2020"
+      },
     },
     extend: {
       screens: {
