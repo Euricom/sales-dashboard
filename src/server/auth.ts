@@ -68,6 +68,11 @@ declare module "next-auth" {
       email: string;
       roles: string[];
     };
+    teamleader: {
+      accessToken: string;
+      refreshToken: string;
+      expirationDate: Date;
+    }
   }
 
   /** Azure AD Account */
