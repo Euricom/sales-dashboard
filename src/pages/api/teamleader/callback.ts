@@ -11,17 +11,19 @@ export default async function handler(
       throw new Error("Invalid code");
     }
 
-    const token = await fetchToken(code);
-    console.log({ token });
+    const tokens = await fetchToken(code);
+    console.log({ tokens });
     // Save the token to your preferred storage
     // For example, you can use cookies or localStorage
     // save to localstorage
-    if (token) {
-      localStorage.setItem("token", token);
+    if (tokens?.access_token && tokens.refresh_token) {
+      res.setHeader("Set-Cookie", [
+        `access_token=${tokens.access_token}; HttpOnly; Path=/; Expires=${new Date(Date.now() + tokens.expires_in * 1000).toString()}`,
+        `refresh_token=${tokens.refresh_token}; HttpOnly; Path=/;`
+      ]);
       res.redirect("/");
-      res.setHeader("Set-Cookie", `token=${token}; HttpOnly`);
     } else {
-      res.status(401).json({ error: "Token not valid", token });
+      res.status(401).json({ error: "Token not valid", tokens });
     }
   } catch (error) {
     console.error("Error fetching token:", error);
