@@ -7,26 +7,26 @@ export const teamleaderRouter = createTRPCRouter({
     return `https://focus.teamleader.eu/oauth2/authorize?client_id=${env.TEAMLEADER_CLIENT_ID}&response_type=code&redirect_uri=${env.TEAMLEADER_REDIRECT_URL}`; // Replace with your desired URL
   }),
 
-  //getDeals: protectedProcedure.input(z.string()).query(async (authCode) => {
-    // getAccessToken(authCode);
-    // const url = `${env.TEAMLEADER_API_URL}/deals`;
-    // const options: RequestInit = {
-    //   method: "GET",
-    //   headers: {
-    //     Authorization: `Bearer ${env.TEAMLEADER_ACCESS_TOKEN}`,
-    //   },
-    // };
-    // try {
-    //   const response = await fetch(url, options);
-    //   if (!response.ok) {
-    //     console.error("Failed to fetch data from Teamleader");
-    //   }
-    //   const data = (await response.json()) as unknown as unknown[];
-    //   return data;
-    // } catch (error) {
-    //   console.error(error);
-    // }
-  //}),
+  getDeals: protectedProcedure.input(z.string()).query(async (accessToken) => {
+    const url = `${env.TEAMLEADER_API_URL}/deals.list`;
+    const options: RequestInit = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken.input}`,
+      },
+    };
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        console.error("Failed to fetch data from Teamleader");
+      }
+      const data = await response.json() as unknown as unknown[];
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.error('Error in getDeals:',error);
+    }
+  }),
 
   getAccessToken: protectedProcedure
     .input(z.string())

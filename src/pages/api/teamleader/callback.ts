@@ -18,8 +18,8 @@ export default async function handler(
     // save to localstorage
     if (tokens?.access_token && tokens.refresh_token) {
       res.setHeader("Set-Cookie", [
-        `access_token=${tokens.access_token}; HttpOnly; Path=/; Expires=${new Date(Date.now() + tokens.expires_in * 1000).toString()}`,
-        `refresh_token=${tokens.refresh_token}; HttpOnly; Path=/;`
+        `access_token=${tokens.access_token}; Path=/; Expires=${new Date(Date.now() + tokens.expires_in * 1000).toString()}`,
+        `refresh_token=${tokens.refresh_token}; Path=/;`
       ]);
       res.redirect("/");
     } else {
