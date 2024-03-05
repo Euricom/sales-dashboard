@@ -1,15 +1,17 @@
 import { env } from "~/env";
 
-export async function fetchToken(code: string): Promise<string | undefined> {
+export async function fetchToken(code: string): Promise<Record<string, any> | undefined> {
   const options: RequestInit = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: `{
-      "client_id":${env.TEAMLEADER_CLIENT_ID},
-      "client_secret":${env.TEAMLEADER_CLIENT_SECRET},
-      "code": ${code},
-      "grant_type":"authorization_code",
-      "redirect_uri":${env.TEAMLEADER_REDIRECT_URL}}`,
+    method: "POST",headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: env.TEAMLEADER_CLIENT_ID,
+      client_secret: env.TEAMLEADER_CLIENT_SECRET,
+      code: code, // Convert authCode to string
+      grant_type: 'authorization_code',
+      redirect_uri: env.TEAMLEADER_REDIRECT_URL,
+    }),
   };
 
   try {
@@ -22,7 +24,7 @@ export async function fetchToken(code: string): Promise<string | undefined> {
 
     const data = await response.json();
     console.log({ data, response });
-    return data.access_token;
+    return data;
   } catch (error) {
     console.error(error);
   }

@@ -7,7 +7,7 @@ export const teamleaderRouter = createTRPCRouter({
     return `https://focus.teamleader.eu/oauth2/authorize?client_id=${env.TEAMLEADER_CLIENT_ID}&response_type=code&redirect_uri=${env.TEAMLEADER_REDIRECT_URL}`; // Replace with your desired URL
   }),
 
-  getDeals: protectedProcedure.input(z.string()).query(async (authCode) => {
+  //getDeals: protectedProcedure.input(z.string()).query(async (authCode) => {
     // getAccessToken(authCode);
     // const url = `${env.TEAMLEADER_API_URL}/deals`;
     // const options: RequestInit = {
