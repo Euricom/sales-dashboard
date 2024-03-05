@@ -20,12 +20,42 @@ export const getToken = async () => {
 };
 
 export const getEmployeesData = async (accessToken: string | undefined) => {
-  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=Title,City,Job_x0020_title,Level,Status,Contract_x0020_Substatus)`;
+  /** Graph query to get all employees with status 'Bench', 'Starter', 'End Of Contract' or 'Open For New Opportunities' and selecting only the necessary fields
+   * items?
+   * $select=id
+   * &
+   * $expand=
+   *    fields($select=
+   *            Title,
+   *            City,
+   *            Job_x0020_title,
+   *            Level,
+   *            Status,
+   *            Contract_x0020_Substatus
+   *    )
+   * &
+   * $filter=
+   *    fields/Status eq 'Bench'
+   *    or fields/Status eq 'Starter'
+   *    or fields/Contract_x0020_Substatus eq 'End Of Contract'
+   *    or fields/Contract_x0020_Substatus eq 'Open For New Opportunities'
+   */
+  const fields = [
+    "Title",
+    "City",
+    "Job_x0020_title",
+    "Level",
+    "Status",
+    "Contract_x0020_Substatus",
+  ];
+  const fieldsString = fields.join(",");
+  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=${fieldsString})&$filter=fields/Status eq 'Bench' or fields/Status eq 'Starter' or fields/Contract_x0020_Substatus eq 'End Of Contract' or fields/Contract_x0020_Substatus eq 'Open For New Opportunities'`;
 
   const options = {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly", // Bypass the warning for non-indexed queries
     },
   };
 
@@ -36,7 +66,7 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
     }
     const data: SharePointContact =
       (await response.json()) as unknown as SharePointContact;
-      return data;
+    return data;
   } catch (error) {
     console.error(error);
   }
