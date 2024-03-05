@@ -45,7 +45,6 @@ export const teamleaderRouter = createTRPCRouter({
           redirect_uri: env.TEAMLEADER_REDIRECT_URL ?? "",
         }),
       };
-      console.log(options);
       try {
         console.log(authCode, "authCode 2");
         const response = await fetch(url, options);

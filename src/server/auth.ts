@@ -9,9 +9,8 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import AzureProvider from "next-auth/providers/azure-ad";
 import type { JWT } from "next-auth/jwt";
-import {env} from "~/env";
-import {db} from "~/server/db";
-
+import { env } from "~/env";
+import { db } from "~/server/db";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -72,7 +71,7 @@ declare module "next-auth" {
       accessToken: string;
       refreshToken: string;
       expirationDate: Date;
-    }
+    };
   }
 
   /** Azure AD Account */
@@ -196,7 +195,6 @@ export const authOptions: NextAuthOptions = {
       clientId: env.AZURE_AD_CLIENT_ID ?? "",
       clientSecret: env.AZURE_AD_CLIENT_SECRET ?? "",
       tenantId: env.AZURE_AD_TENANT_ID ?? "",
-      // idToken: true,
       checks: ["pkce"], // to prevent CSRF and authorization code injection attacks.
       authorization: {
         params: {
@@ -260,6 +258,17 @@ export const authOptions: NextAuthOptions = {
         session.tokenExpiresIn = timeSpanUntilExpires;
       }
       return session;
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        // httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: env.NODE_ENV === "production",
+      },
     },
   },
   // adapter: PrismaAdapter(db) as Adapter,
