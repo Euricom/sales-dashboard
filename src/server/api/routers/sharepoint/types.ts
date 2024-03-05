@@ -17,6 +17,7 @@ export interface SharePointContact {
   webUrl: string;
   createdBy: CreatedBy;
   value : {
+    id: string;
     fields: {
       Title: string;
       City: string;
