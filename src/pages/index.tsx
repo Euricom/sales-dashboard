@@ -1,19 +1,11 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { useRouter } from "next/navigation";
+import Login from "./teamleader/login";
 
 export default function Home() {
   const { data } = useSession();
-  const router = useRouter();
-  const { data: redirection } = api.teamleader.getRedirectionURL.useQuery(
-    undefined,
-    {},
-  );
-  const loginWithTL = () => {
-    if (!redirection) return;
-    router.push(redirection);
-  };
+
   return (
     <>
       <Head>
@@ -23,7 +15,7 @@ export default function Home() {
       </Head>
       <main style={{ background: "grey" }}>
         <AuthShowcase />
-        {data?.user && <button onClick={loginWithTL}>LOGIN TL</button>}
+        <Login data={{ session: data }} />
       </main>
     </>
   );
