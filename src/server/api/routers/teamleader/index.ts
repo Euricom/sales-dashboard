@@ -26,12 +26,16 @@ export const teamleaderRouter = createTRPCRouter({
     // } catch (error) {
     //   console.error(error);
     // }
-  }),
+  //}),
 
   getAccessToken: protectedProcedure
     .input(z.string())
     .query(async (authCode) => {
-      console.log(authCode, "authCode 1");
+      if (authCode !== undefined && authCode !== null) {
+        console.log(authCode.input);
+      } else {
+        console.log('authCode is undefined or null');
+      }
       const url = `${env.TEAMLEADER_ACCESS_TOKEN_URL}`;
       const options: RequestInit = {
         method: "POST",headers: {
@@ -46,17 +50,15 @@ export const teamleaderRouter = createTRPCRouter({
         }),
       };
       try {
-        console.log(authCode, "authCode 2");
         const response = await fetch(url, options);
         if (!response.ok) {
           console.error("Failed to fetch data from Teamleader");
         }
-        console.log(response, "response from Teamleader");
-        // const data: SharePointContact = (await response.json()) as unknown as SharePointContact;
-        // console.log(data);
-        return response;
+        const data = await response.json() as unknown as unknown[];
+        console.log(data);
+        return data;
       } catch (error) {
-        console.error(error);
+        console.error('Error in getAccessToken:',error);
       }
     }),
 });
