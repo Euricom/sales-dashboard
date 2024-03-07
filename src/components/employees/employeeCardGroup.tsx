@@ -35,20 +35,22 @@ export const EmployeeCardGroup = (props: {
         >
           <h4 className="text-sm font-semibold -rotate-90">Label</h4>
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2">
+        <CollapsibleContent>
           <div className="flex justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl">
-            {props.value?.map((employee) => (
-              <EmployeeCard
-                key={employee.id}
-                title={employee.fields.Title}
-                jobTitle={employee.fields.Job_x0020_title}
-                level={employee.fields.Level}
-                status={employee.fields.Status}
-                contractStatus={
-                  employee.fields.Contract_x0020_Substatus ?? null
-                }
-              />
-            ))}
+            {props.value
+              ?.sort((a, b) => a.fields.Title.localeCompare(b.fields.Title))
+              .map((employee) => (
+                <EmployeeCard
+                  key={employee.id}
+                  title={employee.fields.Title}
+                  jobTitle={employee.fields.Job_x0020_title}
+                  level={employee.fields.Level}
+                  status={employee.fields.Status}
+                  contractStatus={
+                    employee.fields.Contract_x0020_Substatus ?? null
+                  }
+                />
+              ))}
           </div>
         </CollapsibleContent>
       </Collapsible>
