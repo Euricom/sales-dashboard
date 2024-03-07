@@ -1,3 +1,10 @@
+export interface Tokens {
+    token_type: string;
+    expires_in: number;
+    access_token: string;
+    refresh_token: string;
+};
+
 export interface Deal {
     id: string;
     title: string;
@@ -77,7 +84,7 @@ export interface User {
             type: string;
             id: string;
         }[] | null; 
-    }
+    }[]
 };
 
 export interface Company {
@@ -140,6 +147,6 @@ export interface SimplifiedDeal {
         first_name: string;
         last_name: string;
         avatar_url: string | null;
-    };
+    }[];
 }
 

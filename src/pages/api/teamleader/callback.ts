@@ -12,14 +12,15 @@ export default async function handler(
     }
 
     const tokens = await fetchToken(code);
-    console.log({ tokens });
     // Save the token to your preferred storage
     // For example, you can use cookies or localStorage
     // save to localstorage
     if (tokens?.access_token && tokens.refresh_token) {
+      const expireDate = new Date(Date.now() + (tokens.expires_in - 600 ) * 1000).toString()
       res.setHeader("Set-Cookie", [
-        `access_token=${tokens.access_token}; Path=/; Expires=${new Date(Date.now() + tokens.expires_in * 1000).toString()}`,
-        `refresh_token=${tokens.refresh_token}; Path=/;`
+        `access_token=${tokens.access_token}; Path=/; Expires=${expireDate}`,
+        `refresh_token=${tokens.refresh_token}; Path=/;`,
+        `access_expires_at=${expireDate}; Path=/;`,
       ]);
       res.redirect("/");
     } else {
