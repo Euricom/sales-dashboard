@@ -16,14 +16,14 @@ export async function fetchToken(code: string): Promise<Record<string, any> | un
 
   try {
     const response = await fetch(env.TEAMLEADER_ACCESS_TOKEN_URL, options);
-    console.log({
-      url: env.TEAMLEADER_ACCESS_TOKEN_URL,
-      options,
-      headers: response.headers,
-    });
+    // console.log({
+    //   url: env.TEAMLEADER_ACCESS_TOKEN_URL,
+    //   options,
+    //   headers: response.headers,
+    // });
 
     const data = await response.json();
-    console.log({ data, response });
+    // console.log({ data, response });
     return data;
   } catch (error) {
     console.error(error);

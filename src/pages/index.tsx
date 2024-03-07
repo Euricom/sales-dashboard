@@ -2,6 +2,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import Login from "./teamleader/login";
+import Deals from "./teamleader/deals";
 
 export default function Home() {
   const { data } = useSession();
@@ -16,6 +17,7 @@ export default function Home() {
       <main style={{ background: "grey" }}>
         <AuthShowcase />
         <Login data={{ session: data }} />
+        <Deals />
       </main>
     </>
   );
@@ -44,40 +46,3 @@ function AuthShowcase() {
     </div>
   );
 }
-// interface GetRedirectionURLShowcaseProps {
-//   onURLReceived: (url: string) => void;
-// }
-
-// const GetRedirectionURLShowcase = ({
-//   onURLReceived,
-// }: GetRedirectionURLShowcaseProps) => {
-//   const [code, setCode] = useState<string | void | null>(null);
-//   // const fnCall = useAccessToken(String(code));
-//   const { data: url } = api.teamleader.getRedirectionURL.useQuery(
-//     undefined, // no input
-//   );
-
-//   useEffect(() => {
-//     if (url) {
-//       // Get the access token from teamleader with the code from the URL
-//       setCode(onURLReceived(url));
-//       console.log(code, "code");
-
-//       // fnCall();
-//     }
-//   }, [url, onURLReceived, code]);
-
-//   // return null;
-//   // return <div>{code !== null && GetAccessToken(String(code))}</div>;
-// };
-
-// const useAccessToken = (code: string) => {
-//   return () => {
-//     const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-//     console.log(accessToken, "front-end access token");
-//     return accessToken
-//   }
-//   // const { data: accessToken } = api.teamleader.getAccessToken.useQuery(code);
-//   // console.log(accessToken, "front-end access token");
-//   // return null;
-// };
