@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import { type User, type Deal, type Company} from "./types";
+import { type User, type Deal, type Company, type Tokens} from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -15,6 +15,32 @@ export const handleURLReceived = (url: string, router: AppRouterInstance): strin
   }
 
   return code ?? "";
+};
+
+export const refreshAccessToken = async (refreshToken: string) => {
+  const url = `${env.TEAMLEADER_ACCESS_TOKEN_URL}`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: `${env.TEAMLEADER_CLIENT_ID}`,
+      client_secret: `${env.TEAMLEADER_CLIENT_SECRET}`,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to refresh the access token from Teamleader");
+    }
+    const data = (await response.json()) as unknown as Tokens;
+    return data;
+  } catch (error) {
+    console.error('Error in getDeals:',error);
+  }
 };
 
 export const getDeals = async (accessToken: string) => {
