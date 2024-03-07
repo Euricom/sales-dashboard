@@ -32,11 +32,15 @@ export const EmployeeCardGroup = (props: {
       >
         <CollapsibleTrigger
           className={`h-[76px] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
+          title="CollapsibleTrigger"
         >
           <h4 className="text-sm font-semibold -rotate-90">Label</h4>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="flex justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl">
+          <div
+            className="flex justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
+            title="CollapsibleContent"
+          >
             {props.value
               ?.sort((a, b) => a.fields.Title.localeCompare(b.fields.Title))
               .map((employee) => (
