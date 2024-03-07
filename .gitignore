@@ -46,6 +46,9 @@ yarn-error.log*
 *.tsbuildinfo
 
 .data/
+
+.github/
+.husky/
 /test-results/
 /playwright-report/
 /blob-report/
