@@ -3,9 +3,11 @@ import Head from "next/head";
 import { EmployeeCardGroup } from "~/components/employees/employeeCardGroup";
 import { api } from "~/utils/api";
 import { Button } from "~/components/ui/button";
+import Deals from "./teamleader/deals";
+import Login from "./teamleader/login";
 
 export default function Home() {
-  const { status } = useSession();
+  const { status, data } = useSession();
 
   if (status === "unauthenticated") {
     return (
@@ -25,9 +27,11 @@ export default function Home() {
         </Head>
         <main className="flex min-h-screen justify-between mx-4">
           <Employees />
+          <Deals />
           <div className="flex flex-col gap-4 w-full items-end justify-end my-4">
             <SignInButton />
             <RefreshButton />
+            <Login data={{ session: data }} />
           </div>
         </main>
       </>

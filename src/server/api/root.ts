@@ -1,6 +1,7 @@
 import { postRouter } from "~/server/api/routers/post";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sharePointRouter } from "./routers/sharepoint";
+import { teamleaderRouter } from "./routers/teamleader";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { sharePointRouter } from "./routers/sharepoint";
 export const appRouter = createTRPCRouter({
   post: postRouter,
   sharePoint: sharePointRouter,
+  teamleader: teamleaderRouter
 });
 
 // export type definition of API
