@@ -3,8 +3,9 @@ import Head from "next/head";
 import { EmployeeCardGroup } from "~/components/employees/employeeCardGroup";
 import { api } from "~/utils/api";
 import { Button } from "~/components/ui/button";
-import Deals from "./teamleader/deals";
-import Login from "./teamleader/login";
+import Deals from "../components/teamleader/deals";
+import Login from "../components/teamleader/login";
+import { Column } from "~/components/ui/column";
 
 export default function Home() {
   const { status, data } = useSession();
@@ -26,8 +27,14 @@ export default function Home() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen justify-between mx-4">
-          <Employees />
-          <Deals />
+          <div className="flex flex-col w-full">
+            <Employees />
+            <div className="w-full h-full my-2">
+              <Column title="Deals">
+                <Deals />
+              </Column>
+            </div>
+          </div>
           <div className="flex flex-col gap-4 w-full items-end justify-end my-4">
             <SignInButton />
             <RefreshButton />
