@@ -13,8 +13,8 @@ const cardVariants = cva("text-white rounded-[14px] tv:rounded-[28px]  ", {
     size: {
       default: "h-10 px-4 py-2",
       column: "h-full px-4 py-2 flex-1",
-      columnDeals: "h-full px-4 py-2 basis-auto",
-      columnMogelijkheden: "h-full px-4 py-2 basis-1/4",
+      columnDeals: "h-full px-4 py-2 basis-auto", // Neemt breedte van de content
+      columnMogelijkheden: "h-full w-[392px] tv:w-[784px] px-4 py-2", // Breedte is voor 4 employees, +1 employee is 76px extra en 152px extra voor tv
       deal: "h-fit w-full pl-3 pr-1.5 py-1.5",
     },
   },
