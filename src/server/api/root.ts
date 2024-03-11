@@ -1,4 +1,3 @@
-import { postRouter } from "~/server/api/routers/post";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sharePointRouter } from "./routers/sharepoint";
 import { teamleaderRouter } from "./routers/teamleader";
@@ -9,7 +8,6 @@ import { teamleaderRouter } from "./routers/teamleader";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
   sharePoint: sharePointRouter,
   teamleader: teamleaderRouter
 });
