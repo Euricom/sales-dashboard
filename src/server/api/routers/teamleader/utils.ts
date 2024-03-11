@@ -133,23 +133,24 @@ export const simplifyDeals = async (dealsObject: Record<string, any>,usersObject
       return [];
   }
 
-  const deals = dealsObject.data; // Assuming deals are nested under 'data' object
+  const deals = dealsObject.data as Deal[]; // Assuming deals are nested under 'data' object
   if (!Array.isArray(deals)) {
       console.error('Deals is not an array');
       return [];
   }
 
-  const simplifiedDeals = await Promise.all(deals.map(async deal => {
-      const dealId = deal.id;
-      const userId = deal.responsible_user.id;
-      const companyId = deal.lead?.customer?.id;
+  const simplifiedDeals = await Promise.all(deals.map(async (deal: Deal) => {
+      const dealId: string = deal.id;
+      const userId: string = deal.responsible_user.id;
+      const companyId: string = deal.lead?.customer?.id;
 
       // Find user and company for the deal
       const [companyResponse] = await Promise.all([
         companyId ? getCompanies(accessToken, companyId) : null,
       ]);
-      const company = companyResponse?.data?.[0];
-      const user = usersObject.data.find((user: { id: string }) => user.id === userId);
+      const company = companyResponse?.data?.[0] as Company;
+      const user = usersObject.data.find((user: { id: string }) => user.id === userId) as User;
+
 
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
@@ -160,19 +161,19 @@ export const simplifyDeals = async (dealsObject: Record<string, any>,usersObject
       }
 
       return {
-          id: deal.id,
-          title: deal.title,
-          estimated_closing_date: deal.estimated_closing_date ?? "",
-          company: {
-              id: company.id ?? null,
-              name: company.name ?? null,
-          },
-          PM: {
-              id: user.id ?? null,
-              first_name: user.first_name ?? null,
-              last_name: user.last_name ?? null,
-              avatar_url: user.avatar_url ?? null,
-          },
+        id: deal.id,
+        title: deal.title,
+        estimated_closing_date: deal.estimated_closing_date ?? "",
+        company: {
+            id: company?.id ?? null,
+            name: company?.name ?? null,
+        },
+        PM: {
+            id: user?.id ?? null,
+            first_name: user?.first_name ?? null,
+            last_name: user?.last_name ?? null,
+            avatar_url: user?.avatar_url ?? null,
+        },
       };
   }));
 

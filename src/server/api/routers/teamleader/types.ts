@@ -66,7 +66,6 @@ export interface Deal {
 }
 
 export interface User {
-  data: {
     id: string;
     account: {
       type: string;
@@ -86,11 +85,9 @@ export interface User {
           id: string;
         }[]
       | null;
-  }[];
 }
 
 export interface Company {
-  data: {
     id: string;
     name: string;
     status: string;
@@ -137,7 +134,6 @@ export interface Company {
       id: string;
     } | null;
     tags: string[];
-  };
 }
 
 export interface SimplifiedDeal {
