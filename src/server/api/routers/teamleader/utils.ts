@@ -52,6 +52,9 @@ export const getDeals = async (accessToken: string) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        filter: {
+          phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb"
+        },
         sort: [
           {
             field: "created_at",
@@ -59,7 +62,7 @@ export const getDeals = async (accessToken: string) => {
           }
         ],
         page: {
-          size: 10
+          size: 15
         },
       }),
     };
@@ -75,21 +78,14 @@ export const getDeals = async (accessToken: string) => {
     }
 };
 
-export const getUsers = async (accessToken: string, dealId: string) => {
+export const getUsers = async (accessToken: string) => {
   const url = `${env.TEAMLEADER_API_URL}/users.list`;
     const options: RequestInit = {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        filter: {
-          ids: [
-            `${dealId}`
-          ]
-        },
-      }),
+      }
     };
     try {
       const response = await fetch(url, options);
@@ -131,7 +127,7 @@ export const getCompanies = async (accessToken: string, dealId: string) => {
     }
 };
 
-export const simplifyDeals = async (dealsObject: Record<string, any>, accessToken: string): Promise<any[]> => {
+export const simplifyDeals = async (dealsObject: Record<string, any>,usersObject: Record<string, any>, accessToken: string): Promise<any[]> => {
   if (!dealsObject || typeof dealsObject !== 'object') {
       console.error('Data, users, or companies is not an object or is null/undefined');
       return [];
@@ -149,16 +145,14 @@ export const simplifyDeals = async (dealsObject: Record<string, any>, accessToke
       const companyId = deal.lead?.customer?.id;
 
       // Find user and company for the deal
-      const [userResponse, companyResponse] = await Promise.all([
-        getUsers(accessToken, userId),
-        companyId ? getCompanies(accessToken, companyId) : null
-    ]);
-
-      const user = userResponse?.data?.[0]; 
+      const [companyResponse] = await Promise.all([
+        companyId ? getCompanies(accessToken, companyId) : null,
+      ]);
       const company = companyResponse?.data?.[0];
+      const user = usersObject.data.find((user: { id: string }) => user.id === userId);
 
       if (!user) {
-          console.log(`User not found for deal ID: ${dealId}`);
+        console.log(`User not found for deal ID: ${dealId}`);
       }
 
       if (!company) {
@@ -182,5 +176,4 @@ export const simplifyDeals = async (dealsObject: Record<string, any>, accessToke
       };
   }));
 
-  return simplifiedDeals.filter(deal => deal !== null);
-}
+  return simplifiedDeals.filter(deal => deal !== null);}
