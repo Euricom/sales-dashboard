@@ -62,7 +62,7 @@ export const getDeals = async (accessToken: string) => {
           }
         ],
         page: {
-          size: 15
+          size: 10,
         },
       }),
     };
