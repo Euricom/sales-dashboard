@@ -28,17 +28,34 @@ export default function Home() {
         </Head>
         <main className="flex min-h-screen justify-between mx-4">
           <div className="flex flex-col w-full">
-            <Employees />
-            <div className="w-full h-full my-2">
-              <Column title="Deals">
+            <div className="flex">
+              <Employees />
+              <div className="flex gap-4 w-full items-start justify-end my-4">
+                <SignInButton />
+                <RefreshButton />
+                <Login data={{ session: data }} />
+              </div>
+            </div>
+            <div className="flex w-full h-full my-2 gap-4">
+              <Column title="Deals" size="columnDeals">
                 <Deals />
               </Column>
+              <Column title="Mogelijkheden" size="columnMogelijkheden">
+                <div />
+              </Column>
+              <Column title="Voorgesteld">
+                <div />
+              </Column>
+              <Column title="Interview">
+                <div />
+              </Column>
+              <Column title="Weerhouden">
+                <div />
+              </Column>
+              <Column title="Niet Weerhouden">
+                <div />
+              </Column>
             </div>
-          </div>
-          <div className="flex flex-col gap-4 w-full items-end justify-end my-4">
-            <SignInButton />
-            <RefreshButton />
-            <Login data={{ session: data }} />
           </div>
         </main>
       </>

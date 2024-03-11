@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "~/lib/utils";
 
-const cardVariants = cva("text-white rounded-[14px]", {
+const cardVariants = cva("text-white rounded-[14px] tv:rounded-[28px]  ", {
   variants: {
     variant: {
       default: "bg-primary hover:bg-primary/70",
@@ -12,7 +12,9 @@ const cardVariants = cva("text-white rounded-[14px]", {
     },
     size: {
       default: "h-10 px-4 py-2",
-      column: "h-full w-fit px-4 py-2",
+      column: "h-full px-4 py-2 flex-1",
+      columnDeals: "h-full px-4 py-2 basis-auto",
+      columnMogelijkheden: "h-full px-4 py-2 basis-1/4",
       deal: "h-fit w-full pl-3 pr-1.5 py-1.5",
     },
   },

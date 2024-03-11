@@ -13,9 +13,9 @@ const config = {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+    },
+    screens: {
+      tv: "2000px",
     },
     extend: {
       colors: {
@@ -84,6 +84,12 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "collapsible-right": "collapsible-down 0.3s ease-in-out",
         "collapsible-left": "collapsible-up 0.3s ease-in-out",
+      },
+      height: {
+        "15": "3.75rem",
+      },
+      width: {
+        "15": "3.75rem",
       },
     },
   },
