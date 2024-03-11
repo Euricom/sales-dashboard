@@ -10,7 +10,6 @@ setup("authenticateAzure", async ({ page }) => {
   // Navigate to the page
   await page.goto("/");
 
-  await page.pause();
   // Sign in to the app
   const signInButton = page.getByRole("button");
   await signInButton.click();
@@ -21,20 +20,69 @@ setup("authenticateAzure", async ({ page }) => {
   await page.waitForTimeout(500);
 
   // Enter credentials
-  const emailInput = page.locator("input[type=email]");
-  await emailInput.waitFor();
-  await emailInput.click();
-  await emailInput.fill(azureMail);
+  const emailInputAZURE = page.locator("input[type=email]");
+  await emailInputAZURE.waitFor();
+  await emailInputAZURE.click();
+  await emailInputAZURE.fill(azureMail);
 
   await page.getByRole("button", { name: "Next" }).click();
 
-  const passwordInput = page.locator("input[type=password]");
-  await passwordInput.waitFor();
-  await passwordInput.click();
-  await passwordInput.fill(azurePassword);
+  const passwordInputAZURE = page.locator("input[type=password]");
+  await passwordInputAZURE.waitFor();
+  await passwordInputAZURE.click();
+  await passwordInputAZURE.fill(azurePassword);
 
   await page.locator("input[type=submit][value='Sign in']").click();
   await page.locator("input[type=submit][value='Yes']").click();
 
   await page.context().storageState({ path: authFile });
+
+  await page.goto("/");
+  await page.waitForTimeout(500);
+
+  // TEAMLEADER LOGIN
+  // workaround for sign in to azure, for some reason you need to login twice
+  await signInButton.click();
+  await signInButtonAzure.click();
+
+  const teamleaderMail = process.env.TEAMLEADER_EMAIL!;
+  const teamleaderPassword = process.env.TEAMLEADER_PASSWORD!;
+  expect(teamleaderMail).not.toBeNull();
+  expect(teamleaderPassword).not.toBeNull();
+
+  // Navigate to the page
+  await page.goto("/");
+
+  await page.waitForSelector('[data-testid="employee-loading"]');
+
+  const signInButtonTeamleader = page.getByRole("button", {
+    name: "Login Teamleader",
+  });
+
+  // HERE IS WHERE TEST FAILS, IT FINDS THE BUTTON AND CLICKS IT, BUT IT DOESN'T NAVIGATE TO TEAMLEADER WHY?????
+  await signInButtonTeamleader.click();
+
+  const acceptCookies = page.locator(
+    "a[id=CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll]",
+  );
+  await acceptCookies.click();
+  // Enter credentials
+  const emailInputTL = page.locator("input[type=email]");
+  await emailInputTL.waitFor();
+  await emailInputTL.click();
+  await emailInputTL.fill(teamleaderMail);
+
+  const passwordInputTL = page.locator("input[type=password]");
+  await passwordInputTL.waitFor();
+  await passwordInputTL.click();
+  await passwordInputTL.fill(teamleaderPassword);
+
+  await page.locator("button[type=submit]").click();
+
+  await page.context().storageState({ path: authFile });
+
+  await page.goto("/");
+  await page.waitForSelector('[data-testid="employee-loading"]');
+  await signInButtonTeamleader.click();
+  await page.waitForTimeout(1000);
 });

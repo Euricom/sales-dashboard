@@ -10,8 +10,8 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
           {deal.company.name}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        <div className="text-end text-xs bg-js_dev_role px-2 py-0.5 rounded-[14px]">
+      <CardContent className="flex flex-col gap-1 items-end">
+        <div className="text-end text-xs bg-js_dev_role px-2 py-0.5 rounded-[14px] w-fit">
           {deal.title}
         </div>
         <div className="flex gap-3 justify-end font-normal text-sm items-end">

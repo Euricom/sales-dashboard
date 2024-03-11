@@ -40,6 +40,10 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         // Use prepared auth state.
         storageState: "playwright/.auth/user.json",
+        viewport: null,
+        launchOptions: {
+          args: ["--start-maximized"],
+        },
       },
       dependencies: ["setup"],
     },
