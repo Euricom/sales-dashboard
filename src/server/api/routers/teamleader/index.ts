@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 import z from "zod";
 import { getDeals, getUsers, refreshAccessToken, simplifyDeals } from "./utils";
+import type {SimplifiedDeal} from "./types";
 
 export const teamleaderRouter = createTRPCRouter({
   getRedirectionURL: protectedProcedure.query(() => {
@@ -20,8 +21,8 @@ export const teamleaderRouter = createTRPCRouter({
         throw new Error("Failed to fetch data from Teamleader");
       }
 
-      const simpleData = await simplifyDeals(deals, users, accessToken.input);
-      console.log(simpleData);
+      const simpleData: SimplifiedDeal[] = await simplifyDeals(deals, users, accessToken.input) as SimplifiedDeal[];
+      //console.log(simpleData);
       return simpleData;
     } catch (error) {
       console.error('Error in getDealsData:',error);
