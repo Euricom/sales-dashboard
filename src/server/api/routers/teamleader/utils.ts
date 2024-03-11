@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import { type User, type Deal, type Company, type Tokens} from "./types";
+import { type User, type Deal, type Company, type Tokens, type DealResponse, type UserResponse, type CompanyResponse, type SimplifiedDealArray} from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -71,7 +71,7 @@ export const getDeals = async (accessToken: string) => {
       if (!response.ok) {
         console.error("Failed to fetch data from Teamleader");
       }
-      const data = (await response.json()) as unknown as Deal[];
+      const data = (await response.json()) as DealResponse;
       return data;
     } catch (error) {
       console.error('Error in getDeals:',error);
@@ -92,7 +92,7 @@ export const getUsers = async (accessToken: string) => {
       if (!response.ok) {
         console.error("Failed to fetch data from Teamleader");
       }
-      const data = (await response.json()) as unknown as User;
+      const data = (await response.json()) as UserResponse;
       return data;
     } catch (error) {
       console.error('Error in getUsers:',error);
@@ -120,14 +120,14 @@ export const getCompanies = async (accessToken: string, dealId: string) => {
       if (!response.ok) {
         console.error("Failed to fetch data from Teamleader");
       }
-      const data = (await response.json()) as unknown as Company;
+      const data = (await response.json()) as CompanyResponse;
       return data;
     } catch (error) {
       console.error('Error in getCompanies:',error);
     }
 };
 
-export const simplifyDeals = async (dealsObject: Record<string, any>,usersObject: Record<string, any>, accessToken: string): Promise<any[]> => {
+export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserResponse, accessToken: string): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== 'object') {
       console.error('Data, users, or companies is not an object or is null/undefined');
       return [];
@@ -176,5 +176,5 @@ export const simplifyDeals = async (dealsObject: Record<string, any>,usersObject
         },
       };
   }));
-
-  return simplifiedDeals.filter(deal => deal !== null);}
+  return simplifiedDeals.filter(deal => deal !== null);
+}
