@@ -9,13 +9,6 @@ test.describe(() => {
     // Navigate to the page
     await page.goto("/");
 
-    // workaround for sign in to azure, for some reason you need to login twice
-    const signInButton = page.getByRole("button");
-    await signInButton.click();
-
-    const signInButtonAzure = page.getByRole("button");
-    await signInButtonAzure.click();
-
     await page.waitForTimeout(500);
     // Find the Collapsible trigger element and click it
     const collapsibleTrigger = page

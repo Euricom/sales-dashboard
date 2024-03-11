@@ -86,7 +86,7 @@ const Employees = () => {
     );
   }
   return (
-    <div className="flex w-full justify-start">
+    <div className="flex w-full justify-start" data-testid="employee-loading">
       <EmployeeCardGroup label="Label" value={employeesData.data?.value} />
     </div>
   );
