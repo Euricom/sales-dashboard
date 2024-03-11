@@ -20,7 +20,7 @@ export const EmployeeNoPhoto = (props: { title: string }) => {
       .join("");
   };
   return (
-    <div className="flex h-[60px] w-[60px] justify-center items-center bg-white text-black rounded-2xl">
+    <div className="flex h-15 w-15 justify-center items-center bg-white text-black rounded-2xl">
       {titleToInitials(props.title)}
     </div>
   );

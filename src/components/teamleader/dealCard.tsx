@@ -11,8 +11,8 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end">
-        <div className="text-end text-xs bg-js_dev_role px-2 py-0.5 rounded-[14px] w-fit">
-          {deal.title}
+        <div className="text-end text-xs bg-js_dev_role px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit">
+          {trimMogelijkhedenTitle(deal.title)}
         </div>
         <div className="flex gap-3 justify-end font-normal text-sm items-end">
           {deal.estimated_closing_date ? (
@@ -43,3 +43,7 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
     </Card>
   );
 }
+
+const trimMogelijkhedenTitle = (title: string) => {
+  return title.split("(")[0];
+};

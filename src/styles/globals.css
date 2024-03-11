@@ -7,6 +7,11 @@
   html {
     font-family: "Poppins", sans-serif;
   }
+  @media screen and (min-width: 2800px) {
+    html {
+      font-size: 32px;
+    }
+  }
 }
 
 @layer base {

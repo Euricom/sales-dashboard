@@ -28,10 +28,10 @@ export const EmployeeCardGroup = (props: {
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
-        className="flex bg-white pt-1.5 border-x-4 border-b-4 border-white h-fit w-fit rounded-b-2xl top-0 items-center justify-between"
+        className="flex bg-white pt-1.5 border-x-4 border-b-4 tv:border-x-8 tv:border-b-[6px] border-white h-fit w-fit rounded-b-2xl top-0 items-center justify-between"
       >
         <CollapsibleTrigger
-          className={`h-[76px] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
+          className={`h-[76px] tv:h-[152px] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
           title="CollapsibleTrigger"
         >
           <h4 className="text-sm font-semibold -rotate-90">Label</h4>
