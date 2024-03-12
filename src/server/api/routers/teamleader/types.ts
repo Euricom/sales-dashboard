@@ -282,6 +282,10 @@ export interface SimplifiedDeal {
   id: string;
   title: string;
   estimated_closing_date: string;
+  current_phase: {
+    phase_name: string | null;
+    id: string;
+  };
   company: {
     id: string;
     name: string;
@@ -295,3 +299,17 @@ export interface SimplifiedDeal {
 }
 
 export type SimplifiedDealArray = SimplifiedDeal[];
+
+export interface DealPhaseResponse {
+  data: {
+    id: string;
+    name: string;
+    actions: [];
+    status: string;
+    requires_attention_after: {
+      amount: number;
+      unit: string;
+    };
+    probablity: number;
+  }[];
+};
