@@ -14,7 +14,7 @@ export const Column = ({
       <CardHeader className="pb-1.5">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">{children}</CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 };
