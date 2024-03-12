@@ -87,6 +87,7 @@ setup("authenticateAzure", async ({ page }) => {
   await page.waitForTimeout(1000);
 
   // this actually sets the cookies in the storage state correctly
+  // this seems to fail sometimes, but just run the test again. it just decides to not work sometimes.
   await page.waitForSelector('[data-testid="dealData-loading"]');
   await page.context().storageState({ path: authFile });
 });
