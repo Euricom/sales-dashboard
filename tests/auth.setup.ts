@@ -79,12 +79,17 @@ setup("authenticateAzure", async ({ page }) => {
 
   await page.locator("button[type=submit]").click();
 
-  // the storage state is being set before we acquire the needed cookie. If we do it later than this point, the cookies won't even be set in the first place and the test skips to the teamleader login once again.
+  // this sets the storage state before the cookies are set, it's not necessary. 
+  // However if we delete this it just doesn't work, I don't know why.
   await page.context().storageState({ path: authFile });
-  //console.log("storagestate set", new Date(new Date().getTime()).toString());
 
   await page.goto("/");
   await page.waitForSelector('[data-testid="employee-loading"]');
+  
   await signInButtonTeamleader.click();
   await page.waitForTimeout(1000);
+
+  // this actually sets the cookies in the storage state correctly
+  await page.waitForSelector('[data-testid="dealData-loading"]');
+  await page.context().storageState({ path: authFile });
 });
