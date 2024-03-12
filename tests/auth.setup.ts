@@ -78,11 +78,8 @@ setup("authenticateAzure", async ({ page }) => {
   await passwordInputTL.fill(teamleaderPassword);
 
   await page.locator("button[type=submit]").click();
-
-  // this sets the storage state before the cookies are set, it's not necessary. 
-  // However if we delete this it just doesn't work, I don't know why.
   await page.context().storageState({ path: authFile });
-
+  
   await page.goto("/");
   await page.waitForSelector('[data-testid="employee-loading"]');
   
