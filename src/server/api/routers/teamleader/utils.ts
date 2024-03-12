@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import { type User, type Deal, type Company, type Tokens, type DealResponse, type UserResponse, type CompanyResponse, type SimplifiedDealArray} from "./types";
+import { type User, type Deal, type Company, type Tokens, type DealResponse, type UserResponse, type CompanyResponse, type SimplifiedDealArray, type DealPhaseResponse} from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -127,7 +127,28 @@ export const getCompanies = async (accessToken: string, dealId: string) => {
     }
 };
 
-export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserResponse, accessToken: string): Promise<SimplifiedDealArray> => {
+export const getDealPhases = async (accessToken: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/dealPhases.list`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    }
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from Teamleader");
+    }
+    const data = (await response.json()) as DealPhaseResponse;
+    return data;
+  } catch (error) {
+    console.error('Error in getDealPhases:',error);
+  }
+}
+
+export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserResponse, dealPhasesObject: DealPhaseResponse, accessToken: string): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== 'object') {
       console.error('Data, users, or companies is not an object or is null/undefined');
       return [];
@@ -143,6 +164,7 @@ export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserR
       const dealId: string = deal.id;
       const userId: string = deal.responsible_user.id;
       const companyId: string = deal.lead?.customer?.id;
+      const dealPhaseId: string = deal.current_phase.id;
 
       // Find user and company for the deal
       const [companyResponse] = await Promise.all([
@@ -150,7 +172,7 @@ export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserR
       ]);
       const company = companyResponse?.data?.[0] as Company;
       const user = usersObject.data.find((user: { id: string }) => user.id === userId) as User;
-
+      const dealPhase = dealPhasesObject.data.find((dealPhase: { id: string }) => dealPhase.id === dealPhaseId);
 
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
@@ -160,10 +182,18 @@ export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserR
           console.log(`Company not found for deal ID: ${dealId}`);
       }
 
+      if (!dealPhase || dealPhase === undefined) {
+        console.log(`Deal phase not found for deal ID: ${dealId}`);
+      }
+
       return {
         id: deal.id,
         title: deal.title,
         estimated_closing_date: deal.estimated_closing_date ?? "",
+        current_phase: {
+          phase_name: dealPhase?.name ?? null,
+          id: dealPhaseId,
+        },
         company: {
             id: company?.id ?? null,
             name: company?.name ?? null,
