@@ -78,11 +78,15 @@ setup("authenticateAzure", async ({ page }) => {
   await passwordInputTL.fill(teamleaderPassword);
 
   await page.locator("button[type=submit]").click();
-
   await page.context().storageState({ path: authFile });
-
+  
   await page.goto("/");
   await page.waitForSelector('[data-testid="employee-loading"]');
+  
   await signInButtonTeamleader.click();
   await page.waitForTimeout(1000);
+
+  // this actually sets the cookies in the storage state correctly
+  await page.waitForSelector('[data-testid="dealData-loading"]');
+  await page.context().storageState({ path: authFile });
 });
