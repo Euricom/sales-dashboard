@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { CompanyResponse, DealResponse, UserResponse } from "~/server/api/routers/teamleader/types";
+import type { CompanyResponse, DealPhaseResponse, DealResponse, UserResponse } from "~/server/api/routers/teamleader/types";
 
 test.describe("Teamleader API tests", () => {
     test("get deals data", async ({ page }) => {
@@ -56,6 +56,22 @@ test.describe("Teamleader API tests", () => {
         //console.log(response);
         expect(response.status).toBe(200);
         const data: CompanyResponse = await response.json() as CompanyResponse;
+        expect(data).toHaveProperty('data');
+        expect(data.data).toBeInstanceOf(Array);
+    });
+
+    test("get deal phases data", async ({ page }) => {
+        const authFile = "playwright/.auth/user.json"; 
+        const storageState = await page.context().storageState({ path: authFile });
+        
+        const access_token_cookie = storageState.cookies.find((cookie) => cookie.name === 'access_token');
+        const response = await fetch('https://api.focus.teamleader.eu/dealPhases.list', {
+            headers: {
+                Authorization: `Bearer ${access_token_cookie?.value}`,
+        }});
+        //console.log(response);
+        expect(response.status).toBe(200);
+        const data: DealPhaseResponse = await response.json() as DealPhaseResponse;
         expect(data).toHaveProperty('data');
         expect(data.data).toBeInstanceOf(Array);
     });
