@@ -10,10 +10,10 @@ export default function Deals() {
   }
 
   return (
-    <>
+    <div data-testid="dealData-loading" className="flex flex-col gap-2">
       {dealsData.data?.map((dealObject: SimplifiedDeal, index) => (
         <DealCard deal={dealObject} key={index} />
       ))}
-    </>
+    </div>
   );
 }
