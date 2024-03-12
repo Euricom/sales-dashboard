@@ -79,7 +79,9 @@ setup("authenticateAzure", async ({ page }) => {
 
   await page.locator("button[type=submit]").click();
 
+  // the storage state is being set before we acquire the needed cookie. If we do it later than this point, the cookies won't even be set in the first place and the test skips to the teamleader login once again.
   await page.context().storageState({ path: authFile });
+  //console.log("storagestate set", new Date(new Date().getTime()).toString());
 
   await page.goto("/");
   await page.waitForSelector('[data-testid="employee-loading"]');
