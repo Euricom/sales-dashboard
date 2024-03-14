@@ -5,24 +5,24 @@ export const EmployeeCard = (props: {
   status: string;
   contractStatus: string | null;
 }) => {
+  const EmployeeNoPhoto = (props: { title: string }) => {
+    const titleToInitials = (title: string) => {
+      return title
+        .split(" ")
+        .map((string) => string[0])
+        .join("");
+    };
+    return (
+      <div className="flex h-15 w-15 justify-center items-center bg-white text-black rounded-2xl">
+        {titleToInitials(props.title)}
+      </div>
+    );
+  };
+  // implement employee with photo here
   return (
     <>
       <EmployeeNoPhoto title={props.title} />
     </>
-  );
-};
-
-export const EmployeeNoPhoto = (props: { title: string }) => {
-  const titleToInitials = (title: string) => {
-    return title
-      .split(" ")
-      .map((string) => string[0])
-      .join("");
-  };
-  return (
-    <div className="flex h-15 w-15 justify-center items-center bg-white text-black rounded-2xl">
-      {titleToInitials(props.title)}
-    </div>
   );
 };
 

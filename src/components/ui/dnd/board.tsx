@@ -12,15 +12,14 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { useState } from "react";
 import Row, { type IRow } from "./row";
-import { type IItem } from "./item";
 import { defaultRows } from "./utils";
 
-interface Sortable {
-  // Dit is een sortable type van dnd-kit, puur voor typechecking
-  containerId: string;
-  index: number;
-  items: IItem[];
-}
+// interface Sortable {
+//   // Dit is een sortable type van dnd-kit
+//   containerId: string;
+//   index: number;
+//   items: IItem[];
+// }
 
 export const Board = () => {
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
@@ -68,39 +67,35 @@ export const Board = () => {
     if (!over) return;
     const activeItemId = active.id;
     const overItemId = over.id;
-    const activeRowIndex =
-      Number((active.data.current?.sortable as Sortable).containerId) - 1;
-    const overRowIndex =
-      Number((over.data.current?.sortable as Sortable).containerId) - 1;
 
     if (activeItemId === overItemId) return;
     setRows((rows) => {
-      const activeItem = rows[activeRowIndex]?.items.find(
+      // gets the initial and target rows
+      const initialRow = rows.find((initialRow) =>
+        initialRow.items?.find((item) => item.itemID === activeItemId),
+      );
+      const targetRow = rows.find((targetRow) =>
+        targetRow.items?.find((item) => item.itemID === overItemId),
+      );
+
+      if (!initialRow?.items || !targetRow?.items) return rows;
+
+      // gets the initial and target item from their respective rows
+      const activeItem = initialRow.items.find(
         (item) => item.itemID === activeItemId,
       );
-      const overItem = rows[activeRowIndex]?.items.find(
-        (item) => item.itemID === activeItemId,
+      const overItem = targetRow.items.find(
+        (item) => item.itemID === overItemId,
       );
+      if (!activeItem || !overItem) return rows;
 
-      // const updatedRow = {
-      //   ...row,
-      //   items: arrayMove(
-      //     row.items, // items to edit
-      //     activeIndexOfItem, // index of the item to move
-      //     overIndexOfItem, // index to move to
-      //   ),
-      // };
+      // removes the initial item from the initial row and adds it to the target row
+      const initialIndexOfItem = initialRow.items.indexOf(activeItem);
+      initialRow.items.splice(initialIndexOfItem, 1);
+      // somehow this also adds the item to the correct index, I don't know how (might cause bugs in the future, but for now it works)
+      targetRow.items.push(activeItem);
 
-      // const rowIndex = rows.findIndex((r) => r.rowID === updatedRow.rowID);
-      // const updatedRows = [...rows];
-      // updatedRows[rowIndex] = updatedRow;
-
-      // return updatedRows;
-      if (activeItem?.itemID !== overItem?.itemID) {
-        return arrayMove(rows, activeRowIndex, overRowIndex - 1);
-      }
-
-      return arrayMove(rows, activeRowIndex, overRowIndex);
+      return rows;
     });
   };
 
@@ -116,7 +111,6 @@ export const Board = () => {
           {rows.map((row) => {
             return <Row key={row.rowID} rowID={row.rowID} items={row.items} />;
           })}
-          {/* <div /> */}
         </Column>
         <Column title="Voorgesteld">
           <div />

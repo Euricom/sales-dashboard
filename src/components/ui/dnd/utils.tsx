@@ -25,4 +25,8 @@ export const defaultRows: IRow[] = [
       { itemID: 33, rowID: 3, content: "II" },
     ],
   },
+  {
+    rowID: 4,
+    items: [],
+  },
 ];

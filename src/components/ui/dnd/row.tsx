@@ -1,5 +1,8 @@
-import { type UniqueIdentifier, useDroppable } from "@dnd-kit/core";
-import { SortableContext } from "@dnd-kit/sortable";
+import { useDroppable, type UniqueIdentifier } from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { FC } from "react";
 import Item, { type IItem } from "./item";
 
@@ -15,27 +18,27 @@ export interface IRow {
 const Row: FC<IRow> = ({ rowID, items }) => {
   const { setNodeRef } = useDroppable({ id: rowID });
 
+  // console.log(rowID);
   return (
-    <>
+    <div ref={setNodeRef} className="flex h-fit min-h-16 gap-4 w-full">
       {/* Dit is een SortableContext en heeft een Sortable type */}
       <SortableContext
         id={rowID.toString()}
         items={items.map((item) => item?.itemID)}
+        strategy={horizontalListSortingStrategy}
       >
-        <div ref={setNodeRef} className="flex h-fit min-h-16 gap-4">
-          {items.map((item) =>
-            !item ? null : (
-              <Item
-                key={item?.itemID}
-                itemID={item?.itemID}
-                rowID={item?.rowID}
-                content={item?.content}
-              />
-            ),
-          )}
-        </div>
+        {items.map((item) =>
+          !item ? null : (
+            <Item
+              key={item?.itemID}
+              itemID={item?.itemID}
+              rowID={item?.rowID}
+              content={item?.content}
+            />
+          ),
+        )}
       </SortableContext>
-    </>
+    </div>
   );
 };
 
