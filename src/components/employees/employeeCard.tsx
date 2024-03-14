@@ -25,3 +25,11 @@ export const EmployeeNoPhoto = (props: { title: string }) => {
     </div>
   );
 };
+
+export const EmployeeCardDragged = (props: { content: string }) => {
+  return (
+    <div className="flex h-15 w-15 justify-center items-center bg-white text-black rounded-2xl">
+      {props.content}
+    </div>
+  );
+};

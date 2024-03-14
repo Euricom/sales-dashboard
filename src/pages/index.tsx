@@ -6,6 +6,8 @@ import { Button } from "~/components/ui/button";
 import Deals from "../components/teamleader/deals";
 import Login from "../components/teamleader/login";
 import { Column } from "~/components/ui/column";
+import { DragContainer } from "~/components/ui/dnd/dragContainer";
+import { Board } from "~/components/ui/dnd/board";
 
 export default function Home() {
   const { status, data } = useSession();
@@ -40,21 +42,7 @@ export default function Home() {
               <Column title="Deals" size="columnDeals">
                 <Deals />
               </Column>
-              <Column title="Mogelijkheden" size="columnMogelijkheden">
-                <div />
-              </Column>
-              <Column title="Voorgesteld">
-                <div />
-              </Column>
-              <Column title="Interview">
-                <div />
-              </Column>
-              <Column title="Weerhouden">
-                <div />
-              </Column>
-              <Column title="Niet Weerhouden">
-                <div />
-              </Column>
+              <Board />
             </div>
           </div>
         </main>

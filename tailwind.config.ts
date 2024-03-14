@@ -15,7 +15,7 @@ const config = {
       padding: "2rem",
     },
     screens: {
-      tv: "2000px",
+      tv: "1600px",
     },
     extend: {
       colors: {
@@ -57,6 +57,7 @@ const config = {
         },
       },
       borderRadius: {
+        14: "0.875rem",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
@@ -87,6 +88,7 @@ const config = {
       },
       height: {
         "15": "3.75rem",
+        "30": "7.5rem",
       },
       width: {
         "15": "3.75rem",
