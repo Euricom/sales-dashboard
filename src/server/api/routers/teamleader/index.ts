@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 import z from "zod";
-import { getDeals, getUsers, refreshAccessToken, simplifyDeals } from "./utils";
+import { getDeals, refreshAccessToken, simplifyDeals } from "./utils";
 import type {SimplifiedDealArray} from "./types";
 
 export const teamleaderRouter = createTRPCRouter({
@@ -15,12 +15,11 @@ export const teamleaderRouter = createTRPCRouter({
         throw new Error("Access token not found");
       }
       const deals = await getDeals(accessToken.input);
-      const users = await getUsers(accessToken.input);
-      if (!deals || !users) {
+      if (!deals) {
         throw new Error("Failed to fetch data from Teamleader");
       }
 
-      const simpleData: SimplifiedDealArray = await simplifyDeals(deals, users, accessToken.input);
+      const simpleData: SimplifiedDealArray = await simplifyDeals(deals);
       //console.log(simpleData);
       return simpleData;
     } catch (error) {
