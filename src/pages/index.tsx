@@ -6,8 +6,8 @@ import { Button } from "~/components/ui/button";
 import DealsColumn from "../components/teamleader/dealsColumn";
 import Login from "../components/teamleader/login";
 import { BoardColumn } from "~/components/ui/dnd/boardColumn";
-import type { Employee, RowId } from "~/lib/types";
-import { initialEmployees } from "~/components/ui/dnd/utils";
+import type { Employee } from "~/lib/types";
+import { DropContextProvider } from "~/components/ui/dnd/dndProvider";
 
 export default function Home() {
   const { status, data } = useSession();
@@ -28,24 +28,24 @@ export default function Home() {
           <meta name="description" content="sales-dashboard" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        {/* <DndLayout> */}
-        <main className="flex min-h-screen justify-between mx-4">
-          <div className="flex flex-col w-full">
-            <div className="flex">
-              <Employees />
-              <div className="flex gap-4 w-full items-start justify-end my-4">
-                <SignInButton />
-                <RefreshButton />
-                <Login data={{ session: data }} />
+        <DropContextProvider>
+          <main className="flex min-h-screen justify-between mx-4">
+            <div className="flex flex-col w-full">
+              <div className="flex">
+                <Employees />
+                <div className="flex gap-4 w-full items-start justify-end my-4">
+                  <SignInButton />
+                  <RefreshButton />
+                  <Login data={{ session: data }} />
+                </div>
+              </div>
+              <div className="flex w-full h-full my-2 gap-4">
+                <DealsColumn />
+                <BoardColumn columnTitle="Mogelijkheden" />
               </div>
             </div>
-            <div className="flex w-full h-full my-2 gap-4">
-              <DealsColumn />
-              <BoardColumn columnTitle="Mogelijkheden" />
-            </div>
-          </div>
-        </main>
-        {/* </DndLayout> */}
+          </main>
+        </DropContextProvider>
       </>
     );
   }

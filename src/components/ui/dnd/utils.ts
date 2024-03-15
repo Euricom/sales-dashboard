@@ -45,7 +45,7 @@ export const defaultRows = [
   },
 ] satisfies Row[];
 
-export const initialEmployees: Employee[] = [
+export const mockEmployees: Employee[] = [
   {
     employeeId: 11,
     rowId: 1,
