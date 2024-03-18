@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { BoardRow } from "./boardRow";
 import { SortableContext } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
-import { DropContext } from "./dndProvider";
+import { DropContext } from "../../../contexts/dndProvider";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rowsMogelijkheden, employeesMogelijkheden } = useContext(DropContext);

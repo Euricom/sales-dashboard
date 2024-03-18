@@ -1,10 +1,10 @@
 import { type UniqueIdentifier } from "@dnd-kit/core";
-import { type defaultRows } from "~/components/ui/dnd/utils";
+import type { Session } from "next-auth";
 
-export type RowId = (typeof defaultRows)[number]["rowId"];
 export type RowType = "Row";
 export type Row = {
-  rowId: UniqueIdentifier;
+  rowId: string;
+  dragIds: UniqueIdentifier[] | [];
 };
 export type BoardRowProps = {
   row: Row;
@@ -15,8 +15,9 @@ export type BoardRowProps = {
 
 export type EmployeeType = "Employee";
 export type Employee = {
-  employeeId: UniqueIdentifier;
-  rowId: RowId;
+  dragId: UniqueIdentifier;
+  employeeId: string;
+  rowId: string;
   fields: {
     Title: string;
     City: string;
@@ -41,3 +42,10 @@ export type EmployeeCardGroupProps = {
   label: string;
   employees: Employee[];
 };
+
+// Teamleader login
+export interface LoginProps {
+  data: {
+    session: Session | null;
+  };
+}
