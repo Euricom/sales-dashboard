@@ -136,12 +136,24 @@ export interface Company {
     tags: string[];
 }
 
+export interface Phase {
+  id : string;
+  name : string;
+  actions : [];
+  status : string;
+  requires_attention_after: {
+    amount: number;
+    unit: string;
+  }
+  probability: number;
+}
 
 export interface dataObject {
   data: Deal[];
   included: {
     company: Company[];
     user: User[];
+    dealPhase: Phase[];
   }
 }
 
@@ -149,10 +161,10 @@ export interface SimplifiedDeal {
   id: string;
   title: string;
   estimated_closing_date: string;
-  current_phase: {
-    phase_name: string | null;
+  deal_phase: {
     id: string;
-  };
+    name: string;
+  }
   company: {
     id: string;
     name: string;

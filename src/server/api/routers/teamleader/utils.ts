@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject } from "./types";
+import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase } from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -58,7 +58,7 @@ export const getDeals = async (accessToken: string) => {
         page: {
           size: 20,
         },
-        include: "lead.customer,responsible_user",
+        include: "lead.customer,responsible_user,current_phase",
       }),
     };
     try {
@@ -82,6 +82,8 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
   const deals = dealsObject.data;
   const users = dealsObject.included.user;
   const companies = dealsObject.included.company;
+  const phases = dealsObject.included.dealPhase;
+
   if (!Array.isArray(deals) || !Array.isArray(users) || !Array.isArray(companies)) {
       console.error('deals, users or companies is not an array');
       return [];
@@ -91,16 +93,19 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
       const dealId: string = deal.id;
       const userId: string = deal.responsible_user.id;
       const companyId: string = deal.lead?.customer?.id;
-      const dealPhaseId: string = deal.current_phase.id;
-
+      const phaseId: string = deal.current_phase.id;
       // find the user and company that are responsible for the deal
       const user = users.find((user: User) => user.id === userId);
       const company = companies.find((company: Company) => company.id === companyId);
+      const phase = phases.find((phase: Phase) => phase.id === phaseId);
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
       }
       if (!company) {
           console.log(`Company not found for deal ID: ${dealId}`);
+      }
+      if (!phase) {
+          console.log(`Phase not found for deal ID: ${dealId}`);
       }
 
       // return the simplified deal
@@ -108,9 +113,9 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
         id: deal.id,
         title: deal.title,
         estimated_closing_date: deal.estimated_closing_date ?? "",
-        current_phase: {
-          phase_name: dealPhase?.name ?? null,
-          id: dealPhaseId,
+        deal_phase: {
+            id: phase?.id ?? null,
+            name: phase?.name ?? null,
         },
         company: {
             id: company?.id ?? null,
