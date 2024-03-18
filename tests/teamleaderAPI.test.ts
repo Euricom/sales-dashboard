@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import exp from "constants";
 import type { dataObject } from "~/server/api/routers/teamleader/types";
 
 test.describe("Teamleader API tests", () => {
@@ -20,7 +21,7 @@ test.describe("Teamleader API tests", () => {
                 page: {
                   size: 20,
                 },
-                include: "lead.customer,responsible_user",
+                include: "lead.customer,responsible_user,current_phase",
               }),
         });
         expect(response.status).toBe(200);
@@ -30,12 +31,16 @@ test.describe("Teamleader API tests", () => {
         expect(data.data).toBeInstanceOf(Array);
         // check if included is present
         expect(data).toHaveProperty('included');
-        // check if included has company and user
+        // check if included has company, user and dealPhase
         expect(data.included).toHaveProperty('company');
         expect(data.included.company).toBeInstanceOf(Array);
 
         expect(data.included).toHaveProperty('user');
         expect(data.included.user).toBeInstanceOf(Array);
+
+        expect(data.included).toHaveProperty('dealPhase');
+        expect(data.included.dealPhase).toBeInstanceOf(Array);
+
     });
 });
 
