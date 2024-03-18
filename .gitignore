@@ -46,6 +46,11 @@ yarn-error.log*
 *.tsbuildinfo
 
 .data/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth
 
 .github/
 .husky/
