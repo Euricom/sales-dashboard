@@ -1,45 +1,14 @@
 import { expect, test } from "@playwright/test";
-import type { CompanyResponse, DealResponse, UserResponse } from "~/server/api/routers/teamleader/types";
+import exp from "constants";
+import type { dataObject } from "~/server/api/routers/teamleader/types";
 
 test.describe("Teamleader API tests", () => {
-    test("get deals data", async ({ page }) => {
+    test("get all deals data alongside the linked companies and users", async ({ page }) => {
         const authFile = "playwright/.auth/user.json"; 
         const storageState = await page.context().storageState({ path: authFile });
         
         const access_token_cookie = storageState.cookies.find((cookie) => cookie.name === 'access_token');
         const response = await fetch('https://api.focus.teamleader.eu/deals.list', {
-            headers: {
-                Authorization: `Bearer ${access_token_cookie?.value}`,
-        }});
-        //console.log(response);
-        expect(response.status).toBe(200);
-        const data: DealResponse = await response.json() as DealResponse;
-        expect(data).toHaveProperty('data');
-        expect(data.data).toBeInstanceOf(Array);
-    });
-
-    test("get users data", async ({ page }) => {
-        const authFile = "playwright/.auth/user.json"; 
-        const storageState = await page.context().storageState({ path: authFile });
-        
-        const access_token_cookie = storageState.cookies.find((cookie) => cookie.name === 'access_token');
-        const response = await fetch('https://api.focus.teamleader.eu/users.list', {
-            headers: {
-                Authorization: `Bearer ${access_token_cookie?.value}`,
-        }});
-        //console.log(response);
-        expect(response.status).toBe(200);
-        const data: UserResponse = await response.json() as UserResponse;
-        expect(data).toHaveProperty('data');
-        expect(data.data).toBeInstanceOf(Array);
-    });
-
-    test("get specific company data", async ({ page }) => {
-        const authFile = "playwright/.auth/user.json"; 
-        const storageState = await page.context().storageState({ path: authFile });
-        
-        const access_token_cookie = storageState.cookies.find((cookie) => cookie.name === 'access_token');
-        const response = await fetch('https://api.focus.teamleader.eu/companies.list', {
             method: "POST",    
             headers: {
                 Authorization: `Bearer ${access_token_cookie?.value}`,
@@ -47,17 +16,31 @@ test.describe("Teamleader API tests", () => {
               },
               body: JSON.stringify({
                 filter: {
-                  ids: [
-                    "e654d05e-2c79-097c-a064-e3803cd75d14"
-                  ]
+                  phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
                 },
+                page: {
+                  size: 20,
+                },
+                include: "lead.customer,responsible_user,current_phase",
               }),
         });
-        //console.log(response);
         expect(response.status).toBe(200);
-        const data: CompanyResponse = await response.json() as CompanyResponse;
+        const data: dataObject = await response.json() as dataObject;
+        // check if data is present
         expect(data).toHaveProperty('data');
         expect(data.data).toBeInstanceOf(Array);
+        // check if included is present
+        expect(data).toHaveProperty('included');
+        // check if included has company, user and dealPhase
+        expect(data.included).toHaveProperty('company');
+        expect(data.included.company).toBeInstanceOf(Array);
+
+        expect(data.included).toHaveProperty('user');
+        expect(data.included.user).toBeInstanceOf(Array);
+
+        expect(data.included).toHaveProperty('dealPhase');
+        expect(data.included.dealPhase).toBeInstanceOf(Array);
+
     });
 });
 

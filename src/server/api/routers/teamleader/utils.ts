@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import { type User, type Deal, type Company, type Tokens, type DealResponse, type UserResponse, type CompanyResponse, type SimplifiedDealArray} from "./types";
+import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase } from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -53,17 +53,12 @@ export const getDeals = async (accessToken: string) => {
       },
       body: JSON.stringify({
         filter: {
-          phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb"
+          phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
         },
-        sort: [
-          {
-            field: "created_at",
-            order: "desc"
-          }
-        ],
         page: {
-          size: 10,
+          size: 20,
         },
+        include: "lead.customer,responsible_user,current_phase",
       }),
     };
     try {
@@ -71,71 +66,26 @@ export const getDeals = async (accessToken: string) => {
       if (!response.ok) {
         console.error("Failed to fetch data from Teamleader");
       }
-      const data = (await response.json()) as DealResponse;
+      const data = (await response.json()) as dataObject;
       return data;
     } catch (error) {
       console.error('Error in getDeals:',error);
     }
 };
 
-export const getUsers = async (accessToken: string) => {
-  const url = `${env.TEAMLEADER_API_URL}/users.list`;
-    const options: RequestInit = {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      }
-    };
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        console.error("Failed to fetch data from Teamleader");
-      }
-      const data = (await response.json()) as UserResponse;
-      return data;
-    } catch (error) {
-      console.error('Error in getUsers:',error);
-    }
-};
-
-export const getCompanies = async (accessToken: string, dealId: string) => {
-  const url = `${env.TEAMLEADER_API_URL}/companies.list`;
-    const options: RequestInit = {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        filter: {
-          ids: [
-            `${dealId}`
-          ]
-        },
-      }),
-    };
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        console.error("Failed to fetch data from Teamleader");
-      }
-      const data = (await response.json()) as CompanyResponse;
-      return data;
-    } catch (error) {
-      console.error('Error in getCompanies:',error);
-    }
-};
-
-export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserResponse, accessToken: string): Promise<SimplifiedDealArray> => {
+export const simplifyDeals = async (dealsObject: dataObject): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== 'object') {
       console.error('Data, users, or companies is not an object or is null/undefined');
       return [];
   }
+  // put deals, users, and companies in variables
+  const deals = dealsObject.data;
+  const users = dealsObject.included.user;
+  const companies = dealsObject.included.company;
+  const phases = dealsObject.included.dealPhase;
 
-  const deals = dealsObject.data as Deal[]; // Assuming deals are nested under 'data' object
-  if (!Array.isArray(deals)) {
-      console.error('Deals is not an array');
+  if (!Array.isArray(deals) || !Array.isArray(users) || !Array.isArray(companies)) {
+      console.error('deals, users or companies is not an array');
       return [];
   }
 
@@ -143,27 +93,30 @@ export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserR
       const dealId: string = deal.id;
       const userId: string = deal.responsible_user.id;
       const companyId: string = deal.lead?.customer?.id;
-
-      // Find user and company for the deal
-      const [companyResponse] = await Promise.all([
-        companyId ? getCompanies(accessToken, companyId) : null,
-      ]);
-      const company = companyResponse?.data?.[0] as Company;
-      const user = usersObject.data.find((user: { id: string }) => user.id === userId) as User;
-
-
+      const phaseId: string = deal.current_phase.id;
+      // find the user and company that are responsible for the deal
+      const user = users.find((user: User) => user.id === userId);
+      const company = companies.find((company: Company) => company.id === companyId);
+      const phase = phases.find((phase: Phase) => phase.id === phaseId);
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
       }
-
       if (!company) {
           console.log(`Company not found for deal ID: ${dealId}`);
       }
+      if (!phase) {
+          console.log(`Phase not found for deal ID: ${dealId}`);
+      }
 
+      // return the simplified deal
       return {
         id: deal.id,
         title: deal.title,
         estimated_closing_date: deal.estimated_closing_date ?? "",
+        deal_phase: {
+            id: phase?.id ?? null,
+            name: phase?.name ?? null,
+        },
         company: {
             id: company?.id ?? null,
             name: company?.name ?? null,
@@ -176,5 +129,13 @@ export const simplifyDeals = async (dealsObject: DealResponse,usersObject: UserR
         },
       };
   }));
-  return simplifiedDeals.filter(deal => deal !== null);
+
+  // remove null values and sort the deals by estimated_closing_date
+  return simplifiedDeals
+  .filter(deal => deal !== null)
+  .sort((a, b) => {
+    if (!a.estimated_closing_date) return 1; // a is put last
+    if (!b.estimated_closing_date) return -1; // b is put last
+    return new Date(b.estimated_closing_date).getTime() - new Date(a.estimated_closing_date).getTime();
+  }) as SimplifiedDealArray;
 }

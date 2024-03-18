@@ -51,3 +51,11 @@ yarn-error.log*
 /blob-report/
 /playwright/.cache/
 /playwright/.auth
+
+.github/
+.husky/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth
