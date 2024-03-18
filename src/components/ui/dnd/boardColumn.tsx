@@ -16,7 +16,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       <CardHeader className="pb-1.5">
         <CardTitle>{columnTitle}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 w-[344px]">
+      <CardContent className="flex flex-col gap-2 w-[21.5rem]">
         <SortableContext items={rowsIds}>
           {rowsMogelijkheden.map((row) => (
             <BoardRow

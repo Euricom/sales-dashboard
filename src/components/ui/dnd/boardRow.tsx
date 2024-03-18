@@ -27,7 +27,7 @@ export function BoardRow({ row, employees, isHeader }: BoardRowProps) {
     <Card
       ref={setNodeRef}
       style={style}
-      className={"min-h-[60px] w-[344 px] max-w-full"}
+      className={"h-[3.75rem] w-[344 px] max-w-full"}
       variant={"row"}
       size={"row"}
     >
