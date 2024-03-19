@@ -1,6 +1,7 @@
 import { env } from "~/env";
+import { type Tokens } from "~/server/api/routers/teamleader/types";
 
-export async function fetchToken(code: string): Promise<Record<string, any> | undefined> {
+export async function fetchToken(code: string): Promise<Tokens | undefined> {
   const options: RequestInit = {
     method: "POST",headers: {
       'Content-Type': 'application/json',
@@ -22,7 +23,7 @@ export async function fetchToken(code: string): Promise<Record<string, any> | un
     //   headers: response.headers,
     // });
 
-    const data = await response.json();
+    const data = await response.json() as Tokens;
     // console.log({ data, response });
     return data;
   } catch (error) {
