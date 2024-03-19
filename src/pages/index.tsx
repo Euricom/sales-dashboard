@@ -78,7 +78,7 @@ const SignInButton = () => {
 
 const RefreshButton = () => {
   const handleRefresh = () => {
-    window.location.reload();
+    window.location.replace(window.location.href);
   };
 
   return (
