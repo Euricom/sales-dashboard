@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
@@ -6,11 +5,10 @@ import {
   type NextAuthOptions,
   type Session,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
 import AzureProvider from "next-auth/providers/azure-ad";
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
-import { db } from "~/server/db";
+import TeamleaderProvider from "./teamleaderProvider";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -202,6 +200,12 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
+    TeamleaderProvider({
+      accessTokenUrl: env.TEAMLEADER_ACCESS_TOKEN_URL ?? "",
+      clientId: env.TEAMLEADER_CLIENT_ID ?? "",
+      clientSecret: env.TEAMLEADER_CLIENT_SECRET ?? "",
+    }),
+
     /**
      * ...add more providers here.
      *
@@ -243,20 +247,15 @@ export const authOptions: NextAuthOptions = {
     },
     session({ session, token }) {
       if (session.user) {
-        // get time span until token expires
-        const date = new Date(0);
-        date.setMilliseconds(token.expiresAt - Date.now());
-        const timeSpanUntilExpires = date.toISOString().substring(11, 19);
-        const roles = token.roles || [];
-
         // create session object
-        session.user.id = token.oid;
-        session.user.name = token.name ?? "";
-        session.user.email = token.email ?? "";
-        session.user.roles = roles;
-        session.tokenExpiresAt = new Date(token.expiresAt).toISOString();
-        session.tokenExpiresIn = timeSpanUntilExpires;
+        session.teamleader = {
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken ?? "",
+          expirationDate: new Date(token.expiresAt),
+        };
+        session.user.name = "placeholderNameForTeamleaderUser";
       }
+
       return session;
     },
   },
