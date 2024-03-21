@@ -1,12 +1,13 @@
-import { getTeamleaderData } from "./utils";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import DealCard from "./dealCard";
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
+import { useContext } from "react";
+import { DealContext } from "~/contexts/dealsProvider";
 
 export default function DealsColumn() {
-  const dealsData = getTeamleaderData();
+  const { deals } = useContext(DealContext);
 
-  if (!dealsData) {
+  if (!deals) {
     return <div>is loading...</div>;
   }
 
@@ -16,7 +17,7 @@ export default function DealsColumn() {
         <CardTitle>Deals</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {dealsData.data?.map((dealObject: SimplifiedDeal, index) => (
+        {deals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
       </CardContent>
