@@ -2,24 +2,21 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { Button } from "~/components/ui/button";
 import DealsColumn from "../components/teamleader/dealsColumn";
-import Login from "../components/teamleader/login";
 import { BoardColumn } from "~/components/ui/dnd/boardColumn";
 import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { api } from "~/utils/api";
 import LoginTeamleader from "~/components/teamleader/LoginTeamleader";
-import { useTLRedirection } from "~/hooks/redirection";
 
 export default function Home() {
   const { status, data } = useSession(); // Azure Login
   const { data: redirectionUrl } = api.teamleader.getRedirectionURL.useQuery();
 
   // If status is not loading & is authenticated, redirect to the TL redirection URL
-  useTLRedirection(status, data, redirectionUrl);
+  //useTLRedirection(status, data, redirectionUrl);
 
   if (status === "unauthenticated") {
-    console.log("checking auth state", "unauthenticated");
     return (
       <div className="flex flex-col gap-4 justify-center items-center w-screen h-screen">
         <h1>You are not signed in</h1>
@@ -29,7 +26,6 @@ export default function Home() {
   }
 
   if (status === "authenticated") {
-    console.log("checking auth state", "unauthenticated");
     return (
       <>
         <Head>
@@ -48,7 +44,7 @@ export default function Home() {
                     <div className="flex gap-4 w-full items-start justify-end my-4">
                       <SignInButton />
                       <RefreshButton />
-                      <Login data={{ session: data }} />
+                      {/* <Login data={{ session: data }} /> */}
                     </div>
                   </div>
                   <div className="flex w-full h-full my-2 gap-4">

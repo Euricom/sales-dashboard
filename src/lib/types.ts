@@ -4,7 +4,7 @@ import type { Session } from "next-auth";
 export type RowType = "Row";
 export type Row = {
   rowId: string;
-  dragIds: UniqueIdentifier[] | [];
+  dragItemIds: UniqueIdentifier[] | [];
 };
 export type BoardRowProps = {
   row: Row;
@@ -15,7 +15,7 @@ export type BoardRowProps = {
 
 export type EmployeeType = "Employee";
 export type Employee = {
-  dragId: UniqueIdentifier;
+  dragItemId: UniqueIdentifier;
   employeeId: string;
   rowId: string;
   fields: {

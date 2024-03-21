@@ -53,9 +53,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   // }
 
   const mappedRows = deals.map((deal) => ({ rowId: deal.id, dragIds: [] }));
-  console.log(deals, "log");
   if (!rowsMogelijkheden) {
-    return <div>No Rows Found</div>;
+    return null;
   }
 
   return (
@@ -172,20 +171,15 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       //   // Active DragItem Index & Over DragItem Index In Active Row
       //   const activeDragItemIndex = activeRow?.dragIds.findIndex((dragId) => dragId === activeId);
       //   const overDragItemIndex = activeRow?.dragIds.findIndex((dragId) => dragId === overId);
-
       //   if (!activeDragItemIndex || !overDragItemIndex) return rows;
-
       //   const activeEmployee = employees.find((employee) => employee.employeeId === );
       //   const overEmployee = activeRow?.dragIds[overDragItemIndex];
-
       //   if (activeEmployee && overEmployee && activeEmployee.rowId !== overEmployee.rowId) {
       //     activeEmployee.rowId = overEmployee.rowId;
       //     return arrayMove(rows, activeDragItemIndex, overDragItemIndex - 1);
       //   }
       //   return arrayMove(rows, activeDragItemIndex, overDragItemIndex);
-
       // }
-      console.log(active);
     }
 
     const isOverARow = overData?.type === "Row";

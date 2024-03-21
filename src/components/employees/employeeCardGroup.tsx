@@ -30,7 +30,11 @@ export const EmployeeCardGroup = ({
           className="flex h-[76px] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
           title="CollapsibleContent"
         >
-          <BoardRow row={{ rowId: 0 }} employees={employees} isHeader={true} />
+          <BoardRow
+            row={{ rowId: "0", dragItemIds: [] }}
+            employees={employees}
+            isHeader={true}
+          />
         </div>
       </CollapsibleContent>
     </Collapsible>
