@@ -10,6 +10,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
+import { getToken, type JWT } from "next-auth/jwt";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -26,6 +27,7 @@ import { db } from "~/server/db";
 
 interface CreateContextOptions {
   session: Session | null;
+  token: JWT | null;
 }
 
 /**
@@ -41,6 +43,7 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
+    token: opts.token,
     db,
   };
 };
@@ -56,9 +59,12 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
+  // Get the token from the session
+  const token = await getToken({ req });
 
   return createInnerTRPCContext({
     session,
+    token,
   });
 };
 

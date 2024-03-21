@@ -8,7 +8,6 @@ import {
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
 import TeamleaderProvider from "./teamleaderProvider";
-import { Tokens } from "./api/routers/teamleader/types";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -320,24 +319,4 @@ export const getUser = (session: Session | null) => {
       roles: [],
     },
   );
-};
-
-/**
- * Function to retrieve the token returned by the `jwt()` callback in NextAuth.js.
- */
-export const getAuthToken = async (): Promise<string> => {
-  console.log("Fetching token...");
-  try {
-    // You can directly access the token from the jwt callback
-    const token = await refreshAccessToken({} as JWT); // Pass an empty JWT object or adjust as necessary
-
-    if (token) {
-      return token.accessToken; // Assuming accessToken is what you need for API calls
-    } else {
-      throw new Error("No token available.");
-    }
-  } catch (error) {
-    console.error("Error fetching token:", error);
-    throw error;
-  }
 };

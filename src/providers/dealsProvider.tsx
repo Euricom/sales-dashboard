@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo } from "react";
+import React, { createContext, useMemo } from "react";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 
@@ -17,14 +17,12 @@ type DealContextProviderProps = {
 export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
-  const { data, isLoading } = api.teamleader.getDealsData.useQuery();
+  const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
 
-  const deals = useMemo(() => (isLoading ? null : data), [data, isLoading]);
-
-  console.log("Deals:", deals);
-  // const deals = useMemo(() => {
-  //   return api.teamleader.getDealsData.useQuery() ?? [];
-  // }, []);
+  const deals = useMemo(
+    () => (isLoading ? null : dealsData),
+    [dealsData, isLoading],
+  );
 
   return (
     <DealContext.Provider
