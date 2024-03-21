@@ -187,7 +187,7 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   callbacks: {
-    jwt({ token, account, profile }) {
+    jwt: async function ({ token, account, profile }) {
       // console.log("jwt: %o", { account, profile });
       // Initial sign in
       if (profile && account) {
@@ -206,8 +206,8 @@ export const authOptions: NextAuthOptions = {
       // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
         return token;
-      }
-      return refreshAccessToken(token);
+      }     
+      return await refreshAccessToken(token);
     },
     session({ session, token }) {
       if (session.user) {
