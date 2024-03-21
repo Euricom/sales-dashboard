@@ -1,6 +1,7 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { env } from "~/env";
 import { type SharePointContact } from "./types";
+import { log } from "console";
 
 const CONTACT_LIST_ID = "dda5396a-4f95-4d63-b9ae-3ce4e6fc0fcf";
 export const azureClient = new ConfidentialClientApplication({
@@ -70,4 +71,38 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+export const sortEmployeesData = (data: SharePointContact) => {
+  const bench: SharePointContact["value"] = [];
+  const starter: SharePointContact["value"] = [];
+  const endOfContract: SharePointContact["value"] = [];
+  const openForNewOpportunities: SharePointContact["value"] = [];
+  
+  // add the users to the correct array based on their status
+  data.value.forEach(contact => {
+    const status = contact.fields.Status;
+    const subStatus = contact.fields.Contract_x0020_Substatus;
+
+    if (status === 'Bench') {
+      bench.push(contact);
+    } else if (status === 'Starter') {
+      starter.push(contact);
+    } else if (subStatus === 'End of Contract') {
+      endOfContract.push(contact);
+    } else if (subStatus === 'Open for New Opportunities') {
+      openForNewOpportunities.push(contact);
+    }
+  });
+
+  // create an object with the sorted data
+  const sortedData = {
+    bench,
+    endOfContract,
+    starter,
+    openForNewOpportunities,
+  }
+
+  //console.log(sortedData);
+  return sortedData;
 };
