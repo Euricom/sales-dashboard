@@ -18,7 +18,7 @@ export function EmployeeCardDragged({
     transition,
     isDragging,
   } = useSortable({
-    id: employee.employeeId,
+    id: employee.dragItemId,
     data: {
       type: "Employee",
       employee,

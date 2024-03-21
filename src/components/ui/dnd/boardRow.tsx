@@ -6,8 +6,8 @@ import { Card, CardContent } from "../card";
 import type { BoardRowProps } from "../../../lib/types";
 
 export function BoardRow({ row, employees, isHeader }: BoardRowProps) {
-  const employeesIds = useMemo(() => {
-    return employees.map((employee) => employee.employeeId);
+  const dragItemIds = useMemo(() => {
+    return employees.map((employee) => employee.dragItemId);
   }, [employees]);
 
   const { setNodeRef, transform, transition } = useSortable({
@@ -32,10 +32,10 @@ export function BoardRow({ row, employees, isHeader }: BoardRowProps) {
       size={"row"}
     >
       <CardContent className={`flex gap-2 ${isHeader ? "" : "flex-wrap"}`}>
-        <SortableContext items={employeesIds}>
+        <SortableContext items={dragItemIds}>
           {employees.map((employee) => (
             <EmployeeCardDragged
-              key={employee.employeeId}
+              key={employee.dragItemId}
               employee={employee}
               isHeader={isHeader}
             />

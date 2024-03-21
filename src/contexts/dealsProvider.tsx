@@ -1,9 +1,10 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useMemo } from "react";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-import { getTeamleaderData } from "~/components/teamleader/utils";
+import { api } from "~/utils/api";
 
 type DealContextType = {
-  deals: SimplifiedDeal[] | null; // Allow for null value to indicate loading state
+  deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state
+  isLoading?: boolean;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -17,18 +18,17 @@ type DealContextProviderProps = {
 export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
-  const [deals, setDeals] = useState<SimplifiedDeal[] | null>(
-    getTeamleaderData()?.data ?? null,
-  ); // Initialize as null
-
-  console.log(deals, "deals");
-
-  if (deals === null) return <div>Loading...</div>; // Handle loading state
+  const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
+  const deals = useMemo(
+    () => (isLoading ? null : dealsData),
+    [dealsData, isLoading],
+  );
 
   return (
     <DealContext.Provider
       value={{
         deals,
+        isLoading: isLoading,
       }}
     >
       {children}

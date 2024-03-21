@@ -1,10 +1,11 @@
-import React, { createContext } from "react";
+import React, { createContext, useState } from "react";
 import { api } from "~/utils/api";
 import type { Employee } from "~/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
 type EmployeeContextType = {
-  employees: Employee[] | null;
+  employeesSharepoint: Employee[] | [];
+  employeesMogelijkheden: Employee[] | [];
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -18,15 +19,31 @@ type EmployeeContextProviderProps = {
 export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
+  // TODO: MAKE useMemo and useCallback's
   // GET employees data from SharePoint
-  const employeesData = api.sharePoint.getEmployeesData.useQuery();
+  const sharepointEmployeesData = api.sharePoint.getEmployeesData.useQuery();
+  const employeesMogelijkheden = useState([]);
+  // if (employeesData.error) {
+  //   console.error(employeesData.error);
+  //   return <div>Error: {employeesData.error.message}</div>;
+  // }
+  // if (employeesData.isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center w-screen h-screen">
+  //       <h1>Loading...</h1>
+  //     </div>
+  //   );
+  // }
+  // Add unique dragId to employees & rowId
 
-  const mappedEmployees = employeesData?.data?.value.map((employee) => ({
-    employeeId: employee.id,
-    dragId: uuidv4(),
-    rowId: "0",
-    fields: employee.fields,
-  })) as Employee[];
+  const mappedEmployees = sharepointEmployeesData?.data?.value.map(
+    (employee) => ({
+      employeeId: employee.id,
+      dragItemId: uuidv4(),
+      rowId: "0",
+      fields: employee.fields,
+    }),
+  ) as Employee[];
 
   if (!mappedEmployees) {
     return;
@@ -35,7 +52,8 @@ export const EmployeeContextProvider: React.FC<
   return (
     <EmployeeContext.Provider
       value={{
-        employees: mappedEmployees,
+        employeesSharepoint: mappedEmployees,
+        employeesMogelijkheden: employeesMogelijkheden as unknown as Employee[],
       }}
     >
       {children}

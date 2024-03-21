@@ -1,5 +1,5 @@
 // DndContextProvider.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
 import type { Row, Employee } from "~/lib/types";
@@ -17,12 +17,11 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { EmployeeCardDragged } from "~/components/employees/employeeCardDragged";
 import { v4 as uuidv4 } from "uuid";
-import { EmployeeContext } from "~/contexts/employeesProvider";
 import { DealContext } from "~/contexts/dealsProvider";
 
 type DropContextType = {
   rowsMogelijkheden: Row[];
-  // employeesMogelijkheden: Employee[];
+  employeesMogelijkheden: Employee[];
   // setRowsMogelijkheden: React.Dispatch<React.SetStateAction<Row[]>>;
   // setEmployeesMogelijkheden: React.Dispatch<React.SetStateAction<Employee[]>>;
 };
@@ -38,32 +37,76 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { deals } = useContext(DealContext);
+  const { deals, isLoading } = useContext(DealContext);
+  // console.log(deals, "deals");
   // const { employees } = useContext(EmployeeContext);
+  const [rowsMogelijkheden, setRowsMogelijkheden] = useState<Row[]>([]);
+  const [employeesMogelijkheden, setEmployeesMogelijkheden] = useState<
+    Employee[]
+  >([
+    {
+      dragItemId: uuidv4(),
+      employeeId: uuidv4(),
+      rowId: "3d300840-a767-0b39-a97e-76e2218286b3",
+      fields: {
+        Title: "John Doe",
+        City: "New York",
+        Job_x0020_title: "Software Engineer",
+        Level: "Senior",
+        Status: "Active",
+        Contract_x0020_Substatus: "Full-time",
+      },
+    },
+    {
+      dragItemId: uuidv4(),
+      employeeId: uuidv4(),
+      rowId: "e5d8a575-6cf2-0968-997c-5205d181ea5a",
+      fields: {
+        Title: "Jane Smith",
+        City: "San Francisco",
+        Job_x0020_title: "Product Manager",
+        Level: "Senior",
+        Status: "Active",
+        Contract_x0020_Substatus: "Full-time",
+      },
+    },
+    {
+      dragItemId: uuidv4(),
+      employeeId: uuidv4(),
+      rowId: "55159183-aa1d-0710-827c-df89217ea48c",
+      fields: {
+        Title: "Mike Johnson",
+        City: "Seattle",
+        Job_x0020_title: "Data Scientist",
+        Level: "Junior",
+        Status: "Active",
+        Contract_x0020_Substatus: "Part-time",
+      },
+    },
+  ]);
 
-  const [rowsMogelijkheden, setRowsMogelijkheden] = useState<Row[]>();
-  // const [employeesMogelijkheden, setEmployeesMogelijkheden] =
-  //   useState<Employee[]>();
+  useEffect(() => {
+    if (!isLoading && deals) {
+      const initializedRows = deals.map((deal) => ({
+        rowId: deal.id,
+        dragItemIds: employeesMogelijkheden
+          ? employeesMogelijkheden
+              .filter((e) => e.rowId === deal.id)
+              .map((e) => e.dragItemId)
+          : [],
+      }));
+      setRowsMogelijkheden(initializedRows);
+    }
+  }, [isLoading, deals, employeesMogelijkheden]);
+
   const [activeEmployee, setActiveEmployee] = useState<Employee | null>(null);
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-
-  // setEmployeesMogelijkheden(employees);
-  // if (!employeesMogelijkheden || !rowsMogelijkheden) {
-  //   return <div>Error: No employees found</div>;
-  // }
-
-  const mappedRows = deals.map((deal) => ({ rowId: deal.id, dragIds: [] }));
-  if (!rowsMogelijkheden) {
-    return null;
-  }
 
   return (
     <DropContext.Provider
       value={{
-        rowsMogelijkheden: mappedRows,
-        // employeesMogelijkheden,
-        // setRowsMogelijkheden,
-        // setEmployeesMogelijkheden,
+        rowsMogelijkheden: rowsMogelijkheden,
+        employeesMogelijkheden: employeesMogelijkheden,
       }}
     >
       <DndContext
@@ -109,6 +152,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     if (activeId === overId) return;
 
+    if (!rowsMogelijkheden) return;
+
     setRowsMogelijkheden((rowsMogelijkheden) => {
       if (!rowsMogelijkheden) return [];
       const activeRowIndex = rowsMogelijkheden.findIndex(
@@ -124,6 +169,15 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
       return arrayMove(rowsMogelijkheden, activeRowIndex, overRowIndex);
     });
+
+    const activeData = active.data.current;
+    const isActiveAnEmployee = activeData?.type === "Employee";
+    if (!isActiveAnEmployee) return;
+
+    const activeEmployee = activeData.employee as Employee;
+    if (activeEmployee.rowId === "0") {
+      appendEmployee(activeEmployee, overId as string);
+    }
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -147,89 +201,127 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     // Dropping an Employee over another Employee
     if (isActiveAnEmployee && isOverAnEmployee) {
-      // setEmployeesMogelijkheden((employees) => {
-      //   const activeIndex = employees.findIndex(
-      //     (e) => e.employeeId === activeId,
-      //   );
-      //   const overIndex = employees.findIndex((e) => e.employeeId === overId);
-      //   const activeEmployee = employees[activeIndex];
-      //   const overEmployee = employees[overIndex];
-      //   if (
-      //     activeEmployee &&
-      //     overEmployee &&
-      //     activeEmployee.rowId !== overEmployee.rowId
-      //   ) {
-      //     activeEmployee.rowId = overEmployee.rowId;
-      //     return arrayMove(employees, activeIndex, overIndex - 1);
-      //   }
-      //   return arrayMove(employees, activeIndex, overIndex);
-      // });
-      // setRowsMogelijkheden((rows) => {
-      //   if (!rows) return [];
-      //   // Active Row
-      //   const activeRow = rows.find((row) => row.rowId === activeId);
-      //   // Active DragItem Index & Over DragItem Index In Active Row
-      //   const activeDragItemIndex = activeRow?.dragIds.findIndex((dragId) => dragId === activeId);
-      //   const overDragItemIndex = activeRow?.dragIds.findIndex((dragId) => dragId === overId);
-      //   if (!activeDragItemIndex || !overDragItemIndex) return rows;
-      //   const activeEmployee = employees.find((employee) => employee.employeeId === );
-      //   const overEmployee = activeRow?.dragIds[overDragItemIndex];
-      //   if (activeEmployee && overEmployee && activeEmployee.rowId !== overEmployee.rowId) {
-      //     activeEmployee.rowId = overEmployee.rowId;
-      //     return arrayMove(rows, activeDragItemIndex, overDragItemIndex - 1);
-      //   }
-      //   return arrayMove(rows, activeDragItemIndex, overDragItemIndex);
-      // }
+      setEmployeesMogelijkheden((employees) => {
+        if (employees.length === 0) return [];
+        const activeIndex = employees.findIndex(
+          (e) => e.dragItemId === activeId,
+        );
+        const overIndex = employees.findIndex((e) => e.dragItemId === overId);
+        const activeEmployee = employees[activeIndex];
+        const overEmployee = employees[overIndex];
+        if (
+          activeEmployee &&
+          overEmployee &&
+          activeEmployee.rowId !== overEmployee.rowId
+        ) {
+          activeEmployee.rowId = overEmployee.rowId;
+          return arrayMove(employees, activeIndex, overIndex - 1);
+        }
+        return arrayMove(employees, activeIndex, overIndex);
+      });
+      setRowsMogelijkheden((rows) => {
+        if (!rows) return [];
+        // Active Row
+        const activeRow = rows.find((row) => row.rowId === activeId);
+        // Active DragItem Index & Over DragItem Index In Active Row
+        const activeDragItemIndex = activeRow?.dragItemIds.findIndex(
+          (dragItemId) => dragItemId === activeId,
+        );
+        const overDragItemIndex = activeRow?.dragItemIds.findIndex(
+          (dragItemId) => dragItemId === overId,
+        );
+        if (!activeDragItemIndex || !overDragItemIndex) return rows;
+        const activeEmployee = employeesMogelijkheden.find(
+          (employee) => employee.dragItemId === activeId,
+        );
+        const overEmployee = employeesMogelijkheden.find(
+          (employee) => employee.dragItemId === overId,
+        );
+        if (
+          activeEmployee &&
+          overEmployee &&
+          activeEmployee.rowId !== overEmployee.rowId
+        ) {
+          activeEmployee.rowId = overEmployee.rowId;
+          return arrayMove(rows, activeDragItemIndex, overDragItemIndex - 1);
+        }
+        return arrayMove(rows, activeDragItemIndex, overDragItemIndex);
+      });
     }
 
     const isOverARow = overData?.type === "Row";
 
-    // // Dropping an Employee over a Row
-    // if (isActiveAnEmployee && isOverARow) {
-    //   setEmployeesMogelijkheden((employees) => {
-    //     const activeIndex = employees.findIndex(
-    //       (e) => e.employeeId === activeId,
-    //     );
-    //     const activeEmployee = employees[activeIndex];
-    //     if (activeEmployee) {
-    //       activeEmployee.rowId = overId as RowId;
-    //       return arrayMove(employees, activeIndex, activeIndex);
-    //     }
-    //     return employees;
-    //   });
-    // }
+    // Dropping an Employee over a Row
+    if (isActiveAnEmployee && isOverARow) {
+      setEmployeesMogelijkheden((employees) => {
+        const activeIndex = employees.findIndex(
+          (e) => e.dragItemId === activeId,
+        );
+        const activeEmployee = employees[activeIndex];
+        if (activeEmployee) {
+          activeEmployee.rowId = overId as string;
+          return arrayMove(employees, activeIndex, activeIndex);
+        }
+        return employees;
+      });
+    }
 
+    // This serves as a preview of the place where the employee being dragged
     // const activeEmployee = activeData.employee as Employee;
-    // if (activeEmployee.rowId === 0) {
-    //   appendEmployee(activeEmployee, overId as RowId);
+    // if (activeEmployee.rowId === "0") {
+    //   // appendEmployee(activeEmployee, overId as string);
+    //   previewEmployee(activeEmployee, overId as string);
     // }
   }
 
-  //   // append new employee to employeeMogelijkheden from EmployeeCardGroup
-  //   function appendEmployee(employee: Employee, rowId: RowId) {
-  //     const isEmployeeAlreadyInRow = alreadyInRow(rowId, employee);
-  //     if (isEmployeeAlreadyInRow) {
-  //       return;
-  //     }
-  //     setEmployeesMogelijkheden((employees) => {
-  //       const filteredEmployees = employees.filter(
-  //         (e) => e.employeeId !== employee.employeeId,
-  //       );
-  //       const newEmployee = {
-  //         ...employee,
-  //         employeeId: generateNewEmployeeId(),
-  //         rowId,
-  //       };
-  //       return [...filteredEmployees, newEmployee];
-  //     });
+  // append new employee to employeeMogelijkheden from EmployeeCardGroup
+  function appendEmployee(employee: Employee, rowId: string) {
+    const isEmployeeAlreadyInRow = alreadyInRow(rowId, employee);
+    if (isEmployeeAlreadyInRow) {
+      return;
+    }
+
+    const newEmployee = {
+      ...employee,
+      dragItemId: uuidv4(),
+      rowId,
+    };
+
+    setEmployeesMogelijkheden((employees) => {
+      const filteredEmployees = employees.filter(
+        (e) => e.dragItemId !== employee.dragItemId,
+      );
+
+      return [...filteredEmployees, newEmployee];
+    });
+  }
+
+  function alreadyInRow(rowId: string, employee: Employee) {
+    const row = rowsMogelijkheden.find((row) => row.rowId === rowId);
+    if (!row) return false;
+    return row.dragItemIds.some(
+      (dragItemId) => dragItemId === employee.dragItemId,
+    );
+  }
+  // // preview new employee from EmployeeCardGroup above mogelijkheden row
+  // function previewEmployee(employee: Employee, rowId: string) {
+  //   const isEmployeeAlreadyInRow = alreadyInRow(rowId, employee);
+  //   if (isEmployeeAlreadyInRow) {
+  //     return;
   //   }
 
-  //   function generateNewEmployeeId() {
-  //     return uuidv4();
-  //   }
-  //   function alreadyInRow(rowId: RowId, employee: Employee) {
-  //     const row = rowsMogelijkheden.find((row) => row.rowId === rowId);
-  //     if (!row) return false;
-  //     return row;
-  //   }
+  //   const newEmployee = {
+  //     ...employee,
+  //     dragItemId: uuidv4(),
+  //     rowId,
+  //   };
+
+  //   setEmployeesMogelijkheden((employees) => {
+  //     const filteredEmployees = employees.filter(
+  //       (e) => e.dragItemId !== employee.dragItemId,
+  //     );
+
+  //     return [...filteredEmployees, newEmployee];
+  //   });
+  // }
 };

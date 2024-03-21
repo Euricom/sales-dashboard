@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { BoardRow } from "./boardRow";
 import { SortableContext } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
-import { DropContext } from "../../../contexts/dndProvider";
+import { DropContext } from "~/contexts/dndProvider";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rowsMogelijkheden, employeesMogelijkheden } = useContext(DropContext);
@@ -11,6 +11,8 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     [rowsMogelijkheden],
   );
 
+  if (!employeesMogelijkheden || !rowsMogelijkheden) return null;
+
   return (
     <Card>
       <CardHeader className="pb-1.5">
@@ -18,11 +20,11 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2 w-[21.5rem]">
         <SortableContext items={rowsIds}>
-          {rowsMogelijkheden.map((row) => (
+          {rowsMogelijkheden?.map((row) => (
             <BoardRow
               key={row.rowId}
               row={row}
-              employees={employeesMogelijkheden.filter(
+              employees={employeesMogelijkheden?.filter(
                 (employee) => employee.rowId === row.rowId,
               )}
             />
