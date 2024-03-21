@@ -129,7 +129,6 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
     });
 
     const data = (await response.json()) as RefreshTokenPayload;
-    console.log(data);
     if ("error" in data) {
       throw new Error(`Failed to refresh accessToken: ${data.error}`);
     }
@@ -205,11 +204,8 @@ export const authOptions: NextAuthOptions = {
           email: profile.data.email,
         };
       }
-
-      console.log(token.expiresAt, Date.now(), token.expiresAt - Date.now());
       // Check if the access token has expired or about to expire
-      if (token.expiresAt && Date.now() >= token.expiresAt - 60000) {
-        // Token has expired or about to expire in less than a minute
+      if (Date.now() < token.expiresAt) {
         return token;
       }
       return refreshAccessToken(token);
