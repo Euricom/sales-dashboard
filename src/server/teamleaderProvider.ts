@@ -36,7 +36,7 @@ export default function Teamleader<P extends TeamleaderProfile>(
     authorization: {
       url: env.TEAMLEADER_AUTHORIZATION_URL,
       params: {
-        scope: "companies users",
+        scope: "companies users deals",
         redirect_uri: env.TEAMLEADER_REDIRECT_URL,
         response_type: "code",
       },

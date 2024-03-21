@@ -5,7 +5,6 @@ import {
   type NextAuthOptions,
   type Session,
 } from "next-auth";
-import AzureProvider from "next-auth/providers/azure-ad";
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
 import TeamleaderProvider from "./teamleaderProvider";
@@ -34,10 +33,12 @@ declare module "next-auth/jwt" {
    */
   interface JWT {
     // default
-    name?: string | null;
-    email?: string | null;
-    picture?: string | null;
-    sub?: string;
+    profile?: {
+      name?: string;
+      email?: string;
+      picture?: string | null;
+      sub?: string | null;
+    };
 
     // extended
     accessToken: string;
@@ -65,11 +66,6 @@ declare module "next-auth" {
       email: string;
       roles: string[];
     };
-    teamleader: {
-      accessToken: string;
-      refreshToken: string;
-      expirationDate: Date;
-    };
   }
 
   /** Azure AD Account */
@@ -85,21 +81,13 @@ declare module "next-auth" {
     session_state: string;
   }
 
-  /** Azure AD Profile (id_token payload) */
+  /** Teamleader Profile (id_token payload) */
   interface Profile {
-    aud: string;
-    iss: string; // https://login.microsoftonline.com/0b53d2c1-bc55-4ab3-a161-927d289257f2/v2.0
-    iat: number;
-    nbf: number;
-    exp: number;
-    aio: string;
-    oid: string;
-    preferred_username: string;
-    rh: string;
-    roles: string[];
-    tid: string;
-    uti: string;
-    ver: "2.0";
+    data: {
+      first_name: string;
+      last_name: string;
+      email: string;
+    };
   }
 }
 
@@ -189,17 +177,6 @@ export const authOptions: NextAuthOptions = {
   },
   // adapter: PrismaAdapter(db),
   providers: [
-    AzureProvider({
-      clientId: env.AZURE_AD_CLIENT_ID ?? "",
-      clientSecret: env.AZURE_AD_CLIENT_SECRET ?? "",
-      tenantId: env.AZURE_AD_TENANT_ID ?? "",
-      checks: ["pkce"], // to prevent CSRF and authorization code injection attacks.
-      authorization: {
-        params: {
-          scope: "openid profile email offline_access",
-        },
-      },
-    }),
     TeamleaderProvider({
       accessTokenUrl: env.TEAMLEADER_ACCESS_TOKEN_URL ?? "",
       clientId: env.TEAMLEADER_CLIENT_ID ?? "",
@@ -217,43 +194,40 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   callbacks: {
-    jwt({ token, account, user, profile }) {
-      // log.debug('jwt: %o', { token });
+    jwt({ token, account, profile }) {
+      // console.log("jwt: %o", { account, profile });
+
       // Initial sign in
       if (profile && account) {
-        delete user?.image; // lets keep auth cookie small
         const clockSkew = 60 * 10 * 1000; // 10 minutes
         const expiresAt = account.expires_at * 1000 - clockSkew; // ms
-        return {
-          expiresAt,
-          oid: profile.oid,
-          iat: token.iat,
-          exp: token.exp,
-          jti: token.jti,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          roles: profile.roles,
-          ...user,
+
+        // Update token object
+        token.expiresAt = expiresAt;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.profile = {
+          name: profile.data.first_name + " " + profile.data.last_name,
+          email: profile.data.email,
         };
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < token.expiresAt) {
-        return token;
-      }
+      return token;
+
+      // TODO: implement automatic token refresh for Teamleader
+      // // Return previous token if the access token has not expired yet
+      // if (Date.now() < account?.expires_at * 1000) {
+      //   return token;
+      // }
 
       // Access token has expired, try to update it
-      return refreshAccessToken(token);
+      // return refreshAccessToken(token);
     },
     session({ session, token }) {
       if (session.user) {
         // create session object
-        session.teamleader = {
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken ?? "",
-          expirationDate: new Date(token.expiresAt),
-        };
-        session.user.name = "placeholderNameForTeamleaderUser";
+        session.user.name = token.profile?.name ?? "";
+        session.user.email = token.profile?.email ?? "";
       }
 
       return session;
