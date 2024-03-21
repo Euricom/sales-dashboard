@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
@@ -6,11 +5,9 @@ import {
   type NextAuthOptions,
   type Session,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
-import AzureProvider from "next-auth/providers/azure-ad";
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
-import { db } from "~/server/db";
+import TeamleaderProvider from "./teamleaderProvider";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -36,10 +33,12 @@ declare module "next-auth/jwt" {
    */
   interface JWT {
     // default
-    name?: string | null;
-    email?: string | null;
-    picture?: string | null;
-    sub?: string;
+    profile?: {
+      name?: string;
+      email?: string;
+      picture?: string | null;
+      sub?: string | null;
+    };
 
     // extended
     accessToken: string;
@@ -67,11 +66,6 @@ declare module "next-auth" {
       email: string;
       roles: string[];
     };
-    teamleader: {
-      accessToken: string;
-      refreshToken: string;
-      expirationDate: Date;
-    };
   }
 
   /** Azure AD Account */
@@ -87,33 +81,22 @@ declare module "next-auth" {
     session_state: string;
   }
 
-  /** Azure AD Profile (id_token payload) */
+  /** Teamleader Profile (id_token payload) */
   interface Profile {
-    aud: string;
-    iss: string; // https://login.microsoftonline.com/0b53d2c1-bc55-4ab3-a161-927d289257f2/v2.0
-    iat: number;
-    nbf: number;
-    exp: number;
-    aio: string;
-    oid: string;
-    preferred_username: string;
-    rh: string;
-    roles: string[];
-    tid: string;
-    uti: string;
-    ver: "2.0";
+    data: {
+      first_name: string;
+      last_name: string;
+      email: string;
+    };
   }
 }
 
 type RefreshTokenPayload =
   | {
       token_type: "Bearer";
-      scope: string;
       expires_in: number;
-      ext_expires_in: number;
-      refresh_token: string;
       access_token: string;
-      id_token: string;
+      refresh_token: string;
     }
   | {
       error: string;
@@ -121,7 +104,6 @@ type RefreshTokenPayload =
       error_codes: number[];
       error_uri: string;
     };
-
 /*
  * Takes a token, and returns a new token with updated
  * `accessToken` and `expiresAt`.
@@ -132,22 +114,20 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
       throw new Error("No refresh token available.");
     }
 
-    const response = await fetch(
-      `https://login.microsoftonline.com/${env.AZURE_AD_TENANT_ID}/oauth2/v2.0/token`,
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "refresh_token",
-          client_id: env.AZURE_AD_CLIENT_ID ?? "",
-          client_secret: env.AZURE_AD_CLIENT_SECRET ?? "",
-          refresh_token: token.refreshToken,
-          scope: "openid profile email offline_access",
-        }),
-        method: "POST",
+    const response = await fetch(`${env.TEAMLEADER_ACCESS_TOKEN_URL}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
-    const data: RefreshTokenPayload =
-      (await response.json()) as RefreshTokenPayload;
+      body: JSON.stringify({
+        client_id: `${env.TEAMLEADER_CLIENT_ID}`,
+        client_secret: `${env.TEAMLEADER_CLIENT_SECRET}`,
+        refresh_token: token.refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+
+    const data = (await response.json()) as RefreshTokenPayload;
     if ("error" in data) {
       throw new Error(`Failed to refresh accessToken: ${data.error}`);
     }
@@ -164,7 +144,6 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
     if (error instanceof Error) {
       console.error("Failed to refresh token:", error.message);
     }
-
     // throwing the error will cause the session to be invalidated
     // and the user must re-login
     throw error;
@@ -191,17 +170,12 @@ export const authOptions: NextAuthOptions = {
   },
   // adapter: PrismaAdapter(db),
   providers: [
-    AzureProvider({
-      clientId: env.AZURE_AD_CLIENT_ID ?? "",
-      clientSecret: env.AZURE_AD_CLIENT_SECRET ?? "",
-      tenantId: env.AZURE_AD_TENANT_ID ?? "",
-      checks: ["pkce"], // to prevent CSRF and authorization code injection attacks.
-      authorization: {
-        params: {
-          scope: "openid profile email offline_access",
-        },
-      },
+    TeamleaderProvider({
+      accessTokenUrl: env.TEAMLEADER_ACCESS_TOKEN_URL ?? "",
+      clientId: env.TEAMLEADER_CLIENT_ID ?? "",
+      clientSecret: env.TEAMLEADER_CLIENT_SECRET ?? "",
     }),
+
     /**
      * ...add more providers here.
      *
@@ -213,50 +187,35 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   callbacks: {
-    jwt({ token, account, user, profile }) {
-      // log.debug('jwt: %o', { token });
+    jwt: async function ({ token, account, profile }) {
+      // console.log("jwt: %o", { account, profile });
       // Initial sign in
       if (profile && account) {
-        delete user?.image; // lets keep auth cookie small
         const clockSkew = 60 * 10 * 1000; // 10 minutes
         const expiresAt = account.expires_at * 1000 - clockSkew; // ms
-        return {
-          expiresAt,
-          oid: profile.oid,
-          iat: token.iat,
-          exp: token.exp,
-          jti: token.jti,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          roles: profile.roles,
-          ...user,
+
+        // Update token object
+        token.expiresAt = expiresAt;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.profile = {
+          name: profile.data.first_name + " " + profile.data.last_name,
+          email: profile.data.email,
         };
       }
-
-      // Return previous token if the access token has not expired yet
+      // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
         return token;
-      }
-
-      // Access token has expired, try to update it
-      return refreshAccessToken(token);
+      }     
+      return await refreshAccessToken(token);
     },
     session({ session, token }) {
       if (session.user) {
-        // get time span until token expires
-        const date = new Date(0);
-        date.setMilliseconds(token.expiresAt - Date.now());
-        const timeSpanUntilExpires = date.toISOString().substring(11, 19);
-        const roles = token.roles || [];
-
         // create session object
-        session.user.id = token.oid;
-        session.user.name = token.name ?? "";
-        session.user.email = token.email ?? "";
-        session.user.roles = roles;
-        session.tokenExpiresAt = new Date(token.expiresAt).toISOString();
-        session.tokenExpiresIn = timeSpanUntilExpires;
+        session.user.name = token.profile?.name ?? "";
+        session.user.email = token.profile?.email ?? "";
       }
+
       return session;
     },
   },
