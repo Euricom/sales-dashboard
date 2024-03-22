@@ -5,6 +5,7 @@ export type RowType = "Row";
 export type Row = {
   rowId: string;
   dragItemIds: UniqueIdentifier[] | [];
+  employeeIds: UniqueIdentifier[] | [];
 };
 export type BoardRowProps = {
   row: Row;

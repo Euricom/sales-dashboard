@@ -15,7 +15,7 @@ const config = {
       padding: "2rem",
     },
     screens: {
-      tv: "1600px",
+      tv: "2000px",
     },
     extend: {
       colors: {

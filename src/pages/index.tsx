@@ -45,6 +45,10 @@ export default function Home() {
                   <div className="flex w-full h-full my-2 gap-4">
                     <DealsColumn />
                     <BoardColumn columnTitle="Mogelijkheden" />
+                    <BoardColumn columnTitle="Voorgesteld" />
+                    <BoardColumn columnTitle="Interview" />
+                    <BoardColumn columnTitle="Weerhouden" />
+                    <BoardColumn columnTitle="Niet Weerhouden" />
                   </div>
                 </div>
               </main>
