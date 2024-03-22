@@ -10,26 +10,35 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     () => rowsMogelijkheden.map((row) => row.rowId),
     [rowsMogelijkheden],
   );
-
-  if (!employeesMogelijkheden || !rowsMogelijkheden) return null;
+  if (
+    !employeesMogelijkheden ||
+    !rowsMogelijkheden ||
+    rowsMogelijkheden.length === 0
+  )
+    return null;
 
   return (
-    <Card>
+    <Card
+      variant={"column"}
+      size={columnTitle === "Mogelijkheden" ? "columnMogelijkheden" : "column"}
+    >
       <CardHeader className="pb-1.5">
         <CardTitle>{columnTitle}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 w-[21.5rem]">
-        <SortableContext items={rowsIds}>
-          {rowsMogelijkheden?.map((row) => (
-            <BoardRow
-              key={row.rowId}
-              row={row}
-              employees={employeesMogelijkheden?.filter(
-                (employee) => employee.rowId === row.rowId,
-              )}
-            />
-          ))}
-        </SortableContext>
+      <CardContent className="flex flex-col gap-2">
+        {columnTitle === "Mogelijkheden" && (
+          <SortableContext items={rowsIds}>
+            {rowsMogelijkheden?.map((row) => (
+              <BoardRow
+                key={row.rowId}
+                row={row}
+                employees={employeesMogelijkheden?.filter(
+                  (employee) => employee.rowId === row.rowId,
+                )}
+              />
+            ))}
+          </SortableContext>
+        )}
       </CardContent>
     </Card>
   );

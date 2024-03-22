@@ -67,25 +67,11 @@ const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({ data, label }) => {
             className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
             title="CollapsibleContent"
           >
-            {/* <h4 className="text-sm font-semibold -rotate-90">{label}</h4>
-            <div
-              className="flex justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
-              title="CollapsibleContent"
-            > */}
-            {/* {data
-                ?.sort((a: Employee, b: Employee) =>
-                  a.fields.Title.localeCompare(b.fields.Title),
-                )
-                .map((employee: Employee) => (
-                  <EmployeeCardDragged
-                    key={employee.dragItemId}
-                    employee={employee}
-                  />
-                ))} */}
             <BoardRow
               row={{
                 rowId: "0",
                 dragItemIds: sortedEmployeeGroup.map((e) => e.dragItemId),
+                employeeIds: sortedEmployeeGroup.map((e) => e.employeeId),
               }}
               employees={sortedEmployeeGroup.map((e) => e)}
               isHeader={true}
