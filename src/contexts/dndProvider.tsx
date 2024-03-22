@@ -26,6 +26,12 @@ type DropContextType = {
   activeDealId: UniqueIdentifier | null;
 };
 
+type Sortable = {
+  containerId: string;
+  index: number;
+  items: string[];
+};
+
 export const DropContext = createContext<DropContextType>(
   {} as DropContextType,
 );
@@ -106,7 +112,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier | null>(
     null,
   );
-  const [originalRowId, setOriginalRowId] = useState<UniqueIdentifier | null>();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   return (
@@ -141,17 +146,16 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     if (!hasDraggableData(event.active)) return;
     const data = event.active.data.current;
     const employee = data?.employee as Employee;
-
     //This serves as a preview of the place where the employee is being dragged
     if (data?.type === "Employee") {
       setActiveEmployee(employee);
-      setOriginalRowId(employee.rowId);
       return;
     }
   }
 
   function onDragEnd(event: DragEndEvent) {
     setActiveEmployee(null);
+    setActiveDealId(null);
 
     const { active, over } = event;
     if (!over) return;
@@ -159,21 +163,27 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const activeId = active.id;
     const overId = over.id;
 
-    if (!hasDraggableData(active)) return;
-
-    if (activeId === overId) return;
-
-    if (!rowsMogelijkheden) return;
+    if (!hasDraggableData(active) || activeId === overId || !rowsMogelijkheden)
+      return;
 
     // Dropping new Employee over the Board from Header
     const activeData = active.data.current;
+    const overData = over.data.current;
     const isActiveAnEmployee = activeData?.type === "Employee";
+    const isOverAnEmployee = overData?.type === "Employee";
+
     if (!isActiveAnEmployee) return;
 
     const activeEmployee = activeData.employee as Employee;
     if (activeEmployee.rowId === "0") {
+      if (isOverAnEmployee) {
+        appendEmployee(
+          activeEmployee,
+          (overData.sortable as Sortable).containerId,
+        );
+        return;
+      }
       appendEmployee(activeEmployee, overId as string);
-      setActiveDealId(null);
     }
 
     // Moving Employee within the same row after dragging from a different row
@@ -209,13 +219,18 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const overData = over.data.current;
 
     const isActiveAnEmployee = activeData?.type === "Employee";
-    const isOverAnEmployee = activeData?.type === "Employee";
+    const isOverAnEmployee = overData?.type === "Employee";
+
+    // setActiveDealId(over.id); // styling the row where the employee is being dragged when over item is a row
 
     if (!isActiveAnEmployee) return;
 
     // if (alreadyInRow(overId as string, activeData.employee as Employee)) return;
     // Dropping an Employee over another Employee
     if (isActiveAnEmployee && isOverAnEmployee) {
+      if (over.data.current)
+        setActiveDealId((over.data.current.sortable as Sortable).containerId); // styling the row where the employee is being dragged when over item is an employee
+      // console.log(over);
       setEmployeesMogelijkheden((employees) => {
         if (employees.length === 0) return [];
         const activeIndex = employees.findIndex(
