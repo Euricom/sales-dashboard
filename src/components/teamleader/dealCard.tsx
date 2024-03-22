@@ -1,13 +1,18 @@
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
 import Image from "next/image";
+import { DropContext } from "~/contexts/dndProvider";
+import { useContext } from "react";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
+  const { activeDealId } = useContext(DropContext);
+  const variant = deal.id === activeDealId ? "dealhighlight" : "deal";
+
   return (
-    <Card variant={"deal"} size={"deal"}>
+    <Card variant={variant} size={"deal"}>
       <CardHeader>
         <CardTitle className="text-sm font-medium flex max-w-32 items-center">
-          {deal.company.name}
+          {trimDealTitle(deal.company.name)}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end">
@@ -46,4 +51,12 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
 
 const trimMogelijkhedenTitle = (title: string) => {
   return title.split("(")[0];
+};
+
+const trimDealTitle = (title: string) => {
+  const splitTitle = title.split(" ");
+  if (splitTitle.length > 2) {
+    return splitTitle.slice(0, 2).join(" ") + "...";
+  }
+  return title;
 };

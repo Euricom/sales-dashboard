@@ -16,7 +16,10 @@ export interface SharePointContact {
   lastModifiedDateTime: string;
   webUrl: string;
   createdBy: CreatedBy;
-  value : {
+  value : SharePointEmployee[];
+}
+
+export interface SharePointEmployee {
     id: string;
     fields: {
       Title: string;
@@ -26,5 +29,4 @@ export interface SharePointContact {
       Status: string;
       Contract_x0020_Substatus: string;
     }
-  }[];
 }
