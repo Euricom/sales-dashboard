@@ -1,4 +1,3 @@
-// DndContextProvider.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
@@ -47,47 +46,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [rowsMogelijkheden, setRowsMogelijkheden] = useState<Row[]>([]);
   const [employeesMogelijkheden, setEmployeesMogelijkheden] = useState<
     Employee[]
-  >([
-    // {
-    //   dragItemId: uuidv4(),
-    //   employeeId: uuidv4(),
-    //   rowId: "3d300840-a767-0b39-a97e-76e2218286b3",
-    //   fields: {
-    //     Title: "John Doe",
-    //     City: "New York",
-    //     Job_x0020_title: "Software Engineer",
-    //     Level: "Senior",
-    //     Status: "Active",
-    //     Contract_x0020_Substatus: "Full-time",
-    //   },
-    // },
-    // {
-    //   dragItemId: uuidv4(),
-    //   employeeId: uuidv4(),
-    //   rowId: "e5d8a575-6cf2-0968-997c-5205d181ea5a",
-    //   fields: {
-    //     Title: "Jane Smith",
-    //     City: "San Francisco",
-    //     Job_x0020_title: "Product Manager",
-    //     Level: "Senior",
-    //     Status: "Active",
-    //     Contract_x0020_Substatus: "Full-time",
-    //   },
-    // },
-    // {
-    //   dragItemId: uuidv4(),
-    //   employeeId: uuidv4(),
-    //   rowId: "55159183-aa1d-0710-827c-df89217ea48c",
-    //   fields: {
-    //     Title: "Mike Johnson",
-    //     City: "Seattle",
-    //     Job_x0020_title: "Data Scientist",
-    //     Level: "Junior",
-    //     Status: "Active",
-    //     Contract_x0020_Substatus: "Part-time",
-    //   },
-    // },
-  ]);
+  >([]);
 
   useEffect(() => {
     if (!isLoading && deals) {
