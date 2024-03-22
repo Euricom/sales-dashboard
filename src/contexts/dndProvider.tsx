@@ -295,6 +295,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // Dropping an Employee over a Row
     if (isActiveAnEmployee && isOverARow) {
       setEmployeesMogelijkheden((employees) => {
+        setActiveDealId(overId);
         const activeIndex = employees.findIndex(
           (e) => e.dragItemId === activeId,
         );
