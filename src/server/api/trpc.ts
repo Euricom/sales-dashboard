@@ -56,12 +56,13 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
+  const secret = process.env.NEXTAUTH_SECRET;
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
   console.log(session, "session in trpc.ts")
   // Get the token from the session
-  const token = await getToken({ req });
+  const token = await getToken({ req, secret });
   console.log(req,"req in trpc.ts")
   return createInnerTRPCContext({
     session,
