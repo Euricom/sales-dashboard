@@ -9,7 +9,6 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { cpSync } from "fs";
 import { type Session } from "next-auth";
 import { getToken, type JWT } from "next-auth/jwt";
 import superjson from "superjson";
@@ -61,9 +60,9 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
-  // Get the token from the session
+  console.log(session,"session in trpc.ts") 
   const token = await getToken({ req, secret });
-  console.log(token,"token in trpc.ts")
+  //console.log(token,"token in trpc.ts") momenteel is de token null
   return createInnerTRPCContext({
     session,
     token,
