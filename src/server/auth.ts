@@ -66,6 +66,7 @@ declare module "next-auth" {
       email: string;
       roles: string[];
     };
+    accessToken: string;
   }
 
   /** Azure AD Account */
@@ -216,6 +217,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.profile?.name ?? "";
         session.user.email = token.profile?.email ?? "";
       }
+      session.accessToken = token.accessToken;
 
       return session;
     },
