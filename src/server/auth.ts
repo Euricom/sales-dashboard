@@ -226,7 +226,7 @@ export const authOptions: NextAuthOptions = {
     sessionToken: {
       name: "next-auth.session-token",
       options: {
-        // httpOnly: true,
+        httpOnly: true,
         sameSite: "lax",
         path: "/",
         secure: env.NODE_ENV === "production",
