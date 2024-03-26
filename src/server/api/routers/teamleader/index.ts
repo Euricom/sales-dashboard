@@ -6,7 +6,7 @@ export const teamleaderRouter = createTRPCRouter({
   getDealsData: protectedProcedure.query(async (options) => {
     // Use the access token from the session to make API calls
     // console.log(options.ctx.token,"tokens in trpc router")
-    const accessToken = options.ctx.token?.accessToken;
+    const accessToken = options.ctx.session.token.accessToken;
     try {
       if (!accessToken) {
         throw new Error("Access token not found");
