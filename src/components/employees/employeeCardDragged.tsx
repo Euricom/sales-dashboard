@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "../ui/card";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button/Button";
 import { cva } from "class-variance-authority";
 import type { EmployeeDragData, EmployeeCardProps } from "~/lib/types";
 
