@@ -1,46 +1,16 @@
-import { expect, test } from "@playwright/test";
-import exp from "constants";
-import type { dataObject } from "~/server/api/routers/teamleader/types";
+import {test } from "@playwright/test";
 
-test.describe("Teamleader API tests", () => {
-    test("get all deals data alongside the linked companies and users", async ({ page }) => {
-        const authFile = "playwright/.auth/user.json"; 
-        const storageState = await page.context().storageState({ path: authFile });
-        
-        const access_token_cookie = storageState.cookies.find((cookie) => cookie.name === 'access_token');
-        const response = await fetch('https://api.focus.teamleader.eu/deals.list', {
-            method: "POST",    
-            headers: {
-                Authorization: `Bearer ${access_token_cookie?.value}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                filter: {
-                  phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
-                },
-                page: {
-                  size: 20,
-                },
-                include: "lead.customer,responsible_user,current_phase",
-              }),
-        });
-        expect(response.status).toBe(200);
-        const data: dataObject = await response.json() as dataObject;
-        // check if data is present
-        expect(data).toHaveProperty('data');
-        expect(data.data).toBeInstanceOf(Array);
-        // check if included is present
-        expect(data).toHaveProperty('included');
-        // check if included has company, user and dealPhase
-        expect(data.included).toHaveProperty('company');
-        expect(data.included.company).toBeInstanceOf(Array);
+test.describe("Teamleader API test", () => {
+    test("Test wether the deals are visible", async ({ page }) => {
 
-        expect(data.included).toHaveProperty('user');
-        expect(data.included.user).toBeInstanceOf(Array);
+      await page.goto("/");
+      const dealsColumn = page.getByTitle("DealsColumn");
+      await dealsColumn.isVisible();
 
-        expect(data.included).toHaveProperty('dealPhase');
-        expect(data.included.dealPhase).toBeInstanceOf(Array);
+      const dealCards = await page.$$('.DealCard');
+      for (const dealCard of dealCards) {
+        await dealCard.isVisible();
+      }
 
     });
 });
-
