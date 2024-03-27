@@ -6,7 +6,7 @@ import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import DealsColumn from "~/components/teamleader/dealsColumn";
-import { EmployeeCardGroup } from "~/components/employees/employeeCardGroup";
+import { CollapsibleCardGroups } from "~/components/employees/employeeCardGroup";
 
 export default function Home() {
   const { status } = useSession();
@@ -36,7 +36,7 @@ export default function Home() {
               <main className="flex min-h-screen justify-between mx-4">
                 <div className="flex flex-col w-full">
                   <div className="flex">
-                    <EmployeeCardGroup />
+                    <CollapsibleCardGroups />
                     <div className="flex gap-4 w-full items-start justify-end my-4">
                       <SignInButton />
                       <RefreshButton />

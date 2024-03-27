@@ -4,21 +4,19 @@ import type { Session } from "next-auth";
 export type RowType = "Row";
 export type Row = {
   rowId: string;
-  dragItemIds: UniqueIdentifier[] | [];
-  employeeIds: UniqueIdentifier[] | [];
 };
+
 export type BoardRowProps = {
   row: Row;
-  employees: Employee[];
   isOverlay?: boolean;
   isHeader?: boolean;
+  rowStatus?: string;
 };
 
 export type EmployeeType = "Employee";
 export type Employee = {
-  dragItemId: UniqueIdentifier;
-  employeeId: string;
-  rowId: string;
+  employeeId: UniqueIdentifier;
+  rows: UniqueIdentifier[];
   fields: {
     Title: string;
     City: string;
@@ -29,14 +27,16 @@ export type Employee = {
   };
 };
 
+export type DraggableEmployee = {
+  dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
+  type: EmployeeType;
+  name: string;
+};
+
 export type EmployeeCardProps = {
-  employee: Employee;
+  draggableEmployee: DraggableEmployee;
   isOverlay?: boolean;
   isHeader?: boolean;
-};
-export type EmployeeDragData = {
-  type: EmployeeType;
-  employee: Employee;
 };
 
 export type EmployeeCardGroupProps = {
@@ -45,8 +45,14 @@ export type EmployeeCardGroupProps = {
 };
 
 // Teamleader login
-export interface LoginProps {
+export type LoginProps = {
   data: {
     session: Session | null;
   };
-}
+};
+
+// Dit binnen halen van teamleader?
+export type DealPhase = {
+  // id: string;
+  name: string;
+};

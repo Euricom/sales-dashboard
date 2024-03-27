@@ -3,13 +3,22 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
-import type { EmployeeDragData, EmployeeCardProps } from "~/lib/types";
+import type { EmployeeCardProps } from "~/lib/types";
+import { EmployeeContext } from "~/contexts/employeesProvider";
+import { useContext } from "react";
 
 export function EmployeeCardDragged({
-  employee,
+  draggableEmployee,
   isOverlay,
   isHeader,
 }: EmployeeCardProps) {
+  const { employees } = useContext(EmployeeContext);
+
+  const employee = employees.find(
+    (employee) =>
+      employee.employeeId ===
+      (draggableEmployee?.dragId as string)?.split("_")[0],
+  );
   const {
     setNodeRef,
     attributes,
@@ -18,11 +27,11 @@ export function EmployeeCardDragged({
     transition,
     isDragging,
   } = useSortable({
-    id: employee.dragItemId,
+    id: draggableEmployee.dragId,
     data: {
       type: "Employee",
-      employee,
-    } satisfies EmployeeDragData,
+      employee: employee,
+    },
     attributes: {
       roleDescription: "Employee",
     },
@@ -57,13 +66,14 @@ export function EmployeeCardDragged({
         {...listeners}
         className="w-full h-full"
       >
-        {titleToInitials(employee.fields.Title)}
+        {titleToInitials(employee?.fields.Title)}
       </Button>
     </Card>
   );
 }
 
-const titleToInitials = (title: string) => {
+const titleToInitials = (title?: string) => {
+  if (!title) return "N/A";
   if (title.split("").length <= 2) return title;
 
   return title

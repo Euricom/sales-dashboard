@@ -6,38 +6,20 @@ import {
 import { useContext, useState } from "react";
 import { BoardRow } from "../ui/dnd/boardRow";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import type { Employee } from "~/lib/types";
+import type { DraggableEmployee } from "~/lib/types";
 
-export const EmployeeCardGroup = () => {
-  const value = useContext(EmployeeContext);
-
-  if (!value.employeesSharepoint) return null;
-  const sortedData = sortEmployeesData(value.employeesSharepoint);
-
-  return (
-    <div className="gap-2 flex">
-      <ReturnCardGroup label="Bench" data={sortedData.bench} />
-      <ReturnCardGroup label="Einde" data={sortedData.endOfContract} />
-      <ReturnCardGroup label="Starter" data={sortedData.starter} />
-      <ReturnCardGroup
-        label="Nieuw"
-        data={sortedData.openForNewOpportunities}
-      />
-    </div>
-  );
-};
-
-type ReturnCardGroupProps = {
-  data: Employee[];
+type CollapsibleCardGroupProps = {
   label: string;
+  data: DraggableEmployee[];
+  status?: string;
 };
 
-const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({ data, label }) => {
+const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
+  label,
+  data,
+  status,
+}) => {
   const [isOpen, setIsOpen] = useState(true);
-  const sortedEmployeeGroup = data.sort((a, b) =>
-    a.fields.Title.localeCompare(b.fields.Title),
-  );
-
   if (data.length === 0)
     return (
       <div className="flex bg-white bg-opacity-75 pt-1.5 border-x-4 border-b-4 tv:border-x-8 tv:border-b-[6px] border-grey h-fit w-fit rounded-b-2xl top-0 items-center justify-between">
@@ -67,16 +49,7 @@ const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({ data, label }) => {
             className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
             title="CollapsibleContent"
           >
-            <BoardRow
-              row={{
-                rowId: "0",
-                dragItemIds: sortedEmployeeGroup.map((e) => e.dragItemId),
-                employeeIds: sortedEmployeeGroup.map((e) => e.employeeId),
-              }}
-              employees={sortedEmployeeGroup.map((e) => e)}
-              isHeader={true}
-            />
-            {/* </div> */}
+            <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -84,35 +57,31 @@ const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({ data, label }) => {
   );
 };
 
-export const sortEmployeesData = (data: Employee[]) => {
-  const bench: Employee[] = [];
-  const starter: Employee[] = [];
-  const endOfContract: Employee[] = [];
-  const openForNewOpportunities: Employee[] = [];
+export const CollapsibleCardGroups = () => {
+  const { sortedData } = useContext(EmployeeContext);
 
-  // add the users to the correct array based on their status
-  data.forEach((contact) => {
-    const status = contact.fields.Status;
-    const subStatus = contact.fields.Contract_x0020_Substatus;
-
-    if (status === "Bench") {
-      bench.push(contact);
-    } else if (status === "Starter") {
-      starter.push(contact);
-    } else if (subStatus === "End of Contract") {
-      endOfContract.push(contact);
-    } else if (subStatus === "Open for New Opportunities") {
-      openForNewOpportunities.push(contact);
-    }
-  });
-
-  // create an object with the sorted data
-  const sortedData = {
-    bench,
-    endOfContract,
-    starter,
-    openForNewOpportunities,
-  };
-
-  return sortedData;
+  return (
+    <div className="gap-2 flex">
+      <CollapsibleCardGroup
+        label="Bench"
+        data={sortedData.bench}
+        status="bench"
+      />
+      <CollapsibleCardGroup
+        label="Einde"
+        data={sortedData.endOfContract}
+        status="endOfContract"
+      />
+      <CollapsibleCardGroup
+        label="Starter"
+        data={sortedData.starter}
+        status="starter"
+      />
+      <CollapsibleCardGroup
+        label="Nieuw"
+        data={sortedData.openForNewOpportunities}
+        status="openForNewOpportunities"
+      />
+    </div>
+  );
 };
