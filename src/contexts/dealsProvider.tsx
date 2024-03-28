@@ -25,10 +25,10 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     () => (isLoading ? null : dealsData),
     [dealsData, isLoading],
   );
-  // Dit is hardcoded en zou ofwel uit teamleader API moeten komen ofwel uit databank
+
   const dealphases = [
     {
-      name: "Mogelijkheden", // Dit is altijd hardcoded
+      name: "Mogelijkheden",
     },
     {
       name: "Voorgesteld",
@@ -40,7 +40,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       name: "Weerhouden",
     },
     {
-      name: "Niet Weerhouden",
+      name: "Niet-Weerhouden",
     },
   ];
 
