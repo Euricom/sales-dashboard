@@ -22,14 +22,14 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       size={columnTitle === "Mogelijkheden" ? "columnMogelijkheden" : "column"}
     >
       <CardHeader className="pb-1.5">
-        <CardTitle>{columnTitle}</CardTitle>
+        <CardTitle>
+          {columnTitle === "Niet-Weerhouden" ? "Niet Weerhouden" : columnTitle}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {columnTitle === "Mogelijkheden" && (
-          <SortableContext items={rowsIds}>
-            {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
-          </SortableContext>
-        )}
+        <SortableContext items={rowsIds}>
+          {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
+        </SortableContext>
       </CardContent>
     </Card>
   );

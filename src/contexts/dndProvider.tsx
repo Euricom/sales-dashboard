@@ -130,13 +130,20 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     )
       return;
 
-    const { overId } = extractEventData(undefined, event.over);
+    const { overId, overData } = extractEventData(undefined, event.over);
+
     if (!overId) return;
+
+    if (overData?.type === "Employee") {
+      setActiveDealId((overId as string).split("_")[1] as UniqueIdentifier);
+      return;
+    }
 
     setActiveDealId(overId);
   }
 
   function onDragEnd(event: DragEndEvent) {
+    setActiveDealId(null);
     if (!event.over || !hasDraggableData(event.active)) return;
 
     const { activeId, overId, overData, activeRowId, overRowId } =
@@ -144,9 +151,11 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     if (activeId === overId || !activeEmployee) return;
     const isOverAnEmployee = overData?.type === "Employee";
+
     // Dragging Employee between rows
     if (activeRowId !== "0") {
-      if (!activeRowId || !overRowId || activeRowId === overRowId) return;
+      if (!activeRowId || activeRowId === overRowId) return;
+
       // Dropping Employee over another Employee in a different row
       if (isOverAnEmployee) {
         moveEmployee(
@@ -154,29 +163,27 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           activeRowId,
           overData.sortable.containerId,
         );
-        setActiveDealId(null);
         setActiveEmployee(null);
       } else {
         // Dropping Employee over a different row
         moveEmployee(activeEmployee, activeRowId, overId as string);
-        setActiveDealId(null);
         setActiveEmployee(null);
       }
     }
     // Dropping new Employee over the Board from Header
-    if (activeRowId === "0") {
+    if (
+      activeRowId === "0" &&
+      (overId as string)?.split("/")[1] === "Mogelijkheden"
+    ) {
       if (isOverAnEmployee) {
         appendEmployee(activeEmployee, overData.sortable.containerId);
-        setActiveDealId(null);
         setActiveEmployee(null);
         return;
       }
       appendEmployee(activeEmployee, overId as string);
-      setActiveDealId(null);
       setActiveEmployee(null);
       return;
     }
-    setActiveDealId(null);
     setActiveEmployee(null);
   }
 
@@ -270,12 +277,38 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   }
 
   // Helper function to check if an employee is already in a row
-  function alreadyInRow(emloyee: DraggableEmployee, rowIdToCompare: string) {
-    const employee = employees.find(
-      (employee) =>
-        employee.employeeId === (emloyee.dragId as string).split("_")[0],
-    );
-    return employee?.rows.some((row) => row === rowIdToCompare);
+  function alreadyInRow(
+    draggableEmployee: DraggableEmployee,
+    rowIdToCompare: string,
+  ) {
+    const employee = employees.find((employee) => {
+      return (
+        employee.employeeId ===
+        (draggableEmployee.dragId as string).split("_")[0]
+      );
+    });
+
+    const initialRowId = (draggableEmployee.dragId as string)
+      .split("_")[1]
+      ?.split("/")[0];
+    const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
+
+    // Inside the same row
+    if (initialRowId === targetRowId) return false;
+
+    // Not in the same row and row does not exist in employee.rows
+    if (
+      initialRowId !== targetRowId &&
+      !employee?.rows.some(
+        (row) => (row as string).split("/")[0] === targetRowId,
+      )
+    ) {
+      // Is the target row a "Mogelijkheden" row?
+      if (targetRowStatus === "Mogelijkheden") {
+        return false;
+      }
+    }
+    return true;
   }
 
   // Helper function to extract id's and data objects from active and over

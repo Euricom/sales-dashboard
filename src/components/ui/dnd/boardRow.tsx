@@ -29,7 +29,8 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
-  const variant = row.rowId === activeDealId ? "rowhighlight" : "row";
+  const variant =
+    row.rowId === activeDealId && !isHeader ? "rowhighlight" : "row";
 
   const { setNodeRef, transform, transition } = useSortable({
     id: row.rowId,
