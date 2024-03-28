@@ -14,14 +14,29 @@ export const EmployeeCardGroup = () => {
   if (!value.employeesSharepoint) return null;
   const sortedData = sortEmployeesData(value.employeesSharepoint);
 
+  const widthBooleans = CheckScreenWidth(sortedData);
+
   return (
-    <div className="gap-2 flex">
-      <ReturnCardGroup label="Bench" data={sortedData.bench} />
-      <ReturnCardGroup label="Einde" data={sortedData.endOfContract} />
-      <ReturnCardGroup label="Starter" data={sortedData.starter} />
+    <div className="gap-2 flex" id="routElement">
+      <ReturnCardGroup
+        label="Bench"
+        data={sortedData.bench}
+        startOpen={widthBooleans[0]}
+      />
+      <ReturnCardGroup
+        label="Einde"
+        data={sortedData.endOfContract}
+        startOpen={widthBooleans[1]}
+      />
+      <ReturnCardGroup
+        label="Starter"
+        data={sortedData.starter}
+        startOpen={widthBooleans[2]}
+      />
       <ReturnCardGroup
         label="Nieuw"
         data={sortedData.openForNewOpportunities}
+        startOpen={widthBooleans[3]}
       />
     </div>
   );
@@ -30,13 +45,22 @@ export const EmployeeCardGroup = () => {
 type ReturnCardGroupProps = {
   data: Employee[];
   label: string;
+  startOpen?: boolean;
 };
 
-const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({ data, label }) => {
-  const [isOpen, setIsOpen] = useState(true);
+const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({
+  data,
+  label,
+  startOpen,
+}) => {
+  const [isOpen, setIsOpen] = useState(startOpen ?? true);
   const sortedEmployeeGroup = data.sort((a, b) =>
     a.fields.Title.localeCompare(b.fields.Title),
   );
+
+  // useEffect(() => {
+  //   setIsOpen(startOpen ?? true);
+  // }, [startOpen]);
 
   if (data.length === 0)
     return (
@@ -115,4 +139,49 @@ export const sortEmployeesData = (data: Employee[]) => {
   };
 
   return sortedData;
+};
+
+// I'm going to be honest, this isn't the way I wanted to calculate it, but I couldn't find a better way. Feel free to improve it.
+const CheckScreenWidth = (data: {
+  bench: Employee[];
+  endOfContract: Employee[];
+  starter: Employee[];
+  openForNewOpportunities: Employee[];
+}) => {
+  // calculate the width of the element
+  const multiplier = window.innerWidth >= 2800 ? 2 : 1; // this is to account for the rem change whenever the width is bigger than 2800px
+  const screenWidth = window.innerWidth - 250 * multiplier; // I subtracted 200px so the refresh and sign out button have enough space
+  let width = 0;
+  const booleanArray: boolean[] = [];
+  let counter = 0;
+
+  // calculate the width for "bench"
+  counter = data.bench.length;
+  width += (counter * 60 + 89) * multiplier; // 60px for each card and 89px for the label
+  if (counter > 1) width += (counter - 1) * 8 * 2; // add the margin between the cards
+  if (width > screenWidth) booleanArray.push(false);
+  else booleanArray.push(true);
+
+  // calculate the width for "end of contract"
+  counter = data.endOfContract.length;
+  width += (counter * 60 + 89) * multiplier; // +8 is to account for the gap
+  if (counter > 1) width += (counter - 1) * 8 * 2;
+  if (width > screenWidth) booleanArray.push(false);
+  else booleanArray.push(true);
+
+  // calculate the width for "starter"
+  counter = data.starter.length;
+  width += (counter * 60 + 89) * multiplier;
+  if (counter > 1) width += (counter - 1) * 8 * 2;
+  if (width > screenWidth) booleanArray.push(false);
+  else booleanArray.push(true);
+
+  // calculate the width for "open for new opportunities"
+  counter = data.openForNewOpportunities.length;
+  width += (counter * 60 + 89) * multiplier;
+  if (counter > 1) width += (counter - 1) * 8 * 2;
+  if (width > screenWidth) booleanArray.push(false);
+  else booleanArray.push(true);
+
+  return booleanArray;
 };

@@ -66,6 +66,7 @@ declare module "next-auth" {
       email: string;
       roles: string[];
     };
+    token: JWT;
   }
 
   /** Azure AD Account */
@@ -205,6 +206,7 @@ export const authOptions: NextAuthOptions = {
       }
       // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
+        //console.log(token,"token in auth.ts callbacks")
         return token;
       }     
       return await refreshAccessToken(token);
@@ -215,6 +217,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.profile?.name ?? "";
         session.user.email = token.profile?.email ?? "";
       }
+      session.token = token;
 
       return session;
     },

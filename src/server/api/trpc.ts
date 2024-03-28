@@ -27,7 +27,6 @@ import { db } from "~/server/db";
 
 interface CreateContextOptions {
   session: Session | null;
-  token: JWT | null;
 }
 
 /**
@@ -43,7 +42,6 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    token: opts.token,
     db,
   };
 };
@@ -56,15 +54,15 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
+  const secret = process.env.NEXTAUTH_SECRET;
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
-  // Get the token from the session
-  const token = await getToken({ req });
-
+  
+  //const token = await getToken({ req, secret});
+  
   return createInnerTRPCContext({
-    session,
-    token,
+    session
   });
 };
 
