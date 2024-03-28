@@ -35,6 +35,8 @@ type CurrentData = {
   sortable: Sortable;
   type: string;
   employee: Employee;
+  dragId: UniqueIdentifier;
+  row?: Row;
 };
 
 export const DropContext = createContext<DropContextType>(
@@ -66,7 +68,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         deals
           .flatMap((deal) =>
             dealPhases.map((phase) => ({
-              rowId: `${deal.id}__${phase.name}`,
+              rowId: `${deal.id}/${phase.name}`,
             })),
           )
           .concat({
@@ -110,98 +112,170 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const { activeData } = extractEventData(event.active);
     if (!hasDraggableData(event.active) || !activeData) return;
     //This serves as a preview of the place where the employee is being dragged
-    if (activeData?.type === "Employee" && activeData?.employee) {
+    if (activeData.type === "Employee" && activeData.employee) {
       setActiveEmployee(
-        draggableEmployees?.find(
-          (draggableEmployee) =>
-            (draggableEmployee.dragId as string).split("_")[0] ===
-            activeData.employee.employeeId,
-        ) ?? null,
+        draggableEmployees.find((draggableEmployee) => {
+          return draggableEmployee.dragId === activeData.dragId;
+        }) ?? null,
       );
       return;
     }
   }
 
   function onDragOver(event: DragOverEvent) {
-    // if (
-    //   !event.over ||
-    //   !hasDraggableData(event.active) ||
-    //   !hasDraggableData(event.over)
-    // )
-    //   return;
-    // const { overId, overData } = extractEventData({ over: event.over });
-    // if (!overId) return;
-    // setRowsMogelijkheden((rows) => {
-    //   if (!rows) return [];
-    //   // overId can be a row or an employee => store the rowId in the activeDealId
-    //   if (overData?.type === "Employee")
-    //     // if it's an employee
-    //     setActiveDealId(overData.sortable.containerId);
-    //   if (overData?.type === "Row")
-    //     // if it's a row
-    //     setActiveDealId(overId);
-    //   const rowToEdit = rows.find((row) => row.rowId === activeDealId);
-    //   if (!rowToEdit) return rows;
-    //   return rows;
-    // });
-    // // Dropping a new Employee over the Board
-    // if (activeEmployee?.rowId === "0") {
-    //   setActiveDealId(overId);
-    // }
+    if (
+      !event.over ||
+      !hasDraggableData(event.active) ||
+      !hasDraggableData(event.over)
+    )
+      return;
+
+    const { overId } = extractEventData(undefined, event.over);
+    if (!overId) return;
+
+    setActiveDealId(overId);
   }
 
   function onDragEnd(event: DragEndEvent) {
     if (!event.over || !hasDraggableData(event.active)) return;
 
-    const { activeId, overId, overData } = extractEventData(
-      event.active,
-      event.over,
-    );
+    const { activeId, overId, overData, activeRowId, overRowId } =
+      extractEventData(event.active, event.over);
 
     if (activeId === overId || !activeEmployee) return;
-
     const isOverAnEmployee = overData?.type === "Employee";
-
+    // Dragging Employee between rows
+    if (activeRowId !== "0") {
+      if (!activeRowId || !overRowId || activeRowId === overRowId) return;
+      // Dropping Employee over another Employee in a different row
+      if (isOverAnEmployee) {
+        moveEmployee(
+          activeEmployee,
+          activeRowId,
+          overData.sortable.containerId,
+        );
+        setActiveDealId(null);
+        setActiveEmployee(null);
+      } else {
+        // Dropping Employee over a different row
+        moveEmployee(activeEmployee, activeRowId, overId as string);
+        setActiveDealId(null);
+        setActiveEmployee(null);
+      }
+    }
     // Dropping new Employee over the Board from Header
-    if ((activeEmployee?.dragId as string).split("_")[1] === "0") {
+    if (activeRowId === "0") {
       if (isOverAnEmployee) {
         appendEmployee(activeEmployee, overData.sortable.containerId);
+        setActiveDealId(null);
+        setActiveEmployee(null);
         return;
       }
       appendEmployee(activeEmployee, overId as string);
+      setActiveDealId(null);
+      setActiveEmployee(null);
       return;
     }
-
     setActiveDealId(null);
     setActiveEmployee(null);
   }
 
   // Helper function to append an employee to a given row
   function appendEmployee(employeeToAppend: DraggableEmployee, rowId: string) {
-    if (alreadyInRow(rowId)) {
+    if (alreadyInRow(employeeToAppend, rowId)) {
       return;
     }
-    console.log("HERE");
 
-    const employee: Employee | undefined = employees.find((employee) => {
+    const employee = employees.find((employee) => {
       return (
         employee.employeeId ===
         (employeeToAppend.dragId as string).split("_")[0]
       );
     });
     if (!employee) return;
-    const updatedEmployee = {
-      ...employee,
-      rows: [...employee.rows, rowId],
-    };
-    setEmployees((employees) => [...employees, updatedEmployee] as Employee[]);
+
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          return {
+            ...emp,
+            rows: [...emp.rows, rowId],
+          };
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
+  }
+
+  // Helper function to remove an employee from a row
+  function removeEmployee(employeeToRemove: DraggableEmployee, rowId: string) {
+    const employee = employees.find((employee) => {
+      return (
+        employee.employeeId ===
+        (employeeToRemove.dragId as string).split("_")[0]
+      );
+    });
+    if (!employee) return;
+
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          return {
+            ...emp,
+            rows: emp.rows.filter((row) => row !== rowId),
+          };
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
+  }
+
+  // Helper function to move an employee from one row to another
+  function moveEmployee(
+    employeeToMove: DraggableEmployee,
+    initalRowId: string,
+    targetRowId: string,
+  ) {
+    if (alreadyInRow(employeeToMove, targetRowId)) {
+      return;
+    }
+    const employee = employees.find((employee) => {
+      return (
+        employee.employeeId === (employeeToMove.dragId as string).split("_")[0]
+      );
+    });
+    if (!employee) return;
+
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          const indexOfRowToRemove = emp.rows.findIndex(
+            (row) => row === initalRowId,
+          );
+          if (indexOfRowToRemove !== -1) {
+            const updatedRows = [...emp.rows]; // Create a copy of rows array
+            updatedRows.splice(indexOfRowToRemove, 1, targetRowId); // Replace the row
+            return {
+              ...emp,
+              rows: updatedRows,
+            };
+          }
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
   }
 
   // Helper function to check if an employee is already in a row
-  function alreadyInRow(rowIdToCompare: string) {
-    return employees.map((employee) => {
-      employee.rows.some((rowId) => rowId === rowIdToCompare);
-    });
+  function alreadyInRow(emloyee: DraggableEmployee, rowIdToCompare: string) {
+    const employee = employees.find(
+      (employee) =>
+        employee.employeeId === (emloyee.dragId as string).split("_")[0],
+    );
+    return employee?.rows.some((row) => row === rowIdToCompare);
   }
 
   // Helper function to extract id's and data objects from active and over
@@ -210,7 +284,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const activeData = active?.data.current as CurrentData;
     const overId = over?.id;
     const overData = over?.data.current as CurrentData;
+    const activeRowId = activeData?.sortable.containerId;
+    const overRowId = overData?.row?.rowId;
 
-    return { activeId, activeData, overId, overData };
+    return { activeId, activeData, overId, overData, activeRowId, overRowId };
   }
 };

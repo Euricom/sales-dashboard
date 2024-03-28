@@ -15,15 +15,16 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       .filter((draggableEmployee) => {
         const rowId = (draggableEmployee.dragId as string).split("_")[1];
         const status = (draggableEmployee.dragId as string).split("_")[2];
-        if (status) {
-          return rowId === "0" && status === rowStatus;
+
+        if (!isHeader && !status) {
+          return rowId === row.rowId.split("_")[0];
         }
-        return rowId === row.rowId;
+        return rowId === "0" && status === rowStatus;
       })
       .sort((a, b) => {
         return a.name.localeCompare(b.name);
       });
-  }, [draggableEmployees, row.rowId, rowStatus]);
+  }, [draggableEmployees, row.rowId, isHeader, rowStatus]);
 
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,

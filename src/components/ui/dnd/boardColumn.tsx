@@ -8,7 +8,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows } = useContext(DropContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
-    .filter((row) => row.rowId.split("__")[1] === columnTitle);
+    .filter((row) => row.rowId.split("/")[1] === columnTitle);
   const rowsIds = useMemo(
     () => filteredRows.map((row) => row.rowId),
     [filteredRows],

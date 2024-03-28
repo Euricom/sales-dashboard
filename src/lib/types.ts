@@ -3,7 +3,7 @@ import type { Session } from "next-auth";
 
 export type RowType = "Row";
 export type Row = {
-  rowId: string;
+  rowId: string; // `${dealId}/${phaseId}`
 };
 
 export type BoardRowProps = {
@@ -15,7 +15,7 @@ export type BoardRowProps = {
 
 export type EmployeeType = "Employee";
 export type Employee = {
-  employeeId: UniqueIdentifier;
+  employeeId: string;
   rows: UniqueIdentifier[];
   fields: {
     Title: string;

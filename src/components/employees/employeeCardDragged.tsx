@@ -19,6 +19,7 @@ export function EmployeeCardDragged({
       employee.employeeId ===
       (draggableEmployee?.dragId as string)?.split("_")[0],
   );
+
   const {
     setNodeRef,
     attributes,
@@ -31,6 +32,7 @@ export function EmployeeCardDragged({
     data: {
       type: "Employee",
       employee: employee,
+      dragId: draggableEmployee.dragId,
     },
     attributes: {
       roleDescription: "Employee",

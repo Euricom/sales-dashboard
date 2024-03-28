@@ -47,16 +47,23 @@ export const EmployeeContextProvider: React.FC<
     if (!employees) return [];
     return employees.flatMap((employee) =>
       employee.rows.map((row) => {
-        const statusIndicator =
-          employee.fields.Status === "Bench"
-            ? "bench"
-            : employee.fields.Status === "Starter"
-              ? "starter"
-              : employee.fields.Contract_x0020_Substatus === "End of Contract"
-                ? "endOfContract"
-                : "openForNewOpportunities";
+        if (row === "0") {
+          const statusIndicator =
+            employee.fields.Status === "Bench"
+              ? "bench"
+              : employee.fields.Status === "Starter"
+                ? "starter"
+                : employee.fields.Contract_x0020_Substatus === "End of Contract"
+                  ? "endOfContract"
+                  : "openForNewOpportunities";
+          return {
+            dragId: `${employee.employeeId}_${row}_${statusIndicator}`,
+            type: "Employee",
+            name: employee.fields.Title,
+          };
+        }
         return {
-          dragId: `${employee.employeeId}_${row}_${statusIndicator}`,
+          dragId: `${employee.employeeId}_${row}`,
           type: "Employee",
           name: employee.fields.Title,
         };
