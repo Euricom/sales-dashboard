@@ -206,9 +206,8 @@ export const authOptions: NextAuthOptions = {
       }
       // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
-        //console.log(token,"token in auth.ts callbacks")
         return token;
-      }     
+      }
       return await refreshAccessToken(token);
     },
     session({ session, token }) {

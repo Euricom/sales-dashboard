@@ -1,11 +1,17 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { api } from "~/utils/api";
-import type { Employee } from "~/lib/types";
-import { v4 as uuidv4 } from "uuid";
+import type { DraggableEmployee, Employee } from "~/lib/types";
 
 type EmployeeContextType = {
-  employeesSharepoint: Employee[] | [];
-  employeesMogelijkheden: Employee[] | [];
+  employees: Employee[];
+  setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
+  draggableEmployees: DraggableEmployee[];
+  sortedData: {
+    bench: DraggableEmployee[];
+    endOfContract: DraggableEmployee[];
+    starter: DraggableEmployee[];
+    openForNewOpportunities: DraggableEmployee[];
+  };
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -19,44 +25,101 @@ type EmployeeContextProviderProps = {
 export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
-  // TODO: MAKE useMemo and useCallback's
   // GET employees data from SharePoint
   const sharepointEmployeesData = api.sharePoint.getEmployeesData.useQuery();
-  const employeesMogelijkheden = useState([]);
-  // if (employeesData.error) {
-  //   console.error(employeesData.error);
-  //   return <div>Error: {employeesData.error.message}</div>;
-  // }
-  // if (employeesData.isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center w-screen h-screen">
-  //       <h1>Loading...</h1>
-  //     </div>
-  //   );
-  // }
-  // Add unique dragId to employees & rowId
+  // Instantiate initial employees
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
-  const mappedEmployees = sharepointEmployeesData?.data?.value.map(
-    (employee) => ({
-      employeeId: employee.id,
-      dragItemId: uuidv4(),
-      rowId: "0",
-      fields: employee.fields,
-    }),
-  ) as Employee[];
+  useEffect(() => {
+    if (sharepointEmployeesData?.data?.value) {
+      const initialEmployees = sharepointEmployeesData?.data?.value.map(
+        (employee) => ({
+          employeeId: employee.id,
+          rows: ["0"],
+          fields: employee.fields,
+        }),
+      ) as Employee[];
+      setEmployees(initialEmployees);
+    }
+  }, [sharepointEmployeesData?.data?.value]);
 
-  if (!mappedEmployees) {
-    return;
-  }
+  const draggableEmployees: DraggableEmployee[] = useMemo(() => {
+    if (!employees) return [];
+    return employees.flatMap((employee) =>
+      employee.rows.map((row) => {
+        if (row === "0") {
+          const statusIndicator =
+            employee.fields.Status === "Bench"
+              ? "bench"
+              : employee.fields.Status === "Starter"
+                ? "starter"
+                : employee.fields.Contract_x0020_Substatus === "End of Contract"
+                  ? "endOfContract"
+                  : "openForNewOpportunities";
+          return {
+            dragId: `${employee.employeeId}_${row}_${statusIndicator}`,
+            type: "Employee",
+            name: employee.fields.Title,
+          };
+        }
+        return {
+          dragId: `${employee.employeeId}_${row}`,
+          type: "Employee",
+          name: employee.fields.Title,
+        };
+      }),
+    );
+  }, [employees]);
+
+  // Sort the initial employees data into the correct arrays based on their status
+  const [sortedData, setSortedData] = useState<{
+    bench: DraggableEmployee[];
+    endOfContract: DraggableEmployee[];
+    starter: DraggableEmployee[];
+    openForNewOpportunities: DraggableEmployee[];
+  }>(sortEmployeesData(draggableEmployees));
+
+  useEffect(() => {
+    setSortedData(sortEmployeesData(draggableEmployees));
+  }, [draggableEmployees]);
 
   return (
     <EmployeeContext.Provider
       value={{
-        employeesSharepoint: mappedEmployees,
-        employeesMogelijkheden: employeesMogelijkheden as unknown as Employee[],
+        employees: employees,
+        setEmployees: setEmployees,
+        draggableEmployees: draggableEmployees,
+        sortedData: sortedData,
       }}
     >
       {children}
     </EmployeeContext.Provider>
   );
+};
+
+const sortEmployeesData = (draggableEmployees: DraggableEmployee[]) => {
+  const bench: DraggableEmployee[] = [],
+    starter: DraggableEmployee[] = [],
+    endOfContract: DraggableEmployee[] = [],
+    openForNewOpportunities: DraggableEmployee[] = [];
+
+  // add the users to the correct array based on their status
+  draggableEmployees.forEach((draggableEmployee) => {
+    if (!draggableEmployee) return;
+
+    const status = (draggableEmployee.dragId as string).split("_")[2];
+
+    if (!status) return;
+
+    if (status === "bench") {
+      bench.push(draggableEmployee);
+    } else if (status === "starter") {
+      starter.push(draggableEmployee);
+    } else if (status === "endOfContract") {
+      endOfContract.push(draggableEmployee);
+    }
+    openForNewOpportunities.push(draggableEmployee);
+  });
+
+  return { bench, endOfContract, starter, openForNewOpportunities };
 };

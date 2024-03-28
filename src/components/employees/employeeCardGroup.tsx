@@ -6,62 +6,20 @@ import {
 import { useContext, useState } from "react";
 import { BoardRow } from "../ui/dnd/boardRow";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import type { Employee } from "~/lib/types";
+import type { DraggableEmployee } from "~/lib/types";
 
-export const EmployeeCardGroup = () => {
-  const value = useContext(EmployeeContext);
-
-  if (!value.employeesSharepoint) return null;
-  const sortedData = sortEmployeesData(value.employeesSharepoint);
-
-  const widthBooleans = CheckScreenWidth(sortedData);
-
-  return (
-    <div className="gap-2 flex" id="routElement">
-      <ReturnCardGroup
-        label="Bench"
-        data={sortedData.bench}
-        startOpen={widthBooleans[0]}
-      />
-      <ReturnCardGroup
-        label="Einde"
-        data={sortedData.endOfContract}
-        startOpen={widthBooleans[1]}
-      />
-      <ReturnCardGroup
-        label="Starter"
-        data={sortedData.starter}
-        startOpen={widthBooleans[2]}
-      />
-      <ReturnCardGroup
-        label="Nieuw"
-        data={sortedData.openForNewOpportunities}
-        startOpen={widthBooleans[3]}
-      />
-    </div>
-  );
-};
-
-type ReturnCardGroupProps = {
-  data: Employee[];
+type CollapsibleCardGroupProps = {
   label: string;
-  startOpen?: boolean;
+  data: DraggableEmployee[];
+  status?: string;
 };
 
-const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({
-  data,
+const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
   label,
-  startOpen,
+  data,
+  status,
 }) => {
-  const [isOpen, setIsOpen] = useState(startOpen ?? true);
-  const sortedEmployeeGroup = data.sort((a, b) =>
-    a.fields.Title.localeCompare(b.fields.Title),
-  );
-
-  // useEffect(() => {
-  //   setIsOpen(startOpen ?? true);
-  // }, [startOpen]);
-
+  const [isOpen, setIsOpen] = useState(true);
   if (data.length === 0)
     return (
       <div className="flex bg-white bg-opacity-75 pt-1.5 border-x-4 border-b-4 tv:border-x-8 tv:border-b-[6px] border-grey h-fit w-fit rounded-b-2xl top-0 items-center justify-between">
@@ -91,16 +49,7 @@ const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({
             className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
             title="CollapsibleContent"
           >
-            <BoardRow
-              row={{
-                rowId: "0",
-                dragItemIds: sortedEmployeeGroup.map((e) => e.dragItemId),
-                employeeIds: sortedEmployeeGroup.map((e) => e.employeeId),
-              }}
-              employees={sortedEmployeeGroup.map((e) => e)}
-              isHeader={true}
-            />
-            {/* </div> */}
+            <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -108,80 +57,31 @@ const ReturnCardGroup: React.FC<ReturnCardGroupProps> = ({
   );
 };
 
-export const sortEmployeesData = (data: Employee[]) => {
-  const bench: Employee[] = [];
-  const starter: Employee[] = [];
-  const endOfContract: Employee[] = [];
-  const openForNewOpportunities: Employee[] = [];
+export const CollapsibleCardGroups = () => {
+  const { sortedData } = useContext(EmployeeContext);
 
-  // add the users to the correct array based on their status
-  data.forEach((contact) => {
-    const status = contact.fields.Status;
-    const subStatus = contact.fields.Contract_x0020_Substatus;
-
-    if (status === "Bench") {
-      bench.push(contact);
-    } else if (status === "Starter") {
-      starter.push(contact);
-    } else if (subStatus === "End of Contract") {
-      endOfContract.push(contact);
-    } else if (subStatus === "Open for New Opportunities") {
-      openForNewOpportunities.push(contact);
-    }
-  });
-
-  // create an object with the sorted data
-  const sortedData = {
-    bench,
-    endOfContract,
-    starter,
-    openForNewOpportunities,
-  };
-
-  return sortedData;
-};
-
-// I'm going to be honest, this isn't the way I wanted to calculate it, but I couldn't find a better way. Feel free to improve it.
-const CheckScreenWidth = (data: {
-  bench: Employee[];
-  endOfContract: Employee[];
-  starter: Employee[];
-  openForNewOpportunities: Employee[];
-}) => {
-  // calculate the width of the element
-  const multiplier = window.innerWidth >= 2800 ? 2 : 1; // this is to account for the rem change whenever the width is bigger than 2800px
-  const screenWidth = window.innerWidth - 250 * multiplier; // I subtracted 200px so the refresh and sign out button have enough space
-  let width = 0;
-  const booleanArray: boolean[] = [];
-  let counter = 0;
-
-  // calculate the width for "bench"
-  counter = data.bench.length;
-  width += (counter * 60 + 89) * multiplier; // 60px for each card and 89px for the label
-  if (counter > 1) width += (counter - 1) * 8 * 2; // add the margin between the cards
-  if (width > screenWidth) booleanArray.push(false);
-  else booleanArray.push(true);
-
-  // calculate the width for "end of contract"
-  counter = data.endOfContract.length;
-  width += (counter * 60 + 89) * multiplier; // +8 is to account for the gap
-  if (counter > 1) width += (counter - 1) * 8 * 2;
-  if (width > screenWidth) booleanArray.push(false);
-  else booleanArray.push(true);
-
-  // calculate the width for "starter"
-  counter = data.starter.length;
-  width += (counter * 60 + 89) * multiplier;
-  if (counter > 1) width += (counter - 1) * 8 * 2;
-  if (width > screenWidth) booleanArray.push(false);
-  else booleanArray.push(true);
-
-  // calculate the width for "open for new opportunities"
-  counter = data.openForNewOpportunities.length;
-  width += (counter * 60 + 89) * multiplier;
-  if (counter > 1) width += (counter - 1) * 8 * 2;
-  if (width > screenWidth) booleanArray.push(false);
-  else booleanArray.push(true);
-
-  return booleanArray;
+  return (
+    <div className="gap-2 flex">
+      <CollapsibleCardGroup
+        label="Bench"
+        data={sortedData.bench}
+        status="bench"
+      />
+      <CollapsibleCardGroup
+        label="Einde"
+        data={sortedData.endOfContract}
+        status="endOfContract"
+      />
+      <CollapsibleCardGroup
+        label="Starter"
+        data={sortedData.starter}
+        status="starter"
+      />
+      <CollapsibleCardGroup
+        label="Nieuw"
+        data={sortedData.openForNewOpportunities}
+        status="openForNewOpportunities"
+      />
+    </div>
+  );
 };
