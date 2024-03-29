@@ -36,14 +36,12 @@ export const EmployeeContextProvider: React.FC<
   // }
   // Add unique dragId to employees & rowId
 
-  const mappedEmployees = sharepointEmployeesData?.data?.value.map(
-    (employee) => ({
-      employeeId: employee.id,
-      dragItemId: uuidv4(),
-      rowId: "0",
-      fields: employee.fields,
-    }),
-  ) as Employee[];
+  const mappedEmployees = sharepointEmployeesData?.data?.map((employee) => ({
+    employeeId: employee.id,
+    dragItemId: uuidv4(),
+    rowId: "0",
+    fields: employee.fields,
+  })) as Employee[];
 
   if (!mappedEmployees) {
     return;

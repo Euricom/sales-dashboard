@@ -45,7 +45,10 @@ export function EmployeeCardDragged({
   return (
     <Card
       ref={setNodeRef}
-      style={style}
+      style={{
+        backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
+        backgroundSize: "cover",
+      }}
       className={variants({
         dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
       })}
@@ -55,9 +58,11 @@ export function EmployeeCardDragged({
         variant={"ghost"}
         {...attributes}
         {...listeners}
-        className="w-full h-full"
+        className="w-full h-full relative "
       >
-        {titleToInitials(employee.fields.Title)}
+        <div className="absolute bottom-0 bg-white text-black w-full rounded-b-2xl">
+          {titleToInitials(employee.fields.Title)}
+        </div>
       </Button>
     </Card>
   );

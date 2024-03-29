@@ -24,9 +24,24 @@ export interface SharePointEmployee {
     fields: {
       Title: string;
       City: string;
+      Euricom_x0020_email: string;
       Job_x0020_title: string;
       Level: string;
       Status: string;
       Contract_x0020_Substatus: string;
     }
+}
+
+export interface SharePointEmployeeWithAvatar {
+  id: string;
+    fields: {
+      Title: string;
+      City: string;
+      Euricom_x0020_email: string;
+      Job_x0020_title: string;
+      Level: string;
+      Status: string;
+      Contract_x0020_Substatus: string;
+      avatar: string;
+    }  
 }

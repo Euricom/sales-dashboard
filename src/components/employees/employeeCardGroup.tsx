@@ -14,9 +14,7 @@ export const EmployeeCardGroup = () => {
   if (!value.employeesSharepoint) return null;
   const sortedData = sortEmployeesData(value.employeesSharepoint);
 
-  let widthBooleans = [true, true, true, true];
-
-  widthBooleans = CheckScreenWidth(sortedData);
+  const widthBooleans = CheckScreenWidth(sortedData);
 
   return (
     <div className="gap-2 flex" id="routElement">
