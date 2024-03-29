@@ -8,6 +8,8 @@ const cardVariants = cva("text-white rounded-14", {
     variant: {
       default: "bg-secondary",
       column: "flex flex-col bg-secondary",
+      columnHighlight:
+        "flex flex-col bg-primary outline outline-white-400 outline-offset-1",
       deal: "flex justify-between bg-primary gap-3",
       row: "bg-none",
       dealhighlight:

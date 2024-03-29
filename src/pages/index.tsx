@@ -6,7 +6,7 @@ import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import DealsColumn from "~/components/teamleader/dealsColumn";
-import { CollapsibleCardGroups } from "~/components/employees/employeeCardGroup";
+import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 
 export default function Home() {
   const { status } = useSession();
