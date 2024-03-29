@@ -6,13 +6,11 @@ import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import DealsColumn from "~/components/teamleader/dealsColumn";
-import { CollapsibleCardGroups } from "~/components/employees/employeeCardGroup";
+import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 
 export default function Home() {
   const { status } = useSession();
 
-  // If status is not loading & is authenticated, redirect to the TL redirection URL
-  //useTLRedirection(status, data, redirectionUrl);
   if (status === "unauthenticated") {
     return (
       <div className="flex flex-col gap-4 justify-center items-center w-screen h-screen">
@@ -48,7 +46,7 @@ export default function Home() {
                     <BoardColumn columnTitle="Voorgesteld" />
                     <BoardColumn columnTitle="Interview" />
                     <BoardColumn columnTitle="Weerhouden" />
-                    <BoardColumn columnTitle="Niet Weerhouden" />
+                    <BoardColumn columnTitle="Niet-Weerhouden" />
                   </div>
                 </div>
               </main>

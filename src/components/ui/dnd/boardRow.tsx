@@ -1,14 +1,14 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useContext, useMemo } from "react";
-import { EmployeeCardDragged } from "../../employees/employeeCardDragged";
+import { EmployeeCardDragged } from "../../employees/employeeCard";
 import { Card, CardContent } from "../card";
 import type { BoardRowProps, DraggableEmployee } from "~/lib/types";
 import { DropContext } from "~/contexts/dndProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
-  const { activeDealId } = useContext(DropContext);
+  const { activeDealId, activeColumnId } = useContext(DropContext);
   const { draggableEmployees } = useContext(EmployeeContext);
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
@@ -29,7 +29,11 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
-  const variant = row.rowId === activeDealId ? "rowhighlight" : "row";
+  const isMogelijkheden = activeColumnId === "Mogelijkheden";
+  const variant =
+    row.rowId === activeDealId && !isHeader && isMogelijkheden
+      ? "rowhighlight"
+      : "row";
 
   const { setNodeRef, transform, transition } = useSortable({
     id: row.rowId,

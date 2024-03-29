@@ -1,11 +1,12 @@
 import { useContext, useMemo } from "react";
 import { BoardRow } from "./boardRow";
-import { SortableContext } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 import { DropContext } from "~/contexts/dndProvider";
+import { CSS } from "@dnd-kit/utilities";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
-  const { rows } = useContext(DropContext);
+  const { rows, activeColumnId } = useContext(DropContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
     .filter((row) => row.rowId.split("/")[1] === columnTitle);
@@ -14,22 +15,43 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     [filteredRows],
   );
 
+  const { setNodeRef, transform, transition } = useSortable({
+    id: columnTitle,
+    data: {
+      type: "Column",
+      filteredRows,
+    },
+  });
+
+  const style = {
+    transition,
+    transform: CSS.Translate.toString(transform),
+  };
+
   if (!filteredRows || filteredRows.length === 0) return null;
 
+  const isMogelijkheden = columnTitle === "Mogelijkheden";
+  const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
   return (
     <Card
-      variant={"column"}
-      size={columnTitle === "Mogelijkheden" ? "columnMogelijkheden" : "column"}
+      ref={setNodeRef}
+      style={style}
+      variant={
+        activeColumnId === columnTitle && !isMogelijkheden
+          ? "columnHighlight"
+          : "column"
+      }
+      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
     >
       <CardHeader className="pb-1.5">
-        <CardTitle>{columnTitle}</CardTitle>
+        <CardTitle>
+          {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {columnTitle === "Mogelijkheden" && (
-          <SortableContext items={rowsIds}>
-            {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
-          </SortableContext>
-        )}
+        <SortableContext items={rowsIds}>
+          {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
+        </SortableContext>
       </CardContent>
     </Card>
   );

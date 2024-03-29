@@ -1,7 +1,6 @@
 import type { Active, DataRef, Over } from "@dnd-kit/core";
-import type { EmployeeDragData } from "~/lib/types";
 
-type DraggableData = "Row" | EmployeeDragData;
+type DraggableData = "Row" | "Employee" | "Column";
 
 export function hasDraggableData<T extends Active | Over>(
   entry: T | null | undefined,
@@ -14,7 +13,11 @@ export function hasDraggableData<T extends Active | Over>(
 
   const data = entry.data.current;
 
-  if (data?.type === "Row" || data?.type === "Employee") {
+  if (
+    data?.type === "Row" ||
+    data?.type === "Employee" ||
+    data?.type === "Column"
+  ) {
     return true;
   }
 
