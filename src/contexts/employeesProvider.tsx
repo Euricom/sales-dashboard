@@ -31,8 +31,8 @@ export const EmployeeContextProvider: React.FC<
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
-    if (sharepointEmployeesData?.data?.value) {
-      const initialEmployees = sharepointEmployeesData?.data?.value.map(
+    if (sharepointEmployeesData?.data?.values) {
+      const initialEmployees = sharepointEmployeesData?.data?.map(
         (employee) => ({
           employeeId: employee.id,
           rows: ["0"],
@@ -41,7 +41,7 @@ export const EmployeeContextProvider: React.FC<
       ) as Employee[];
       setEmployees(initialEmployees);
     }
-  }, [sharepointEmployeesData?.data?.value]);
+  }, [sharepointEmployeesData?.data]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];

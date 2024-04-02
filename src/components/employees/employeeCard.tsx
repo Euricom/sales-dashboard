@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 import { useContext } from "react";
-import type { EmployeeDragData, EmployeeCardProps } from "~/lib/types";
+import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 
 export function EmployeeCardDragged({
@@ -19,7 +19,7 @@ export function EmployeeCardDragged({
     (employee) =>
       employee.employeeId ===
       (draggableEmployee?.dragId as string)?.split("_")[0],
-  );
+  )!;
 
   const {
     setNodeRef,
