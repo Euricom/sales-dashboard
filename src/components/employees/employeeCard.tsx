@@ -3,9 +3,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
-import type { EmployeeCardProps } from "~/lib/types";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 import { useContext } from "react";
+import type { EmployeeDragData, EmployeeCardProps } from "~/lib/types";
+import Image from "next/image";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -52,11 +53,20 @@ export function EmployeeCardDragged({
       },
     },
   });
+  console.log(employee.fields.avatar, "avatar");
 
   return (
     <Card
       ref={setNodeRef}
-      style={style}
+      style={
+        isHeader && employee.fields.avatar
+          ? {
+              ...style,
+              backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
+              backgroundSize: "cover",
+            }
+          : { ...style }
+      }
       className={variants({
         dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
       })}
@@ -66,9 +76,22 @@ export function EmployeeCardDragged({
         variant={"ghost"}
         {...attributes}
         {...listeners}
-        className="w-full h-full"
+        className="w-full h-full relative"
       >
-        {titleToInitials(employee?.fields.Title)}
+        {isHeader ? null : (
+          <div className="absolute top-[5px] w-full rounded-2xl flex flex-row">
+            <Image
+              src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+              alt={employee.fields.Title}
+              className="ml-2 object-cover rounded-full"
+              width={30}
+              height={30}
+            />
+          </div>
+        )}
+        <div className="absolute bottom-0 bg-white/75 text-black w-full rounded-b-2xl">
+          {titleToInitials(employee.fields.Title)}
+        </div>
       </Button>
     </Card>
   );
