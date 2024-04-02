@@ -1,6 +1,6 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { env } from "~/env";
-import { type SharePointContact, type SharePointEmployee, type SharePointEmployeeWithAvatar } from "./types";
+import { type batchRequestResponse, type batchResponse, type SharePointContact, type SharePointEmployee, type SharePointEmployeeWithAvatar } from "./types";
 
 const CONTACT_LIST_ID = "dda5396a-4f95-4d63-b9ae-3ce4e6fc0fcf";
 export const azureClient = new ConfidentialClientApplication({
@@ -20,9 +20,14 @@ export const getAllEmployeeData = async () => {
   if (!employeeData) {
     throw new Error("Failed to get employee data");
   }
-  const employeesWithAvatars: SharePointEmployeeWithAvatar[] = await Promise.all(
+
+  let employeesWithAvatars: SharePointEmployeeWithAvatar[] | undefined = [];
+  if (employeeData.value.length <= 20) {
+    employeesWithAvatars = await generateQueryBody(employeeData, token);
+  } else {
+    employeesWithAvatars = await Promise.all(
     employeeData.value.map(async (employee: SharePointEmployee) => {
-      const avatarString = await getEmployeeAvatar(token, employee.fields.Euricom_x0020_email) ?? "";
+      const avatarString = await getEmployeeAvatar(token, employee.fields.Euricom_x0020_email) ?? null;
       return {
         ...employee,
         fields: {
@@ -32,7 +37,8 @@ export const getAllEmployeeData = async () => {
       };
     })
   );
-  
+  }
+
   return employeesWithAvatars;
 };
 
@@ -103,7 +109,6 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
 /* 
 for the user avatar url:
 https://graph.microsoft.com/v1.0/users/{email}/photo/$value
-bvb.: https://graph.microsoft.com/v1.0/users/Bart.Debeuckelaere@euri.com/photo/$value
 */
 
 export const getEmployeeAvatar = async (accessToken: string, email: string) => {
@@ -128,3 +133,55 @@ export const getEmployeeAvatar = async (accessToken: string, email: string) => {
     console.error(error);
   }
 };
+
+const generateQueryBody = async (employeeData : SharePointContact, accessToken: string) => {
+
+  const requests = employeeData.value.map((employee) => {
+    return {
+      id: employee.id,
+      method: "GET",
+      url: `/users/${employee.fields.Euricom_x0020_email}/photo/$value`,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly", 
+      }
+  }});
+
+  const url = "https://graph.microsoft.com/v1.0/$batch";
+  const options = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly",
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      requests: requests,
+    })
+  }
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from SharePoint");
+    }
+
+    const data = await response.json() as batchRequestResponse;
+    const employeesWithAvatars: SharePointEmployeeWithAvatar[] = employeeData.value.map((employee: SharePointEmployee) => {
+      const avatar = data.responses.find((response: batchResponse) => response.id === employee.id);
+      return {
+        ...employee,
+        fields: {
+          ...employee.fields,
+          avatar: avatar?.body ?? null,
+        },
+      };
+    });
+    
+    return employeesWithAvatars;
+
+  } catch (error) {
+    console.error(error);
+  }
+}

@@ -42,6 +42,21 @@ export interface SharePointEmployeeWithAvatar {
       Level: string;
       Status: string;
       Contract_x0020_Substatus: string;
-      avatar: string;
+      avatar: string | null;
     }  
+}
+
+export interface batchResponse {
+  id: string;
+  status: number;
+  headers: {
+    "Cache-Control": string;
+    "Content-Type": string;
+    ETag: string;
+  };
+  body: string;
+}
+
+export interface batchRequestResponse {
+  responses: batchResponse[];
 }

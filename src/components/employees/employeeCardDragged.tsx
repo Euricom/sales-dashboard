@@ -4,6 +4,7 @@ import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import type { EmployeeDragData, EmployeeCardProps } from "~/lib/types";
+import Image from "next/image";
 
 export function EmployeeCardDragged({
   employee,
@@ -41,14 +42,20 @@ export function EmployeeCardDragged({
       },
     },
   });
+  console.log(employee.fields.avatar, "avatar");
 
   return (
     <Card
       ref={setNodeRef}
-      style={{
-        backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
-        backgroundSize: "cover",
-      }}
+      style={
+        isHeader && employee.fields.avatar
+          ? {
+              ...style,
+              backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
+              backgroundSize: "cover",
+            }
+          : { ...style }
+      }
       className={variants({
         dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
       })}
@@ -58,9 +65,20 @@ export function EmployeeCardDragged({
         variant={"ghost"}
         {...attributes}
         {...listeners}
-        className="w-full h-full relative "
+        className="w-full h-full relative"
       >
-        <div className="absolute bottom-0 bg-white text-black w-full rounded-b-2xl">
+        {isHeader ? null : (
+          <div className="absolute top-[5px] w-full rounded-2xl flex flex-row">
+            <Image
+              src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+              alt={employee.fields.Title}
+              className="ml-2 object-cover rounded-full"
+              width={30}
+              height={30}
+            />
+          </div>
+        )}
+        <div className="absolute bottom-0 bg-white/75 text-black w-full rounded-b-2xl">
           {titleToInitials(employee.fields.Title)}
         </div>
       </Button>

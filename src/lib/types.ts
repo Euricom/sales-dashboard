@@ -26,7 +26,7 @@ export type Employee = {
     Level: string;
     Status: string;
     Contract_x0020_Substatus: string;
-    avatar: string;
+    avatar: string | null;
   };
 };
 
