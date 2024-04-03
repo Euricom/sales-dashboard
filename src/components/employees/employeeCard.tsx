@@ -53,7 +53,6 @@ export function EmployeeCardDragged({
       },
     },
   });
-  console.log(employee.fields.avatar, "avatar");
 
   return (
     <Card

@@ -7,39 +7,15 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Client {
-    id        String     @id @default(uuid()) @map("_id")
-    name      String
-    employees Employee[] @relation("ClientEmployees")
-}
-
 model Employee {
-    id         String   @id @default(uuid()) @map("_id")
-    name       String
-    category   Category @relation(fields: [categoryId], references: [id])
-    categoryId String   @map("categoryId")
-    client     Client?  @relation("ClientEmployees", fields: [clientId], references: [id])
-    clientId   String?  @map("clientId")
+    id   String   @id @default(uuid()) @map("_id")
+    rows String[] @default(["0"])
 }
 
-model Category {
-    id        String     @id @default(uuid()) @map("_id")
-    name      String
-    employees Employee[]
-}
-
-model Deal {
-    id               String   @id @default(uuid()) @map("_id")
-    bedrijfsnaam     String
-    title            String
-    beslissingsDatum DateTime
-    pmNaam           String
-}
-
-//Save Teamleader token
-model ApiToken {
-  tokenId        String   @id @default(uuid()) @map("_id")
-  accessToken    String
-  expirationDate DateTime
-  refreshToken   String
-}
+// //Save Teamleader token
+// model ApiToken {
+//     tokenId        String   @id @default(uuid()) @map("_id")
+//     accessToken    String
+//     expirationDate DateTime
+//     refreshToken   String
+// }
