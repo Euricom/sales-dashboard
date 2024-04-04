@@ -179,7 +179,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const isOverAnEmployee = overData?.type === "Employee";
 
     // Dropping Employee over the deals column
-    if (activeColumnId === "Deals") {
+    if (activeColumnId === "Deals" && activeRowId !== "0") {
       removeEmployee(activeEmployee, activeRowId);
     }
 
