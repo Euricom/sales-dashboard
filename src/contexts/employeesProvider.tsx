@@ -25,23 +25,17 @@ type EmployeeContextProviderProps = {
 export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
-  // GET employees data from SharePoint
-  const sharepointEmployeesData = api.sharePoint.getEmployeesData.useQuery();
-  // Instantiate initial employees
+  // GET employees data
+  const employeesData = api.mongodb.getEmployees.useQuery();
+  // Instantiatein itial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
-    if (sharepointEmployeesData?.data?.values) {
-      const initialEmployees = sharepointEmployeesData?.data?.map(
-        (employee) => ({
-          employeeId: employee.id,
-          rows: ["0"],
-          fields: employee.fields,
-        }),
-      ) as Employee[];
-      setEmployees(initialEmployees);
+    if (employeesData) {
+      // GET employees from MongoDB
+      setEmployees(employeesData.data as Employee[]);
     }
-  }, [sharepointEmployeesData?.data]);
+  }, [employeesData]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];

@@ -1,7 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sharePointRouter } from "./routers/sharepoint";
 import { teamleaderRouter } from "./routers/teamleader";
-
+import { mongodbRouter } from "./routers/mongodb";
 /**
  * This is the primary router for your server.
  *
@@ -9,7 +9,8 @@ import { teamleaderRouter } from "./routers/teamleader";
  */
 export const appRouter = createTRPCRouter({
   sharePoint: sharePointRouter,
-  teamleader: teamleaderRouter
+  teamleader: teamleaderRouter,
+  mongodb: mongodbRouter,
 });
 
 // export type definition of API

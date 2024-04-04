@@ -28,6 +28,11 @@ export type Employee = {
   };
 };
 
+export type EmployeeFromDB = {
+  employeeId: string;
+  rows: UniqueIdentifier[];
+};
+
 export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
   type: EmployeeType;
