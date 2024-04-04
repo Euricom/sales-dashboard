@@ -50,9 +50,10 @@ export const getInitialEmployees = async () => {
       // if db is empty, all employees are missing, so fill the db with all employees from sharepoint
       if (employeesFromDb.length === 0) return true;
       // if db is not empty, check if sharepoint employee is in db, if not, add to missing employees (should work but not tested yet)
-      employeesFromDb.some((dbEmployee) => {
+      const employee = employeesFromDb.find((dbEmployee) => {
         dbEmployee.employeeId === sharepointEmployee.id;
       });
+      return !employee;
     },
   );
 
