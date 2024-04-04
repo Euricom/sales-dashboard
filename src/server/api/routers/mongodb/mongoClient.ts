@@ -35,6 +35,20 @@ export const createEmployee = async (newEmployee: EmployeeFromDB) => {
   }
 };
 
+export const createMultipleEmployees = async (newEmployees: EmployeeFromDB[]) => {
+  const client = new MongoClient(env.DATABASE_URL);
+  const db = client.db();
+  try {
+    await client.connect();
+    const postResult = await db.collection("Employee").insertMany(newEmployees);
+    return postResult;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await client.close();
+  }
+}
+
 // Uses getEmployeesFromDB and createEmployee
 export const getInitialEmployees = async () => {
   // fetch employees from sharepoint
@@ -61,14 +75,15 @@ export const getInitialEmployees = async () => {
   );
 
   // if there are missing employees, create missing employees in the db
-  if (missingEmployees.length) {
-    for (const employeeFromSharepoint of missingEmployees) {
-      await createEmployee({
-        employeeId: employeeFromSharepoint.id,
-        rows: ["0"],
-      });
+  if (missingEmployees.length === 1) {
+    for (const missingEmployee of missingEmployees) {
+      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"] });
     }
   }
+  if (missingEmployees.length > 1) {
+    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"] })));
+  }
+
 
   // return db employees with fields from sharepoint
   return employeesFromDb.map((employeeDb) => {
