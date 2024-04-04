@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createEmployee, getInitialEmployees } from "./mongoClient";
+import { getInitialEmployees, updateEmployee } from "./mongoClient";
 import { z } from "zod";
 
 export const mongodbRouter = createTRPCRouter({
@@ -8,13 +8,18 @@ export const mongodbRouter = createTRPCRouter({
     return employees;
   }),
 
-  createEmployee: protectedProcedure
-    .input(z.object({ id: z.string() }))
+  updateEmployee: protectedProcedure
+    .input(
+      // EmployeeFromDB type
+      z.object({
+        employee: z.object({
+          employeeId: z.string(),
+          rows: z.array(z.string()),
+        }),
+      }),
+    )
     .mutation(async ({ input }) => {
-      const newEmployee = await createEmployee({
-        employeeId: input.id,
-        rows: ["0"],
-      });
-      return newEmployee;
+      console.log(input.employee);
+      await updateEmployee(input.employee);
     }),
 });

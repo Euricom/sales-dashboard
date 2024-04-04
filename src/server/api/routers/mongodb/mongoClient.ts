@@ -36,6 +36,7 @@ export const createEmployee = async (newEmployee: EmployeeFromDB) => {
   }
 };
 
+// Uses getEmployeesFromDB and createEmployee
 export const getInitialEmployees = async () => {
   // fetch employees from sharepoint
   const employeesFromSharepoint = await getAllEmployeeDataFromSharepoint();
@@ -78,34 +79,20 @@ export const getInitialEmployees = async () => {
   });
 };
 
-// export default async function handler(req, res) {
-//   const client = new MongoClient(env.DATABASE_URL);
-
-//   await client.connect();
-//   const db = client.db();
-
-//   switch (req.method) {
-//     case 'GET':
-//         const employees = await db.collection('Employee').find({}).toArray();
-//         res.status(200).json(employees);
-//         break;
-//     case 'POST':
-//         const newEmployee = req.body;
-//         const postResult = await db.collection('Employee').insertOne(newEmployee);
-//         res.status(201).json(postResult);
-//         break;
-//     case 'PUT':
-//         const {id, ...employee} = req.body;
-//         const putResult = await db.collection('Employee').updateOne({id}, {$set: employee});
-//         res.status(200).json(putResult);
-//         break;
-//     case 'DELETE':
-//         const deleteResult = await db.collection('Employee').deleteOne({id: req.body.id});
-//         res.status(200).json(deleteResult);
-//         break;
-//     default:
-//         res.status(405).json({ error: 'Unsupported HTTP method' });
-//   }
-
-//     await client.close();
-// }
+export const updateEmployee = async (employee: EmployeeFromDB) => {
+  const client = new MongoClient(env.DATABASE_URL);
+  const db = client.db();
+  try {
+    await client.connect();
+    await db
+      .collection("Employee")
+      .updateOne(
+        { employeeId: employee.employeeId },
+        { $set: { rows: employee.rows } },
+      );
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await client.close();
+  }
+};

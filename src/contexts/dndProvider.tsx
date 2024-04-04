@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
-import type { Row, DraggableEmployee, Employee } from "~/lib/types";
+import type {
+  Row,
+  DraggableEmployee,
+  Employee,
+  EmployeeFromDB,
+} from "~/lib/types";
 import {
   DndContext,
   type DragEndEvent,
@@ -19,6 +24,7 @@ import {
 import { EmployeeCardDragged } from "~/components/employees/employeeCard";
 import { DealContext } from "~/contexts/dealsProvider";
 import { EmployeeContext } from "./employeesProvider";
+import { api } from "~/utils/api";
 
 type DropContextType = {
   rows: Row[];
@@ -59,7 +65,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-
+  const employeeUpdator = api.mongodb.updateEmployee.useMutation();
   // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
   useEffect(() => {
     if (!isLoading && deals) {
@@ -76,6 +82,23 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       );
     }
   }, [isLoading, deals, dealPhases]);
+
+  // useEffect(() => {
+  //   if (!activeEmployee) return;
+  //   const employeeToUpdate = employees.find((employee) => {
+  //     return (
+  //       employee.employeeId === (activeEmployee.dragId as string).split("_")[0]
+  //     );
+  //   });
+  //   if (!employeeToUpdate) return;
+
+  //   void api.mongodb.updateEmployee.useMutation().mutateAsync({
+  //     employee: {
+  //       employeeId: employeeToUpdate.employeeId,
+  //       rows: employeeToUpdate.rows as string[],
+  //     },
+  //   });
+  // }, [activeEmployee, employees]);
 
   return (
     <DropContext.Provider
@@ -210,10 +233,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
-          return {
-            ...emp,
-            rows: [...emp.rows, rowId],
-          };
+          emp.rows.push(rowId);
+          updateEmployee(emp); // Update the employee in the database
+          return emp;
         }
         return emp;
       });
@@ -229,10 +251,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
-          return {
-            ...emp,
-            rows: emp.rows.filter((row) => row !== rowId),
-          };
+          emp.rows = emp.rows.filter((row) => row !== rowId);
+          updateEmployee(emp); // Update the employee in the database
+          return emp;
         }
         return emp;
       });
@@ -267,10 +288,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           if (indexOfRowToRemove !== -1) {
             const updatedRows = [...emp.rows]; // Create a copy of rows array
             updatedRows.splice(indexOfRowToRemove, 1, targetId); // Replace the row
-            return {
-              ...emp,
-              rows: updatedRows,
-            };
+            emp.rows = updatedRows;
+            updateEmployee(emp); // Update the employee in the database
+            return emp;
           }
         }
         return emp;
@@ -356,5 +376,14 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     } else {
       return;
     }
+  }
+
+  function updateEmployee(employee: Employee) {
+    employeeUpdator.mutate({
+      employee: {
+        employeeId: employee.employeeId,
+        rows: employee.rows as string[],
+      },
+    });
   }
 };
