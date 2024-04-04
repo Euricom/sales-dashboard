@@ -26,7 +26,6 @@ export const createEmployee = async (newEmployee: EmployeeFromDB) => {
   const db = client.db();
   try {
     await client.connect();
-    // console.log(newEmployee);
     const postResult = await db.collection("Employee").insertOne(newEmployee);
     return postResult;
   } catch (error) {
@@ -50,10 +49,14 @@ export const getInitialEmployees = async () => {
       // if db is empty, all employees are missing, so fill the db with all employees from sharepoint
       if (employeesFromDb.length === 0) return true;
       // if db is not empty, check if sharepoint employee is in db, if not, add to missing employees (should work but not tested yet)
-      const employee = employeesFromDb.find((dbEmployee) => {
-        dbEmployee.employeeId === sharepointEmployee.id;
+      const employee = employeesFromDb.some((dbEmployee) => {
+        return dbEmployee.employeeId === sharepointEmployee.id;
       });
-      return !employee;
+      if (employee) {
+        return false;
+      } else {
+        return true;
+      }
     },
   );
 

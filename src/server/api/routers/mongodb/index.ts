@@ -19,7 +19,6 @@ export const mongodbRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(input.employee);
       await updateEmployee(input.employee);
     }),
 });
