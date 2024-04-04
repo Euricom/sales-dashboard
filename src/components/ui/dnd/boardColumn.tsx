@@ -4,6 +4,7 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
+import DealsColumn from "~/components/teamleader/dealsColumn";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
@@ -28,16 +29,18 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     transform: CSS.Translate.toString(transform),
   };
 
-  if (!filteredRows || filteredRows.length === 0) return null;
-
+  const isDeals = columnTitle === "Deals";
   const isMogelijkheden = columnTitle === "Mogelijkheden";
   const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
+
+  if (!filteredRows || (filteredRows.length === 0 && !isDeals)) return null;
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       variant={
-        activeColumnId === columnTitle && !isMogelijkheden
+        activeColumnId === columnTitle && !isMogelijkheden && !isDeals
           ? "columnHighlight"
           : "column"
       }
@@ -48,11 +51,15 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <SortableContext items={rowsIds}>
-          {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
-        </SortableContext>
-      </CardContent>
+      {isDeals ? (
+        <DealsColumn isDeals={activeColumnId === "Deals" ? true : false} />
+      ) : (
+        <CardContent className="flex flex-col gap-2">
+          <SortableContext items={rowsIds}>
+            {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
+          </SortableContext>
+        </CardContent>
+      )}
     </Card>
   );
 }

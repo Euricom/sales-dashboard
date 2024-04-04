@@ -5,7 +5,6 @@ import { BoardColumn } from "~/components/ui/dnd/boardColumn";
 import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
-import DealsColumn from "~/components/teamleader/dealsColumn";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 
 export default function Home() {
@@ -41,7 +40,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex w-full h-full my-2 gap-4">
-                    <DealsColumn />
+                    <BoardColumn columnTitle="Deals" />
                     <BoardColumn columnTitle="Mogelijkheden" />
                     <BoardColumn columnTitle="Voorgesteld" />
                     <BoardColumn columnTitle="Interview" />

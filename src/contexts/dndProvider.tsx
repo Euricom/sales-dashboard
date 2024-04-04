@@ -1,12 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
-import type {
-  Row,
-  DraggableEmployee,
-  Employee,
-  EmployeeFromDB,
-} from "~/lib/types";
+import type { Row, DraggableEmployee, Employee } from "~/lib/types";
 import {
   DndContext,
   type DragEndEvent,
@@ -30,6 +25,7 @@ type DropContextType = {
   rows: Row[];
   activeDealId: UniqueIdentifier | undefined;
   activeColumnId: UniqueIdentifier | undefined;
+  isDeletable: boolean;
 };
 
 type Sortable = {
@@ -64,6 +60,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeEmployee, setActiveEmployee] = useState<DraggableEmployee>();
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
+  const [isDeletable, setIsDeletable] = useState<boolean>(false);
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
   // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
@@ -83,29 +80,13 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
   }, [isLoading, deals, dealPhases]);
 
-  // useEffect(() => {
-  //   if (!activeEmployee) return;
-  //   const employeeToUpdate = employees.find((employee) => {
-  //     return (
-  //       employee.employeeId === (activeEmployee.dragId as string).split("_")[0]
-  //     );
-  //   });
-  //   if (!employeeToUpdate) return;
-
-  //   void api.mongodb.updateEmployee.useMutation().mutateAsync({
-  //     employee: {
-  //       employeeId: employeeToUpdate.employeeId,
-  //       rows: employeeToUpdate.rows as string[],
-  //     },
-  //   });
-  // }, [activeEmployee, employees]);
-
   return (
     <DropContext.Provider
       value={{
         rows: rows,
         activeDealId: activeDealId,
         activeColumnId: activeColumnId,
+        isDeletable: isDeletable,
       }}
     >
       <DndContext
@@ -132,8 +113,11 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   );
 
   function onDragStart(event: DragStartEvent) {
-    const { activeData } = extractEventData(event.active);
+    const { activeData, activeRowId } = extractEventData(event.active);
     if (!hasDraggableData(event.active) || !activeData) return;
+
+    activeRowId === "0" ? setIsDeletable(false) : setIsDeletable(true); // check if card is from header
+
     //This serves as a preview of the place where the employee is being dragged
     if (activeData.type === "Employee" && activeData.employee) {
       setActiveEmployee(
@@ -185,6 +169,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   function onDragEnd(event: DragEndEvent) {
     setActiveDealId(undefined);
     setActiveColumnId(undefined);
+    setIsDeletable(false);
 
     if (!event.over || !hasDraggableData(event.active)) return;
     const { activeId, overId, overData, activeRowId, overRowId } =
@@ -192,6 +177,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     if (activeId === overId || !activeEmployee) return;
     const isOverAnEmployee = overData?.type === "Employee";
+
+    // Dropping Employee over the deals column
+    if (activeColumnId === "Deals") {
+      removeEmployee(activeEmployee, activeRowId);
+    }
+
     // Dragging Employee between rows
     if (activeRowId !== "0") {
       if (!activeRowId || activeRowId === overRowId) {
@@ -218,6 +209,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         appendEmployee(activeEmployee, overId);
       }
     }
+
     setActiveEmployee(undefined);
   }
 
