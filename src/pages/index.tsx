@@ -6,6 +6,7 @@ import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
+import { ActionMenu } from "~/components/ui/actionMenu";
 
 export default function Home() {
   const { status } = useSession();
@@ -35,8 +36,7 @@ export default function Home() {
                   <div className="flex">
                     <CollapsibleCardGroups />
                     <div className="flex gap-4 w-full items-start justify-end my-4">
-                      <SignInButton />
-                      <RefreshButton />
+                      <ActionMenu />
                     </div>
                   </div>
                   <div className="flex w-full h-full my-2 gap-4">
@@ -60,26 +60,9 @@ export default function Home() {
 }
 
 const SignInButton = () => {
-  const { data: sessionData } = useSession();
-
   return (
-    <Button
-      size={"sm"}
-      onClick={sessionData ? () => void signOut() : () => void signIn()}
-    >
-      {sessionData ? "Sign out" : "Sign in"}
-    </Button>
-  );
-};
-
-const RefreshButton = () => {
-  const handleRefresh = () => {
-    window.location.replace(window.location.href);
-  };
-
-  return (
-    <Button size={"sm"} onClick={handleRefresh} title="refreshButton">
-      Refresh
+    <Button size={"sm"} onClick={() => void signIn()}>
+      Sign in
     </Button>
   );
 };
