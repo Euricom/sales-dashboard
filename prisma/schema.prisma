@@ -11,11 +11,3 @@ model Employee {
     id   String   @id @default(uuid()) @map("_id")
     rows String[] @default(["0"])
 }
-
-// //Save Teamleader token
-// model ApiToken {
-//     tokenId        String   @id @default(uuid()) @map("_id")
-//     accessToken    String
-//     expirationDate DateTime
-//     refreshToken   String
-// }

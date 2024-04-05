@@ -157,19 +157,9 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  // callbacks: {
-  //   session: ({ session, user }) => ({
-  //     ...session,
-  //     user: {
-  //       ...session.user,
-  //       id: user.id,
-  //     },
-  //   }),
-  // },
   session: {
     maxAge: 1 * 24 * 60 * 60, // 24h - should be the same as the refresh token lifetime
   },
-  // adapter: PrismaAdapter(db),
   providers: [
     TeamleaderProvider({
       accessTokenUrl: env.TEAMLEADER_ACCESS_TOKEN_URL ?? "",
@@ -232,7 +222,6 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
-  // adapter: PrismaAdapter(db) as Adapter,
 };
 
 /**
