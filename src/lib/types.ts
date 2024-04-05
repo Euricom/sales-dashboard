@@ -11,6 +11,7 @@ export type BoardRowProps = {
   isOverlay?: boolean;
   isHeader?: boolean;
   rowStatus?: string;
+  isFiltering?: boolean;
 };
 
 export type EmployeeType = "Employee";

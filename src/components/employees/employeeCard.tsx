@@ -7,6 +7,7 @@ import { EmployeeContext } from "~/contexts/employeesProvider";
 import { useContext } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
+import { DealContext } from "~/contexts/dealsProvider";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -14,6 +15,7 @@ export function EmployeeCardDragged({
   isHeader,
 }: EmployeeCardProps) {
   const { employees } = useContext(EmployeeContext);
+  const { setDealIds } = useContext(DealContext);
 
   const employee = employees.find(
     (employee) =>
@@ -70,6 +72,15 @@ export function EmployeeCardDragged({
         dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
       })}
       size={isHeader ? "employee" : "employeeDragged"}
+      onClick={() => {
+        if (employee.rows[1]) {
+          const dealIdsWithoutSuffix = employee.rows.slice(1).map((row) => {
+            const dealId = row.toString();
+            return dealId.split("/")[0];
+          });
+          setDealIds(dealIdsWithoutSuffix.filter((id) => id !== undefined));
+        }
+      }}
     >
       <Button
         variant={"ghost"}
