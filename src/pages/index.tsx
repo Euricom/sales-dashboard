@@ -7,12 +7,10 @@ import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
-import { useState } from "react";
-import { ListFilter, X } from "lucide-react";
+import { FilterButton } from "~/components/employees/filterEmployeesButton";
 
 export default function Home() {
   const { status } = useSession();
-  const [isFiltering, setFiltering] = useState(false);
 
   if (status === "unauthenticated") {
     return (
@@ -22,18 +20,6 @@ export default function Home() {
       </div>
     );
   }
-
-  const FilterButton = () => {
-    const handleFilter = () => {
-      setFiltering(!isFiltering);
-    };
-
-    return (
-      <Button size={"sm"} onClick={handleFilter} title="filterButton">
-        {isFiltering ? <X /> : <ListFilter />}
-      </Button>
-    );
-  };
 
   if (status === "authenticated") {
     return (
@@ -49,7 +35,7 @@ export default function Home() {
               <main className="flex min-h-screen justify-between mx-4">
                 <div className="flex flex-col w-full">
                   <div className="flex">
-                    <CollapsibleCardGroups isFiltering={isFiltering} />
+                    <CollapsibleCardGroups />
                     <div className="flex gap-4 w-full items-start justify-end my-4">
                       <FilterButton />
                       <SignInButton />

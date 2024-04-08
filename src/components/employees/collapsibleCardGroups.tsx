@@ -12,14 +12,12 @@ type CollapsibleCardGroupProps = {
   label: string;
   data: DraggableEmployee[];
   status?: string;
-  isFiltering: boolean;
 };
 
 const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
   label,
   data,
   status,
-  isFiltering,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   if (data.length === 0)
@@ -51,12 +49,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
             className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
             title="CollapsibleContent"
           >
-            <BoardRow
-              row={{ rowId: "0" }}
-              isHeader={true}
-              rowStatus={status}
-              isFiltering={isFiltering}
-            />
+            <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -64,11 +57,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
   );
 };
 
-export const CollapsibleCardGroups = ({
-  isFiltering,
-}: {
-  isFiltering: boolean;
-}) => {
+export const CollapsibleCardGroups = () => {
   const { sortedData } = useContext(EmployeeContext);
 
   return (
@@ -77,25 +66,21 @@ export const CollapsibleCardGroups = ({
         label="Bench"
         data={sortedData.bench}
         status="bench"
-        isFiltering={isFiltering}
       />
       <CollapsibleCardGroup
         label="Einde"
         data={sortedData.endOfContract}
         status="endOfContract"
-        isFiltering={isFiltering}
       />
       <CollapsibleCardGroup
         label="Starter"
         data={sortedData.starter}
         status="starter"
-        isFiltering={isFiltering}
       />
       <CollapsibleCardGroup
         label="Nieuw"
         data={sortedData.openForNewOpportunities}
         status="openForNewOpportunities"
-        isFiltering={isFiltering}
       />
     </div>
   );

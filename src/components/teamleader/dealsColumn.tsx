@@ -3,23 +3,15 @@ import DealCard from "./dealCard";
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
 import { useContext } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
-import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export default function DealsColumn() {
-  const { filteredDeals, setDealIds } = useContext(DealContext);
-  const { setEmployeeId } = useContext(EmployeeContext);
+  const { filteredDeals } = useContext(DealContext);
 
   if (!filteredDeals) {
     return <div>is loading...</div>;
   }
   return (
-    <Card
-      variant="column"
-      onClick={() => {
-        setDealIds([]);
-        setEmployeeId("");
-      }}
-    >
+    <Card variant="column">
       <CardHeader className="pb-1.5">
         <CardTitle>Deals</CardTitle>
       </CardHeader>

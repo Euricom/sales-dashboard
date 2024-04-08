@@ -7,14 +7,9 @@ import type { BoardRowProps, DraggableEmployee } from "~/lib/types";
 import { DropContext } from "~/contexts/dndProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 
-export function BoardRow({
-  row,
-  isHeader,
-  rowStatus,
-  isFiltering,
-}: BoardRowProps) {
+export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const { activeDealId, activeColumnId } = useContext(DropContext);
-  const { draggableEmployees } = useContext(EmployeeContext);
+  const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
       .filter((draggableEmployee) => {
