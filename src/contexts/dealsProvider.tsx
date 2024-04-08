@@ -52,7 +52,6 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   >(deals ?? null);
 
   useEffect(() => {
-    console.log(dealIds);
     if (dealIds.length === 0) {
       setFilteredDeals(deals);
     } else {

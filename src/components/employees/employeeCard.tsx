@@ -8,7 +8,6 @@ import { useContext } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
-import { set } from "zod";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -65,7 +64,7 @@ export function EmployeeCardDragged({
   const onClickAction = () => {
     if (employee.rows[1]) {
       const dealIdsWithoutSuffix = employee.rows.slice(1).map((row) => {
-        const dealId = row.toString();
+        const dealId = String(row);
         return dealId.split("/")[0];
       });
       setDealIds(

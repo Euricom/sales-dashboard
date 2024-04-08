@@ -7,7 +7,7 @@ import { Trash } from "lucide-react";
 import { DropContext } from "~/contexts/dndProvider";
 
 export default function DealsColumn({ isDeals }: { isDeals: boolean }) {
-  const { deals } = useContext(DealContext);
+  const { filteredDeals } = useContext(DealContext);
   const { isDeletable } = useContext(DropContext);
 
   if (!filteredDeals) {
@@ -21,7 +21,7 @@ export default function DealsColumn({ isDeals }: { isDeals: boolean }) {
         </div>
       )}
       <CardContent className="flex flex-col gap-2 ">
-        {deals?.map((dealObject: SimplifiedDeal, index) => (
+        {filteredDeals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
       </CardContent>
