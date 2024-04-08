@@ -1,14 +1,30 @@
-import { DropdownMenuSeparator } from "@radix-ui/react-dropdown-menu";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "./dropdown-menu";
-import { Plus, LogOut, RotateCcw } from "lucide-react";
+import { Plus, LogOut, RotateCcw, Expand, Shrink } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useState } from "react";
 
 export function ActionMenu() {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleRefresh = () => {
+    window.location.replace(window.location.href);
+  };
+
+  const handleFullscreen = () => {
+    if (document.fullscreenElement) {
+      exitFullscreen();
+      setIsFullscreen(false);
+    } else {
+      enterFullScreen();
+      setIsFullscreen(true);
+    }
+  };
+
   return (
     <div className="absolute bottom-6 right-9 z-20">
       <DropdownMenu>
@@ -22,16 +38,21 @@ export function ActionMenu() {
         >
           <DropdownMenuItem
             className="w-fit border-primary border-2 bg-white cursor-pointer"
-            onClick={() => void signOut()}
+            onClick={handleFullscreen}
           >
-            <LogOut />
+            {isFullscreen ? <Shrink /> : <Expand />}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="w-fit border-primary border-2 bg-white cursor-pointer"
             onClick={handleRefresh}
           >
             <RotateCcw />
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="w-fit border-primary border-2 bg-white cursor-pointer"
+            onClick={() => void signOut()}
+          >
+            <LogOut />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -39,6 +60,20 @@ export function ActionMenu() {
   );
 }
 
-const handleRefresh = () => {
-  window.location.replace(window.location.href);
+const enterFullScreen = () => {
+  document.documentElement
+    .requestFullscreen()
+    .then()
+    .catch((err) => {
+      console.error("Failed to enter fullscreen", err);
+    });
+};
+
+const exitFullscreen = () => {
+  document
+    .exitFullscreen()
+    .then()
+    .catch((err) => {
+      console.error("Failed to enter fullscreen", err);
+    });
 };
