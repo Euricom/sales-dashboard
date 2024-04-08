@@ -130,12 +130,14 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
       };
   }));
 
-  // remove null values and sort the deals by estimated_closing_date
-  return simplifiedDeals
+  const sortedDeals = simplifiedDeals
   .filter(deal => deal !== null)
   .sort((a, b) => {
     if (!a.estimated_closing_date) return 1; // a is put last
     if (!b.estimated_closing_date) return -1; // b is put last
-    return new Date(b.estimated_closing_date).getTime() - new Date(a.estimated_closing_date).getTime();
+    return new Date(a.estimated_closing_date).getTime() - new Date(b.estimated_closing_date).getTime();
   }) as SimplifiedDealArray;
+
+  // remove null values and sort the deals by estimated_closing_date
+  return sortedDeals;
 }
