@@ -66,7 +66,9 @@ export function EmployeeCardDragged({
         const dealId = row.toString();
         return dealId.split("/")[0];
       });
-      setDealIds(dealIdsWithoutSuffix.filter((id) => id !== undefined));
+      setDealIds(
+        dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
+      );
       setEmployeeId(employee.employeeId);
     }
   };
