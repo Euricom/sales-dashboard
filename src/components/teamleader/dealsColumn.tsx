@@ -10,10 +10,9 @@ export default function DealsColumn({ isDeals }: { isDeals: boolean }) {
   const { deals } = useContext(DealContext);
   const { isDeletable } = useContext(DropContext);
 
-  if (!deals) {
+  if (!filteredDeals) {
     return <div>is loading...</div>;
   }
-
   return (
     <>
       {isDeals && isDeletable && (

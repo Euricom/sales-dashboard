@@ -12,6 +12,10 @@ type EmployeeContextType = {
     starter: DraggableEmployee[];
     openForNewOpportunities: DraggableEmployee[];
   };
+  employeeId: string;
+  setEmployeeId: React.Dispatch<React.SetStateAction<string>>;
+  isFiltering: boolean;
+  setFiltering: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -29,6 +33,7 @@ export const EmployeeContextProvider: React.FC<
   const employeesData = api.mongodb.getEmployees.useQuery();
   // Instantiatein itial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isFiltering, setFiltering] = useState(false);
 
   useEffect(() => {
     if (employeesData) {
@@ -73,6 +78,8 @@ export const EmployeeContextProvider: React.FC<
     openForNewOpportunities: DraggableEmployee[];
   }>(sortEmployeesData(draggableEmployees));
 
+  const [employeeId, setEmployeeId] = useState<string>("");
+
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
@@ -84,6 +91,10 @@ export const EmployeeContextProvider: React.FC<
         setEmployees: setEmployees,
         draggableEmployees: draggableEmployees,
         sortedData: sortedData,
+        employeeId: employeeId,
+        setEmployeeId: setEmployeeId,
+        isFiltering: isFiltering,
+        setFiltering: setFiltering,
       }}
     >
       {children}

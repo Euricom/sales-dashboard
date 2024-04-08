@@ -7,6 +7,7 @@ import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 import { ActionMenu } from "~/components/ui/actionMenu";
+import { FilterButton } from "~/components/employees/filterEmployeesButton";
 
 export default function Home() {
   const { status } = useSession();
@@ -37,6 +38,7 @@ export default function Home() {
                     <CollapsibleCardGroups />
                     <div className="flex gap-4 w-full items-start justify-end my-4">
                       <ActionMenu />
+                      <FilterButton />
                     </div>
                   </div>
                   <div className="flex w-full h-full my-2 gap-4">

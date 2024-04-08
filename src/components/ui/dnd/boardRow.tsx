@@ -9,7 +9,7 @@ import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const { activeDealId, activeColumnId } = useContext(DropContext);
-  const { draggableEmployees } = useContext(EmployeeContext);
+  const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
       .filter((draggableEmployee) => {
@@ -51,7 +51,11 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   return (
     <Card ref={setNodeRef} style={style} variant={variant} size={"row"}>
       <CardContent className={`flex gap-2 ${isHeader ? "" : "flex-wrap"}`}>
-        <SortableContext items={dragItemIds} id={row.rowId}>
+        <SortableContext
+          items={dragItemIds}
+          id={row.rowId}
+          disabled={isFiltering}
+        >
           {draggableEmployeesInThisRow?.map((e) => (
             <EmployeeCardDragged
               key={e.dragId}

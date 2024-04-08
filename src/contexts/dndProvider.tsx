@@ -53,7 +53,7 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { deals, dealPhases, isLoading } = useContext(DealContext);
+  const { filteredDeals, dealPhases, isLoading } = useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
   const [rows, setRows] = useState<Row[]>([]);
@@ -65,9 +65,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
   // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
   useEffect(() => {
-    if (!isLoading && deals) {
+    if (!isLoading && filteredDeals) {
       setRows(
-        deals
+        filteredDeals
           .flatMap((deal) =>
             dealPhases.map((phase) => ({
               rowId: `${deal.id}/${phase.name}`,
@@ -78,7 +78,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           }),
       );
     }
-  }, [isLoading, deals, dealPhases]);
+  }, [isLoading, filteredDeals, dealPhases]);
 
   return (
     <DropContext.Provider
