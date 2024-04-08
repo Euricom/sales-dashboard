@@ -10,6 +10,7 @@ import { EmployeeContext } from "~/contexts/employeesProvider";
 export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const { activeDealId, activeColumnId } = useContext(DropContext);
   const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
+
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
       .filter((draggableEmployee) => {
@@ -54,7 +55,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
         <SortableContext
           items={dragItemIds}
           id={row.rowId}
-          disabled={isFiltering}
+          disabled={isFiltering && isHeader}
         >
           {draggableEmployeesInThisRow?.map((e) => (
             <EmployeeCardDragged
