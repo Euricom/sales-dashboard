@@ -45,6 +45,9 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           : "column"
       }
       size={isMogelijkheden ? "columnMogelijkheden" : "column"}
+      className={
+        activeColumnId && isDeals ? "outline-red-500 outline outline-2 " : ""
+      }
     >
       <CardHeader className="pb-1.5">
         <CardTitle>
