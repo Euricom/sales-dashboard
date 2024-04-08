@@ -19,7 +19,7 @@ export function EmployeeCardDragged({
     (employee) =>
       employee.employeeId ===
       (draggableEmployee?.dragId as string)?.split("_")[0],
-  )!;
+  );
 
   const {
     setNodeRef,
@@ -53,6 +53,8 @@ export function EmployeeCardDragged({
       },
     },
   });
+
+  if (!employee) return null;
 
   return (
     <Card
@@ -88,20 +90,14 @@ export function EmployeeCardDragged({
             />
           </div>
         )}
-        <div className="absolute bottom-0 bg-white/75 text-black w-full rounded-b-2xl">
-          {titleToInitials(employee.fields.Title)}
+        <div className="absolute bottom-0 bg-white/75 text-black w-full rounded-b-2xl truncate px-1.5">
+          {firstNameOnly(employee.fields.Title)}
         </div>
       </Button>
     </Card>
   );
 }
 
-const titleToInitials = (title?: string) => {
-  if (!title) return "N/A";
-  if (title.split("").length <= 2) return title;
-
-  return title
-    .split(" ")
-    .map((string) => string[0])
-    .join("");
+const firstNameOnly = (name: string) => {
+  return name.split(" ")[0];
 };

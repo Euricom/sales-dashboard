@@ -111,8 +111,9 @@ const sortEmployeesData = (draggableEmployees: DraggableEmployee[]) => {
       starter.push(draggableEmployee);
     } else if (status === "endOfContract") {
       endOfContract.push(draggableEmployee);
+    } else {
+      openForNewOpportunities.push(draggableEmployee);
     }
-    openForNewOpportunities.push(draggableEmployee);
   });
 
   return { bench, endOfContract, starter, openForNewOpportunities };
