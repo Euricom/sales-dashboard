@@ -7,7 +7,9 @@ const cardVariants = cva("text-white rounded-14", {
   variants: {
     variant: {
       default: "bg-secondary",
-      column: "flex flex-col bg-secondary",
+      column: "flex flex-col bg-secondary relative",
+      columnHighlight:
+        "flex flex-col bg-primary outline outline-white-400 outline-offset-1",
       deal: "flex justify-between bg-primary gap-3",
       row: "bg-none",
       dealhighlight:
@@ -21,10 +23,9 @@ const cardVariants = cva("text-white rounded-14", {
       columnMogelijkheden: "h-full w-[376px] tv:w-[752px] px-4 py-2", // Breedte is voor 4 employees, +1 employee is 76px extra en 152px extra voor tv
       deal: "h-15 w-full min-w-72 pl-3 pr-1.5 py-1.5",
       row: "h-15 w-[344 px]",
-      employee:
-        "h-15 w-15 justify-center items-center bg-white text-black rounded-14",
+      employee: "h-15 w-15 justify-center items-center bg-white text-black ",
       employeeDragged:
-        "h-15 w-20 justify-center items-center bg-white text-black rounded-14",
+        "h-15 w-20 justify-center items-center bg-white text-black",
     },
   },
   defaultVariants: {

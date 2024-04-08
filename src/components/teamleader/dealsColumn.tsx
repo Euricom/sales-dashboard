@@ -1,26 +1,31 @@
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import DealCard from "./dealCard";
-import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
+import { CardContent } from "../ui/card";
 import { useContext } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
+import { Trash } from "lucide-react";
+import { DropContext } from "~/contexts/dndProvider";
 
-export default function DealsColumn() {
+export default function DealsColumn({ isDeals }: { isDeals: boolean }) {
   const { deals } = useContext(DealContext);
+  const { isDeletable } = useContext(DropContext);
 
   if (!deals) {
     return <div>is loading...</div>;
   }
 
   return (
-    <Card variant="column">
-      <CardHeader className="pb-1.5">
-        <CardTitle>Deals</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
+    <>
+      {isDeals && isDeletable && (
+        <div className="flex justify-center items-center absolute z-10 bg-red-500 h-full w-full left-0 top-0 rounded-14 transition-all">
+          <Trash size={64} />
+        </div>
+      )}
+      <CardContent className="flex flex-col gap-2 ">
         {deals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
       </CardContent>
-    </Card>
+    </>
   );
 }

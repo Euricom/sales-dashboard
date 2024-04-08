@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
-import type { Row, Employee } from "~/lib/types";
+import type { Row, DraggableEmployee, Employee } from "~/lib/types";
 import {
   DndContext,
   type DragEndEvent,
@@ -13,22 +13,33 @@ import {
   TouchSensor,
   MouseSensor,
   type UniqueIdentifier,
+  type Active,
+  type Over,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
-import { EmployeeCardDragged } from "~/components/employees/employeeCardDragged";
-import { v4 as uuidv4 } from "uuid";
+import { EmployeeCardDragged } from "~/components/employees/employeeCard";
 import { DealContext } from "~/contexts/dealsProvider";
+import { EmployeeContext } from "./employeesProvider";
+import { api } from "~/utils/api";
 
 type DropContextType = {
-  rowsMogelijkheden: Row[];
-  employeesMogelijkheden: Employee[];
-  activeDealId: UniqueIdentifier | null;
+  rows: Row[];
+  activeDealId: UniqueIdentifier | undefined;
+  activeColumnId: UniqueIdentifier | undefined;
+  isDeletable: boolean;
 };
 
 type Sortable = {
   containerId: string;
   index: number;
   items: string[];
+};
+
+type CurrentData = {
+  sortable: Sortable;
+  type: string;
+  employee: Employee;
+  dragId: UniqueIdentifier;
+  row?: Row;
 };
 
 export const DropContext = createContext<DropContextType>(
@@ -42,43 +53,40 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { deals, isLoading } = useContext(DealContext);
-  const [rowsMogelijkheden, setRowsMogelijkheden] = useState<Row[]>([]);
-  const [employeesMogelijkheden, setEmployeesMogelijkheden] = useState<
-    Employee[]
-  >([]);
-
+  const { deals, dealPhases, isLoading } = useContext(DealContext);
+  const { employees, setEmployees, draggableEmployees } =
+    useContext(EmployeeContext);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [activeEmployee, setActiveEmployee] = useState<DraggableEmployee>();
+  const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
+  const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
+  const [isDeletable, setIsDeletable] = useState<boolean>(false);
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  const employeeUpdator = api.mongodb.updateEmployee.useMutation();
+  // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
   useEffect(() => {
     if (!isLoading && deals) {
-      const initializedRows = deals.map((deal) => ({
-        rowId: deal.id,
-        dragItemIds: employeesMogelijkheden
-          ? employeesMogelijkheden
-              .filter((e) => e.rowId === deal.id)
-              .map((e) => e.dragItemId)
-          : [],
-        employeeIds: employeesMogelijkheden
-          ? employeesMogelijkheden
-              .filter((e) => e.rowId === deal.id)
-              .map((e) => e.employeeId)
-          : [],
-      }));
-      setRowsMogelijkheden(initializedRows);
+      setRows(
+        deals
+          .flatMap((deal) =>
+            dealPhases.map((phase) => ({
+              rowId: `${deal.id}/${phase.name}`,
+            })),
+          )
+          .concat({
+            rowId: "0",
+          }),
+      );
     }
-  }, [isLoading, deals, employeesMogelijkheden]);
-
-  const [activeEmployee, setActiveEmployee] = useState<Employee | null>(null);
-  const [activeDealId, setActiveDealId] = useState<UniqueIdentifier | null>(
-    null,
-  );
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  }, [isLoading, deals, dealPhases]);
 
   return (
     <DropContext.Provider
       value={{
-        rowsMogelijkheden: rowsMogelijkheden,
-        employeesMogelijkheden: employeesMogelijkheden,
+        rows: rows,
         activeDealId: activeDealId,
+        activeColumnId: activeColumnId,
+        isDeletable: isDeletable,
       }}
     >
       <DndContext
@@ -92,7 +100,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           createPortal(
             <DragOverlay>
               {activeEmployee && (
-                <EmployeeCardDragged employee={activeEmployee} isOverlay />
+                <EmployeeCardDragged
+                  draggableEmployee={activeEmployee}
+                  isOverlay
+                />
               )}
             </DragOverlay>,
             document.body,
@@ -102,196 +113,269 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   );
 
   function onDragStart(event: DragStartEvent) {
-    if (!hasDraggableData(event.active)) return;
-    const data = event.active.data.current;
-    const employee = data?.employee as Employee;
+    const { activeData, activeRowId } = extractEventData(event.active);
+    if (!hasDraggableData(event.active) || !activeData) return;
+
+    activeRowId === "0" ? setIsDeletable(false) : setIsDeletable(true); // check if card is from header
+
     //This serves as a preview of the place where the employee is being dragged
-    if (data?.type === "Employee") {
-      setActiveEmployee(employee);
+    if (activeData.type === "Employee" && activeData.employee) {
+      setActiveEmployee(
+        draggableEmployees.find((draggableEmployee) => {
+          return draggableEmployee.dragId === activeData.dragId;
+        }) ?? undefined,
+      );
       return;
     }
-  }
-
-  function onDragEnd(event: DragEndEvent) {
-    setActiveEmployee(null);
-    setActiveDealId(null);
-
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    if (!hasDraggableData(active) || activeId === overId || !rowsMogelijkheden)
-      return;
-
-    // Dropping new Employee over the Board from Header
-    const activeData = active.data.current;
-    const overData = over.data.current;
-    const isActiveAnEmployee = activeData?.type === "Employee";
-    const isOverAnEmployee = overData?.type === "Employee";
-
-    if (!isActiveAnEmployee) return;
-
-    const activeEmployee = activeData.employee as Employee;
-    if (activeEmployee.rowId === "0") {
-      if (isOverAnEmployee) {
-        appendEmployee(
-          activeEmployee,
-          (overData.sortable as Sortable).containerId,
-        );
-        return;
-      }
-      appendEmployee(activeEmployee, overId as string);
-    }
-
-    // Moving Employee within the same row after dragging from a different row
-    setRowsMogelijkheden((rowsMogelijkheden) => {
-      if (!rowsMogelijkheden) return [];
-      const activeRowIndex = rowsMogelijkheden.findIndex(
-        (row) => row.rowId === activeId,
-      );
-
-      const overRowIndex = rowsMogelijkheden.findIndex(
-        (row) => row.rowId === overId,
-      );
-
-      if (activeRowIndex === -1 || overRowIndex === -1)
-        return rowsMogelijkheden;
-
-      return arrayMove(rowsMogelijkheden, activeRowIndex, overRowIndex);
-    });
   }
 
   function onDragOver(event: DragOverEvent) {
-    const { active, over } = event;
-    if (!over) return;
+    if (
+      !event.over ||
+      !hasDraggableData(event.active) ||
+      !hasDraggableData(event.over)
+    )
+      return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const { activeId, overId, overData } = extractEventData(
+      event.active,
+      event.over,
+    );
 
-    if (activeId === overId) return;
+    if (!overId) return;
 
-    if (!hasDraggableData(active) || !hasDraggableData(over)) return;
-
-    const activeData = active.data.current;
-    const overData = over.data.current;
-
-    const isActiveAnEmployee = activeData?.type === "Employee";
-    const isOverAnEmployee = overData?.type === "Employee";
-
-    // setActiveDealId(over.id); // styling the row where the employee is being dragged when over item is a row
-
-    if (!isActiveAnEmployee) return;
-
-    // if (alreadyInRow(overId as string, activeData.employee as Employee)) return;
-    // Dropping an Employee over another Employee
-    if (isActiveAnEmployee && isOverAnEmployee) {
-      if (over.data.current)
-        setActiveDealId((over.data.current.sortable as Sortable).containerId); // styling the row where the employee is being dragged when over item is an employee
-      // console.log(over);
-      setEmployeesMogelijkheden((employees) => {
-        if (employees.length === 0) return [];
-        const activeIndex = employees.findIndex(
-          (e) => e.dragItemId === activeId,
-        );
-        const overIndex = employees.findIndex((e) => e.dragItemId === overId);
-        const activeEmployee = employees[activeIndex];
-        const overEmployee = employees[overIndex];
-
-        if (
-          activeEmployee &&
-          overEmployee &&
-          activeEmployee.rowId !== overEmployee.rowId &&
-          !alreadyInRow(overEmployee.rowId, activeEmployee)
-        ) {
-          activeEmployee.rowId = overEmployee.rowId;
-          return arrayMove(employees, activeIndex, overIndex - 1);
-        }
-
-        if (
-          activeEmployee &&
-          overEmployee &&
-          !alreadyInRow(overEmployee?.rowId, activeEmployee)
-        )
-          return arrayMove(employees, activeIndex, overIndex);
-
-        return employees;
-      });
-      setRowsMogelijkheden((rows) => {
-        if (!rows) return [];
-        // Active Row
-        const activeRow = rows.find((row) => row.rowId === activeId);
-        // Active DragItem Index & Over DragItem Index In Active Row
-        const activeDragItemIndex = activeRow?.dragItemIds.findIndex(
-          (dragItemId) => dragItemId === activeId,
-        );
-        const overDragItemIndex = activeRow?.dragItemIds.findIndex(
-          (dragItemId) => dragItemId === overId,
-        );
-        if (!activeDragItemIndex || !overDragItemIndex) return rows;
-        const activeEmployee = employeesMogelijkheden.find(
-          (employee) => employee.dragItemId === activeId,
-        );
-        const overEmployee = employeesMogelijkheden.find(
-          (employee) => employee.dragItemId === overId,
-        );
-        if (
-          activeEmployee &&
-          overEmployee &&
-          activeEmployee.rowId !== overEmployee.rowId
-        ) {
-          activeEmployee.rowId = overEmployee.rowId;
-          return arrayMove(rows, activeDragItemIndex, overDragItemIndex - 1);
-        }
-
-        return arrayMove(rows, activeDragItemIndex, overDragItemIndex);
-      });
-    }
-
-    const isOverARow = overData?.type === "Row";
-
-    // Dropping an Employee over a Row
-    if (isActiveAnEmployee && isOverARow) {
-      setEmployeesMogelijkheden((employees) => {
-        setActiveDealId(overId);
-        const activeIndex = employees.findIndex(
-          (e) => e.dragItemId === activeId,
-        );
-        const activeEmployee = employees[activeIndex];
-        // Check if the Employee is already in the Row and if not, move it to the Row
-        if (activeEmployee && !alreadyInRow(overId as string, activeEmployee)) {
-          activeEmployee.rowId = overId as string;
-          return arrayMove(employees, activeIndex, activeIndex);
-        }
-        return employees;
-      });
-    }
-
-    // Dropping a new Employee over the Board
-    if (activeEmployee?.rowId === "0" && isOverARow) {
-      setActiveDealId(overId);
-    }
-  }
-
-  // append new employee to employeeMogelijkheden from EmployeeCardGroup
-  function appendEmployee(activeEmployee: Employee, rowId: string) {
-    if (alreadyInRow(rowId, activeEmployee)) {
+    // Highlight the correct column and/or deal
+    if (overData?.type === "Employee") {
+      setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
+      if (overId.split("/")[1] === "Mogelijkheden") {
+        setActiveDealId(overId.split("_")[1] as UniqueIdentifier);
+      } else {
+        setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
+      }
       return;
     }
-    const newEmployee = {
-      ...activeEmployee,
-      dragItemId: uuidv4(),
-      rowId,
-    };
-    setEmployeesMogelijkheden((employees) => [...employees, newEmployee]);
+    if (overData?.type === "Row") {
+      setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
+      if (overId.split("/")[1] === "Mogelijkheden") {
+        setActiveDealId(overId);
+      } else {
+        setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
+      }
+      return;
+    }
+    setActiveColumnId(overId);
   }
 
-  function alreadyInRow(rowId: string, employee: Employee) {
-    const row = rowsMogelijkheden.find((row) => row.rowId === rowId);
-    if (!row) return false;
-    return row.employeeIds.some(
-      (employeeId) => employeeId === employee.employeeId,
-    );
+  function onDragEnd(event: DragEndEvent) {
+    setActiveDealId(undefined);
+    setActiveColumnId(undefined);
+    setIsDeletable(false);
+
+    if (!event.over || !hasDraggableData(event.active)) return;
+    const { activeId, overId, overData, activeRowId, overRowId } =
+      extractEventData(event.active, event.over);
+
+    if (activeId === overId || !activeEmployee) return;
+    const isOverAnEmployee = overData?.type === "Employee";
+
+    // Dropping Employee over the deals column
+    if (activeColumnId === "Deals" && activeRowId !== "0") {
+      removeEmployee(activeEmployee, activeRowId);
+    }
+
+    // Dragging Employee between rows
+    if (activeRowId !== "0") {
+      if (!activeRowId || activeRowId === overRowId) {
+        return;
+      }
+      // Dropping Employee over another Employee in a different row
+      if (isOverAnEmployee) {
+        moveEmployee(
+          activeEmployee,
+          activeRowId,
+          overData.sortable.containerId,
+        );
+      } else {
+        // Dropping Employee over a different row
+        moveEmployee(activeEmployee, activeRowId, overId);
+      }
+    }
+
+    // Dropping new Employee over the Board from Header
+    if (activeRowId === "0" && activeColumnId === "Mogelijkheden") {
+      if (isOverAnEmployee) {
+        appendEmployee(activeEmployee, overData.sortable.containerId);
+      } else {
+        appendEmployee(activeEmployee, overId);
+      }
+    }
+
+    setActiveEmployee(undefined);
+  }
+
+  // Helper function to append an employee to a given row
+  function appendEmployee(draggableEmployee: DraggableEmployee, rowId: string) {
+    if (!isAllowedToDrop(draggableEmployee, rowId)) {
+      return;
+    }
+
+    const employee = findEmployee(draggableEmployee);
+    if (!employee) return;
+
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          emp.rows.push(rowId);
+          updateEmployee(emp); // Update the employee in the database
+          return emp;
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
+  }
+
+  // Helper function to remove an employee from a row
+  function removeEmployee(draggableEmployee: DraggableEmployee, rowId: string) {
+    const employee = findEmployee(draggableEmployee);
+    if (!employee) return;
+
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          emp.rows = emp.rows.filter((row) => row !== rowId);
+          updateEmployee(emp); // Update the employee in the database
+          return emp;
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
+  }
+
+  // Helper function to move an employee from one row to another
+  function moveEmployee(
+    draggableEmployee: DraggableEmployee,
+    initialRowId: string,
+    targetId: string,
+  ) {
+    // Check if move is allowed
+    if (!isAllowedToDrop(draggableEmployee, targetId)) {
+      // Handle special cases
+      const newTargetId = handleSpecialCases(initialRowId, targetId);
+      if (!newTargetId) return;
+      targetId = newTargetId;
+    }
+
+    // Find the employee to move
+    const employee = findEmployee(draggableEmployee);
+    if (!employee) return;
+
+    // Update the employees state
+    setEmployees((employees) => {
+      const updatedEmployees = employees.map((emp) => {
+        if (emp.employeeId === employee.employeeId) {
+          const indexOfRowToRemove = emp.rows.indexOf(initialRowId);
+
+          if (indexOfRowToRemove !== -1) {
+            const updatedRows = [...emp.rows]; // Create a copy of rows array
+            updatedRows.splice(indexOfRowToRemove, 1, targetId); // Replace the row
+            emp.rows = updatedRows;
+            updateEmployee(emp); // Update the employee in the database
+            return emp;
+          }
+        }
+        return emp;
+      });
+      return updatedEmployees;
+    });
+  }
+
+  // Helper function to check if an employee is already in a row
+  function isAllowedToDrop(
+    draggableEmployee: DraggableEmployee,
+    rowIdToCompare: string,
+  ) {
+    const employee = employees.find((employee) => {
+      return (
+        employee.employeeId ===
+        (draggableEmployee.dragId as string).split("_")[0]
+      );
+    });
+
+    const initialRowId = (draggableEmployee.dragId as string)
+      .split("_")[1]
+      ?.split("/")[0];
+    const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
+
+    // Inside the same row
+    if (initialRowId === targetRowId) return true;
+
+    // Not in the same row and row does not exist in employee.rows
+    if (
+      initialRowId !== targetRowId &&
+      !employee?.rows.some(
+        (row) => (row as string).split("/")[0] === targetRowId,
+      )
+    ) {
+      // Is the target row a "Mogelijkheden" row?
+      if (targetRowStatus === "Mogelijkheden") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Helper function to extract id's and data objects from active and over
+  function extractEventData(active?: Active, over?: Over) {
+    const activeId = active?.id as string;
+    const activeData = active?.data.current as CurrentData;
+    const overId = over?.id as string;
+    const overData = over?.data.current as CurrentData;
+    const activeRowId = activeData?.sortable.containerId;
+    const overRowId = overData?.row?.rowId;
+
+    return { activeId, activeData, overId, overData, activeRowId, overRowId };
+  }
+
+  // Helper function to find an employee by dragId
+  function findEmployee(employeeToFind: DraggableEmployee) {
+    return employees.find((employee) => {
+      return (
+        employee.employeeId === (employeeToFind.dragId as string).split("_")[0]
+      );
+    });
+  }
+
+  // Helper function to handle special cases
+  function handleSpecialCases(initialRowId: string, targetId: string) {
+    // If the target row is not the correct row to drop the employee
+    // Check if the target is a column not equal to the initial column
+    if (
+      ["Voorgesteld", "Interview", "Weerhouden", "Niet-Weerhouden"].includes(
+        targetId,
+      ) &&
+      initialRowId.split("/")[1] !== targetId
+    ) {
+      return (targetId = initialRowId.split("/")[0] + "/" + targetId);
+    } else if (
+      targetId.split("/")[1] !== initialRowId.split("/")[1] &&
+      targetId !== "Mogelijkheden" &&
+      initialRowId.split("/")[1] !== targetId
+    ) {
+      return (targetId =
+        initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);
+    } else {
+      return;
+    }
+  }
+
+  function updateEmployee(employee: Employee) {
+    employeeUpdator.mutate({
+      employee: {
+        employeeId: employee.employeeId,
+        rows: employee.rows as string[],
+      },
+    });
   }
 };

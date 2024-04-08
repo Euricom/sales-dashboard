@@ -1,45 +1,65 @@
 import { useContext, useMemo } from "react";
 import { BoardRow } from "./boardRow";
-import { SortableContext } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 import { DropContext } from "~/contexts/dndProvider";
+import { CSS } from "@dnd-kit/utilities";
+import DealsColumn from "~/components/teamleader/dealsColumn";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
-  const { rowsMogelijkheden, employeesMogelijkheden } = useContext(DropContext);
+  const { rows, activeColumnId } = useContext(DropContext);
+  const filteredRows = rows
+    .filter((row) => row.rowId !== "0")
+    .filter((row) => row.rowId.split("/")[1] === columnTitle);
   const rowsIds = useMemo(
-    () => rowsMogelijkheden.map((row) => row.rowId),
-    [rowsMogelijkheden],
+    () => filteredRows.map((row) => row.rowId),
+    [filteredRows],
   );
-  if (
-    !employeesMogelijkheden ||
-    !rowsMogelijkheden ||
-    rowsMogelijkheden.length === 0
-  )
-    return null;
+
+  const { setNodeRef, transform, transition } = useSortable({
+    id: columnTitle,
+    data: {
+      type: "Column",
+      filteredRows,
+    },
+  });
+
+  const style = {
+    transition,
+    transform: CSS.Translate.toString(transform),
+  };
+
+  const isDeals = columnTitle === "Deals";
+  const isMogelijkheden = columnTitle === "Mogelijkheden";
+  const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
+
+  if (!filteredRows || (filteredRows.length === 0 && !isDeals)) return null;
 
   return (
     <Card
-      variant={"column"}
-      size={columnTitle === "Mogelijkheden" ? "columnMogelijkheden" : "column"}
+      ref={setNodeRef}
+      style={style}
+      variant={
+        activeColumnId === columnTitle && !isMogelijkheden && !isDeals
+          ? "columnHighlight"
+          : "column"
+      }
+      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
     >
       <CardHeader className="pb-1.5">
-        <CardTitle>{columnTitle}</CardTitle>
+        <CardTitle>
+          {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        {columnTitle === "Mogelijkheden" && (
+      {isDeals ? (
+        <DealsColumn isDeals={activeColumnId === "Deals" ? true : false} />
+      ) : (
+        <CardContent className="flex flex-col gap-2">
           <SortableContext items={rowsIds}>
-            {rowsMogelijkheden?.map((row) => (
-              <BoardRow
-                key={row.rowId}
-                row={row}
-                employees={employeesMogelijkheden?.filter(
-                  (employee) => employee.rowId === row.rowId,
-                )}
-              />
-            ))}
+            {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
           </SortableContext>
-        )}
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

@@ -6,7 +6,11 @@ import { useContext } from "react";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
   const { activeDealId } = useContext(DropContext);
-  const variant = deal.id === activeDealId ? "dealhighlight" : "deal";
+
+  const variant =
+    deal.id === (activeDealId as string)?.split("/")[0]
+      ? "dealhighlight"
+      : "deal";
 
   return (
     <Card variant={variant} size={"deal"}>

@@ -157,19 +157,9 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  // callbacks: {
-  //   session: ({ session, user }) => ({
-  //     ...session,
-  //     user: {
-  //       ...session.user,
-  //       id: user.id,
-  //     },
-  //   }),
-  // },
   session: {
     maxAge: 1 * 24 * 60 * 60, // 24h - should be the same as the refresh token lifetime
   },
-  // adapter: PrismaAdapter(db),
   providers: [
     TeamleaderProvider({
       accessTokenUrl: env.TEAMLEADER_ACCESS_TOKEN_URL ?? "",
@@ -206,9 +196,8 @@ export const authOptions: NextAuthOptions = {
       }
       // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
-        //console.log(token,"token in auth.ts callbacks")
         return token;
-      }     
+      }
       return await refreshAccessToken(token);
     },
     session({ session, token }) {
@@ -233,7 +222,6 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
-  // adapter: PrismaAdapter(db) as Adapter,
 };
 
 /**
