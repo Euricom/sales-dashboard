@@ -8,7 +8,7 @@ import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 import { useState } from "react";
-import { ListFilter } from "lucide-react";
+import { ListFilter, X } from "lucide-react";
 
 export default function Home() {
   const { status } = useSession();
@@ -30,7 +30,7 @@ export default function Home() {
 
     return (
       <Button size={"sm"} onClick={handleFilter} title="filterButton">
-        <ListFilter />
+        {isFiltering ? <X /> : <ListFilter />}
       </Button>
     );
   };

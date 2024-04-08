@@ -8,13 +8,14 @@ import { useContext } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
+import { set } from "zod";
 
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
   isHeader,
 }: EmployeeCardProps) {
-  const { employees } = useContext(EmployeeContext);
+  const { employees, employeeId, setEmployeeId } = useContext(EmployeeContext);
   const { setDealIds } = useContext(DealContext);
 
   const employee = employees.find(
@@ -53,8 +54,22 @@ export function EmployeeCardDragged({
         over: "ring-2 opacity-30",
         overlay: "ring-2 ring-primary",
       },
+      filtering: {
+        filtering: "rounded-[18px] border-2 border-primary border-[#00ff00]",
+      },
     },
   });
+
+  const onClickAction = () => {
+    if (employee.rows[1]) {
+      const dealIdsWithoutSuffix = employee.rows.slice(1).map((row) => {
+        const dealId = row.toString();
+        return dealId.split("/")[0];
+      });
+      setDealIds(dealIdsWithoutSuffix.filter((id) => id !== undefined));
+      setEmployeeId(employee.employeeId);
+    }
+  };
 
   return (
     <Card
@@ -70,16 +85,14 @@ export function EmployeeCardDragged({
       }
       className={variants({
         dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
+        filtering:
+          employee.employeeId === employeeId && isHeader
+            ? "filtering"
+            : undefined,
       })}
       size={isHeader ? "employee" : "employeeDragged"}
       onClick={() => {
-        if (employee.rows[1]) {
-          const dealIdsWithoutSuffix = employee.rows.slice(1).map((row) => {
-            const dealId = row.toString();
-            return dealId.split("/")[0];
-          });
-          setDealIds(dealIdsWithoutSuffix.filter((id) => id !== undefined));
-        }
+        onClickAction();
       }}
     >
       <Button

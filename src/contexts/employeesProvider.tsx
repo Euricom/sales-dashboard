@@ -12,6 +12,8 @@ type EmployeeContextType = {
     starter: DraggableEmployee[];
     openForNewOpportunities: DraggableEmployee[];
   };
+  employeeId: string;
+  setEmployeeId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -73,6 +75,8 @@ export const EmployeeContextProvider: React.FC<
     openForNewOpportunities: DraggableEmployee[];
   }>(sortEmployeesData(draggableEmployees));
 
+  const [employeeId, setEmployeeId] = useState<string>("");
+
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
@@ -84,6 +88,8 @@ export const EmployeeContextProvider: React.FC<
         setEmployees: setEmployees,
         draggableEmployees: draggableEmployees,
         sortedData: sortedData,
+        employeeId: employeeId,
+        setEmployeeId: setEmployeeId,
       }}
     >
       {children}
