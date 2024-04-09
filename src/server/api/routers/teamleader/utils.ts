@@ -53,7 +53,7 @@ export const getDeals = async (accessToken: string) => {
       },
       body: JSON.stringify({
         filter: {
-          phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
+          status: ["open"],
         },
         page: {
           size: 20,
@@ -73,6 +73,20 @@ export const getDeals = async (accessToken: string) => {
     }
 };
 
+const getCompanyLogo = async (url : string) => {
+  if (url === "") return null;
+  // for some reason the url for this site isn't correct in Teamleader. As soon as it's fixed this will be deleted.
+  if (url === "http:\/\/www.district09.be") url = "http://www.district09.gent";
+
+  const response = await fetch(` http://www.google.com/s2/favicons?domain_url=${url}&sz=64`);
+  // er zijn nog een aantal favicon urls die niet kunnen worden opgehaald.
+  // die ga ik hier proberen ophalen op een andere manier.
+  if (!response.ok) {
+    return `${url}/favicon.ico`
+  }
+  return response.url;
+};
+
 export const simplifyDeals = async (dealsObject: dataObject): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== 'object') {
       console.error('Data, users, or companies is not an object or is null/undefined');
@@ -88,6 +102,7 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
       console.error('deals, users or companies is not an array');
       return [];
   }
+  
 
   const simplifiedDeals = await Promise.all(deals.map(async (deal: Deal) => {
       const dealId: string = deal.id;
@@ -108,6 +123,8 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
           console.log(`Phase not found for deal ID: ${dealId}`);
       }
 
+      const favicon = await getCompanyLogo(company?.website ?? "");
+
       // return the simplified deal
       return {
         id: deal.id,
@@ -120,6 +137,7 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
         company: {
             id: company?.id ?? null,
             name: company?.name ?? null,
+            logo_url: favicon,
         },
         PM: {
             id: user?.id ?? null,
