@@ -60,8 +60,19 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeEmployee, setActiveEmployee] = useState<DraggableEmployee>();
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
-  const [isDeletable, setIsDeletable] = useState<boolean>(false);
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  const [isDeletable, setDeletable] = useState<boolean>(false);
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+  );
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
   // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
   useEffect(() => {
@@ -116,7 +127,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const { activeData, activeRowId } = extractEventData(event.active);
     if (!hasDraggableData(event.active) || !activeData) return;
 
-    activeRowId === "0" ? setIsDeletable(false) : setIsDeletable(true); // check if card is from header
+    activeRowId === "0" ? setDeletable(false) : setDeletable(true); // check if card is from header
 
     //This serves as a preview of the place where the employee is being dragged
     if (activeData.type === "Employee" && activeData.employee) {
@@ -147,8 +158,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // Highlight the correct column and/or deal
     if (overData?.type === "Employee") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (overId.split("/")[1] === "Mogelijkheden") {
-        setActiveDealId(overId.split("_")[1] as UniqueIdentifier);
+      if (["Mogelijkheden", "Voorgesteld"].includes(overId.split("/")[1]!)) {
+        return;
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
       }
@@ -156,7 +167,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
     if (overData?.type === "Row") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (overId.split("/")[1] === "Mogelijkheden") {
+      if (["Mogelijkheden", "Voorgesteld"].includes(overId.split("/")[1]!)) {
         setActiveDealId(overId);
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
@@ -169,17 +180,17 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   function onDragEnd(event: DragEndEvent) {
     setActiveDealId(undefined);
     setActiveColumnId(undefined);
-    setIsDeletable(false);
+    setDeletable(false);
 
     if (!event.over || !hasDraggableData(event.active)) return;
     const { activeId, overId, overData, activeRowId, overRowId } =
       extractEventData(event.active, event.over);
 
-    if (activeId === overId || !activeEmployee) return;
+    if (activeId === overId || !activeEmployee || activeColumnId === "Deals")
+      return;
     const isOverAnEmployee = overData?.type === "Employee";
-
-    // Dropping Employee over the deals column
-    if (activeColumnId === "Deals" && activeRowId !== "0") {
+    // Dropping Employee over the header
+    if (activeRowId !== "0" && overId.split("_")[1] === "0") {
       removeEmployee(activeEmployee, activeRowId);
     }
 
@@ -202,7 +213,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
 
     // Dropping new Employee over the Board from Header
-    if (activeRowId === "0" && activeColumnId === "Mogelijkheden") {
+    if (
+      activeRowId === "0" &&
+      ["Mogelijkheden", "Voorgesteld"].includes(activeColumnId as string)
+    ) {
       if (isOverAnEmployee) {
         appendEmployee(activeEmployee, overData.sortable.containerId);
       } else {
@@ -215,12 +229,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
   // Helper function to append an employee to a given row
   function appendEmployee(draggableEmployee: DraggableEmployee, rowId: string) {
-    if (!isAllowedToDrop(draggableEmployee, rowId)) {
-      return;
-    }
-
     const employee = findEmployee(draggableEmployee);
     if (!employee) return;
+
+    if (!isAllowedToDrop(draggableEmployee, rowId, employee)) {
+      return;
+    }
 
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
@@ -259,17 +273,17 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     initialRowId: string,
     targetId: string,
   ) {
+    // Find the employee to move
+    const employee = findEmployee(draggableEmployee);
+    if (!employee) return;
+
     // Check if move is allowed
-    if (!isAllowedToDrop(draggableEmployee, targetId)) {
+    if (!isAllowedToDrop(draggableEmployee, targetId, employee)) {
       // Handle special cases
       const newTargetId = handleSpecialCases(initialRowId, targetId);
       if (!newTargetId) return;
       targetId = newTargetId;
     }
-
-    // Find the employee to move
-    const employee = findEmployee(draggableEmployee);
-    if (!employee) return;
 
     // Update the employees state
     setEmployees((employees) => {
@@ -295,14 +309,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   function isAllowedToDrop(
     draggableEmployee: DraggableEmployee,
     rowIdToCompare: string,
+    employee: Employee,
   ) {
-    const employee = employees.find((employee) => {
-      return (
-        employee.employeeId ===
-        (draggableEmployee.dragId as string).split("_")[0]
-      );
-    });
-
     const initialRowId = (draggableEmployee.dragId as string)
       .split("_")[1]
       ?.split("/")[0];
@@ -319,7 +327,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       )
     ) {
       // Is the target row a "Mogelijkheden" row?
-      if (targetRowStatus === "Mogelijkheden") {
+      if (
+        targetRowStatus === "Mogelijkheden" ||
+        targetRowStatus === "Voorgesteld"
+      ) {
         return true;
       }
     }
@@ -352,16 +363,14 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // If the target row is not the correct row to drop the employee
     // Check if the target is a column not equal to the initial column
     if (
-      ["Voorgesteld", "Interview", "Weerhouden", "Niet-Weerhouden"].includes(
-        targetId,
-      ) &&
+      ["Interview", "Weerhouden", "Niet-Weerhouden"].includes(targetId) &&
       initialRowId.split("/")[1] !== targetId
     ) {
       return (targetId = initialRowId.split("/")[0] + "/" + targetId);
     } else if (
       targetId.split("/")[1] !== initialRowId.split("/")[1] &&
-      targetId !== "Mogelijkheden" &&
-      initialRowId.split("/")[1] !== targetId
+      initialRowId.split("/")[1] !== targetId &&
+      (targetId !== "Mogelijkheden" || "Voorgesteld")
     ) {
       return (targetId =
         initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);

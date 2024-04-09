@@ -31,7 +31,7 @@ export const EmployeeContextProvider: React.FC<
 > = ({ children }) => {
   // GET employees data
   const employeesData = api.mongodb.getEmployees.useQuery();
-  // Instantiatein itial employees
+  // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
 

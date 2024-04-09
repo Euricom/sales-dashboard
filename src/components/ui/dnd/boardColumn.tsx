@@ -31,6 +31,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
 
   const isDeals = columnTitle === "Deals";
   const isMogelijkheden = columnTitle === "Mogelijkheden";
+  const isVoorgesteld = columnTitle === "Voorgesteld";
   const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
 
   if (!filteredRows || (filteredRows.length === 0 && !isDeals)) return null;
@@ -40,22 +41,22 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       ref={setNodeRef}
       style={style}
       variant={
-        activeColumnId === columnTitle && !isMogelijkheden && !isDeals
+        activeColumnId === columnTitle &&
+        !isMogelijkheden &&
+        !isDeals &&
+        !isVoorgesteld
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
-      className={
-        activeColumnId && isDeals ? "outline-red-500 outline outline-2 " : ""
-      }
+      size={isMogelijkheden || isVoorgesteld ? "columnMogelijkheden" : "column"}
     >
-      <CardHeader className="pb-1.5">
+      <CardHeader className="pb-1.5 truncate w-full">
         <CardTitle>
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
         </CardTitle>
       </CardHeader>
       {isDeals ? (
-        <DealsColumn isDeals={activeColumnId === "Deals" ? true : false} />
+        <DealsColumn />
       ) : (
         <CardContent className="flex flex-col gap-2">
           <SortableContext items={rowsIds}>

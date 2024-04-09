@@ -31,8 +31,12 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     (draggableEmployee) => draggableEmployee.dragId,
   );
   const isMogelijkheden = activeColumnId === "Mogelijkheden";
+  const isVoorgesteld = activeColumnId === "Voorgesteld";
+
   const variant =
-    row.rowId === activeDealId && !isHeader && isMogelijkheden
+    row.rowId === activeDealId &&
+    !isHeader &&
+    (isMogelijkheden || isVoorgesteld)
       ? "rowhighlight"
       : "row";
 
