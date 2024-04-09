@@ -49,9 +49,6 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           : "column"
       }
       size={isMogelijkheden || isVoorgesteld ? "columnMogelijkheden" : "column"}
-      className={
-        activeColumnId && isDeals ? "outline-red-500 outline outline-2 " : ""
-      }
     >
       <CardHeader className="pb-1.5 truncate w-full">
         <CardTitle>
@@ -59,7 +56,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
         </CardTitle>
       </CardHeader>
       {isDeals ? (
-        <DealsColumn isDeals={activeColumnId === "Deals" ? true : false} />
+        <DealsColumn />
       ) : (
         <CardContent className="flex flex-col gap-2">
           <SortableContext items={rowsIds}>

@@ -60,7 +60,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeEmployee, setActiveEmployee] = useState<DraggableEmployee>();
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
-  const [isDeletable, setIsDeletable] = useState<boolean>(false);
+  const [isDeletable, setDeletable] = useState<boolean>(false);
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -127,7 +127,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const { activeData, activeRowId } = extractEventData(event.active);
     if (!hasDraggableData(event.active) || !activeData) return;
 
-    activeRowId === "0" ? setIsDeletable(false) : setIsDeletable(true); // check if card is from header
+    activeRowId === "0" ? setDeletable(false) : setDeletable(true); // check if card is from header
 
     //This serves as a preview of the place where the employee is being dragged
     if (activeData.type === "Employee" && activeData.employee) {
@@ -180,17 +180,17 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   function onDragEnd(event: DragEndEvent) {
     setActiveDealId(undefined);
     setActiveColumnId(undefined);
-    setIsDeletable(false);
+    setDeletable(false);
 
     if (!event.over || !hasDraggableData(event.active)) return;
     const { activeId, overId, overData, activeRowId, overRowId } =
       extractEventData(event.active, event.over);
 
-    if (activeId === overId || !activeEmployee) return;
+    if (activeId === overId || !activeEmployee || activeColumnId === "Deals")
+      return;
     const isOverAnEmployee = overData?.type === "Employee";
-
-    // Dropping Employee over the deals column
-    if (activeColumnId === "Deals" && activeRowId !== "0") {
+    // Dropping Employee over the header
+    if (activeRowId !== "0" && overId.split("_")[1] === "0") {
       removeEmployee(activeEmployee, activeRowId);
     }
 
@@ -372,7 +372,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       initialRowId.split("/")[1] !== targetId &&
       (targetId !== "Mogelijkheden" || "Voorgesteld")
     ) {
-      console.log("HERE");
       return (targetId =
         initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);
     } else {

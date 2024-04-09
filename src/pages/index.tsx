@@ -1,4 +1,4 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import { Button } from "~/components/ui/button";
 import { BoardColumn } from "~/components/ui/dnd/boardColumn";
@@ -7,7 +7,6 @@ import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 import { ActionMenu } from "~/components/ui/actionMenu";
-import { FilterButton } from "~/components/employees/filterEmployeesButton";
 
 export default function Home() {
   const { status } = useSession();
@@ -34,9 +33,7 @@ export default function Home() {
             <DropContextProvider>
               <main className="flex min-h-screen justify-between mx-4">
                 <div className="flex flex-col w-full">
-                  <div className="flex">
-                    <CollapsibleCardGroups />
-                  </div>
+                  <CollapsibleCardGroups />
                   <div className="flex w-full h-full my-2 gap-4">
                     <BoardColumn columnTitle="Deals" />
                     <BoardColumn columnTitle="Mogelijkheden" />
