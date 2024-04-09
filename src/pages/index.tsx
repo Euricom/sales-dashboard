@@ -36,10 +36,6 @@ export default function Home() {
                 <div className="flex flex-col w-full">
                   <div className="flex">
                     <CollapsibleCardGroups />
-                    <div className="flex gap-4 w-full items-start justify-end my-4">
-                      <ActionMenu />
-                      <FilterButton />
-                    </div>
                   </div>
                   <div className="flex w-full h-full my-2 gap-4">
                     <BoardColumn columnTitle="Deals" />
@@ -50,6 +46,7 @@ export default function Home() {
                     <BoardColumn columnTitle="Niet-Weerhouden" />
                   </div>
                 </div>
+                <ActionMenu />
               </main>
             </DropContextProvider>
           </EmployeeContextProvider>

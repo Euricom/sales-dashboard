@@ -61,7 +61,18 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const [isDeletable, setIsDeletable] = useState<boolean>(false);
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+  );
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
   // Make the initial empty rows, one row for each deal AND phase. There is always one initial row for the header (rowId="0")
   useEffect(() => {
