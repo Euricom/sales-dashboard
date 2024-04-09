@@ -31,6 +31,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
 
   const isDeals = columnTitle === "Deals";
   const isMogelijkheden = columnTitle === "Mogelijkheden";
+  const isVoorgesteld = columnTitle === "Voorgesteld";
   const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
 
   if (!filteredRows || (filteredRows.length === 0 && !isDeals)) return null;
@@ -40,11 +41,14 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       ref={setNodeRef}
       style={style}
       variant={
-        activeColumnId === columnTitle && !isMogelijkheden && !isDeals
+        activeColumnId === columnTitle &&
+        !isMogelijkheden &&
+        !isDeals &&
+        !isVoorgesteld
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
+      size={isMogelijkheden || isVoorgesteld ? "columnMogelijkheden" : "column"}
       className={
         activeColumnId && isDeals ? "outline-red-500 outline outline-2 " : ""
       }
