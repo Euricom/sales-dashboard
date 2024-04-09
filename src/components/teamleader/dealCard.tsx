@@ -3,6 +3,8 @@ import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
 import Image from "next/image";
 import { DropContext } from "~/contexts/dndProvider";
 import { useContext } from "react";
+import { url } from "inspector";
+import CompanyLogo from "./companyLogo";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
   const { activeDealId } = useContext(DropContext);
@@ -16,6 +18,34 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
     <Card variant={variant} size={"deal"}>
       <CardHeader>
         <CardTitle className="text-sm font-medium flex max-w-32 items-center">
+          {deal.company.logo_url ? (
+            // hier checken we of de url via de google api komt
+            deal.company.logo_url.startsWith(
+              `https://t${0 | 1 | 2 | 3}.gstatic.com/faviconV2`,
+            ) ? (
+              <CompanyLogo url={deal.company.logo_url} />
+            ) : (
+              // dit gebruiken we als de google api niet werkt, omdat /favicon.ico niet werkt met next/image moeten we de default gebruiken.
+              <div className="bg-white rounded-[0.438rem] mr-2 min-w-[1.875rem] min-h-[1.875rem] flex items-center justify-center">
+                <div
+                  style={{ width: "1.5rem", height: "1.5rem", display: "flex" }}
+                >
+                  <img
+                    src={deal.company.logo_url}
+                    alt="example.com icon"
+                    className="rounded-[0.438rem]"
+                  />
+                </div>
+              </div>
+            )
+          ) : (
+            // dit is de placeholder image
+            <CompanyLogo
+              url={
+                "https://www.svgrepo.com/show/508699/landscape-placeholder.svg"
+              }
+            />
+          )}
           {trimDealTitle(deal.company.name)}
         </CardTitle>
       </CardHeader>

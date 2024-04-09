@@ -168,6 +168,7 @@ export interface SimplifiedDeal {
   company: {
     id: string;
     name: string;
+    logo_url: string | null;
   };
   PM: {
     id: string;
