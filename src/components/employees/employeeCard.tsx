@@ -106,13 +106,22 @@ export function EmployeeCardDragged({
       >
         {isHeader ? null : (
           <div className="absolute top-[5px] w-full flex flex-row">
-            <Image
-              src={`data:image/jpeg;base64,${employee.fields.avatar}`}
-              alt={employee.fields.Title}
-              className="ml-2 object-cover rounded-14"
-              width={30}
-              height={30}
-            />
+            <div
+              style={{ width: "1.875rem", height: "1.875rem", display: "flex" }}
+            >
+              <Image
+                src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+                alt={employee.fields.Title}
+                className="ml-2 object-cover rounded-14"
+                width={30}
+                height={30}
+                style={{
+                  objectFit: "contain",
+                  width: "100%",
+                  height: "100%",
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="absolute bottom-0 bg-white/75 text-black w-full rounded-b-14 truncate px-1.5">

@@ -51,7 +51,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
 
   return (
     <Card ref={setNodeRef} style={style} variant={variant} size={"row"}>
-      <CardContent className={`flex gap-2 ${isHeader ? "" : "flex-wrap"}`}>
+      <CardContent className={`flex gap-2 h-15 ${isHeader ? "" : "flex-wrap"}`}>
         <SortableContext
           items={dragItemIds}
           id={row.rowId}

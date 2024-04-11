@@ -32,7 +32,7 @@ export default function Home() {
         <DealContextProvider>
           <EmployeeContextProvider>
             <DropContextProvider>
-              <main className="flex min-h-screen justify-between mx-4">
+              <main className="flex justify-between mx-4 ">
                 <div className="flex flex-col w-full">
                   <div className="flex">
                     <CollapsibleCardGroups />
@@ -41,7 +41,7 @@ export default function Home() {
                       <FilterButton />
                     </div>
                   </div>
-                  <div className="flex w-full h-full my-2 gap-4">
+                  <div className="flex w-full  my-2 gap-4 h-[calc(100vh-6.375rem)]">
                     <BoardColumn columnTitle="Deals" />
                     <BoardColumn columnTitle="Mogelijkheden" />
                     <BoardColumn columnTitle="Voorgesteld" />

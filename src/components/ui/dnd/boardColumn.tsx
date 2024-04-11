@@ -1,10 +1,11 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BoardRow } from "./boardRow";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import DealsColumn from "~/components/teamleader/dealsColumn";
+import { useSyncScroll } from "~/hooks/useSyncScroll";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
@@ -15,6 +16,40 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     () => filteredRows.map((row) => row.rowId),
     [filteredRows],
   );
+
+  // this is for the scroll functionality
+  const columnsRef = useRef<NodeListOf<HTMLDivElement> | null>(null);
+  const [columns, setColumns] = useState<NodeListOf<HTMLDivElement> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    // Function to update columnsRef and columns state variable
+    const updateColumns = () => {
+      const newColumns: NodeListOf<HTMLDivElement> =
+        document.querySelectorAll(".column");
+      columnsRef.current = newColumns;
+      setColumns(newColumns);
+    };
+
+    // Initial update
+    updateColumns();
+
+    // Listen for DOM changes and update columns
+    const observer = new MutationObserver(updateColumns);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+
+    return () => {
+      observer.disconnect(); // Clean up the observer
+    };
+  }, []);
+
+  // Call useSyncScroll hook with columns
+  useSyncScroll(columns);
 
   const { setNodeRef, transform, transition } = useSortable({
     id: columnTitle,
@@ -57,7 +92,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       {isDeals ? (
         <DealsColumn isDeals={activeColumnId === "Deals" ? true : false} />
       ) : (
-        <CardContent className="flex flex-col gap-2">
+        <CardContent className="flex flex-col gap-2 column no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
           <SortableContext items={rowsIds}>
             {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
           </SortableContext>
