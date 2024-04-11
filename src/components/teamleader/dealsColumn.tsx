@@ -11,12 +11,12 @@ export default function DealsColumn() {
     return <div>is loading...</div>;
   }
   return (
-    <>
-      <CardContent className="flex flex-col gap-2 ">
+    <div>
+      <CardContent className="column flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
         {filteredDeals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
       </CardContent>
-    </>
+    </div>
   );
 }

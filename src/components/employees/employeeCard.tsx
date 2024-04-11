@@ -126,14 +126,23 @@ export function EmployeeCardDragged({
         className="w-full h-full relative"
       >
         {isHeader ? null : (
-          <div className="w-full h-full flex flex-row items-start mt-2">
-            <Image
-              src={`data:image/jpeg;base64,${employee.fields.avatar}`}
-              alt={employee.fields.Title}
-              className="rounded-14"
-              width={30}
-              height={30}
-            />
+          <div className="absolute top-[5px] w-full flex flex-row">
+            <div
+              style={{ width: "1.875rem", height: "1.875rem", display: "flex" }}
+            >
+              <Image
+                src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+                alt={employee.fields.Title}
+                className="ml-2 object-cover rounded-14"
+                width={30}
+                height={30}
+                style={{
+                  objectFit: "contain",
+                  width: "100%",
+                  height: "100%",
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="absolute z-10 bottom-0 bg-white/75 text-black w-full rounded-b-14 truncate px-1.5">
