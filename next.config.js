@@ -22,6 +22,8 @@ const config = {
       {
         protocol: "https",
         hostname: "**",
+        port: "",
+        pathname: "**",
       },
     ],
   },

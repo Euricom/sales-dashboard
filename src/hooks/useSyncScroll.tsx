@@ -3,7 +3,6 @@ import { useEffect } from "react";
 export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
   useEffect(() => {
     if (!columns) return;
-    console.log("I get fired");
 
     function syncScroll(event: WheelEvent) {
       const currentColumn = event.currentTarget as HTMLDivElement;
