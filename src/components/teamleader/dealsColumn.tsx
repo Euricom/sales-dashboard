@@ -12,7 +12,7 @@ export default function DealsColumn() {
   }
   return (
     <div>
-      <CardContent className="column flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
+      <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
         {filteredDeals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
