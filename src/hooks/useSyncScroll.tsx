@@ -4,28 +4,27 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
   useEffect(() => {
     if (!columns) return;
 
-    function syncScroll(event: WheelEvent) {
-      const currentColumn = event.currentTarget as HTMLDivElement;
+    function syncScroll(event: Event) {
+      const targetColumn = event.currentTarget as HTMLDivElement;
       const scrollRatio =
-        currentColumn.scrollTop /
-        (currentColumn.scrollHeight - currentColumn.clientHeight);
+        targetColumn.scrollTop /
+        (targetColumn.scrollHeight - targetColumn.clientHeight);
 
       columns?.forEach((column) => {
-        if (column !== currentColumn) {
-          const scrollAmount =
+        if (column !== targetColumn) {
+          column.scrollTop =
             scrollRatio * (column.scrollHeight - column.clientHeight);
-          column.scrollTop = scrollAmount;
         }
       });
     }
 
     columns.forEach((column) => {
-      column.addEventListener("wheel", syncScroll);
+      column.addEventListener("scroll", syncScroll);
     });
 
     return () => {
       columns.forEach((column) => {
-        column.removeEventListener("wheel", syncScroll);
+        column.removeEventListener("scroll", syncScroll);
       });
     };
   }, [columns]);

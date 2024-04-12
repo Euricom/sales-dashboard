@@ -6,7 +6,6 @@ import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
-import { useSyncDragScroll } from "~/hooks/useSyncScrollDrag";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
@@ -51,7 +50,6 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
 
   // Call useSyncScroll hook with columns
   useSyncScroll(columns);
-  useSyncDragScroll(columns);
 
   const { setNodeRef, transform, transition } = useSortable({
     id: columnTitle,
