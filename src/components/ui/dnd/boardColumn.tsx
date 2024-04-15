@@ -6,9 +6,11 @@ import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
+import { DealContext } from "~/contexts/dealsProvider";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
+  const { isLoading } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
     .filter((row) => row.rowId.split("/")[1] === columnTitle);
@@ -69,7 +71,36 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const isVoorgesteld = columnTitle === "Voorgesteld";
   const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
 
-  if (!filteredRows || (filteredRows.length === 0 && !isDeals)) return null;
+  // Skeleton for loading state
+  if (isLoading ?? !filteredRows ?? filteredRows.length === 0) {
+    if (isDeals) {
+      return (
+        <div className="basis-[24.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
+          <div className="pb-1.5 text-white">{columnTitle}</div>
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-[3.75rem] bg-primary rounded-14 animate-pulse"
+              ></div>
+            ))}
+          </div>
+        </div>
+      );
+    } else if (isMogelijkheden || isVoorgesteld) {
+      return (
+        <div className="w-[23.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
+          <div className="pb-1.5 text-white">{columnTitle}</div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex-1 bg-secondary rounded-14 animate-pulse  px-4 py-2">
+          <div className="pb-1.5 text-white">{columnTitle}</div>
+        </div>
+      );
+    }
+  }
 
   return (
     <Card

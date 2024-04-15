@@ -16,6 +16,7 @@ type EmployeeContextType = {
   setEmployeeId: React.Dispatch<React.SetStateAction<string>>;
   isFiltering: boolean;
   setFiltering: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading?: boolean;
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -30,7 +31,8 @@ export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
   // GET employees data
-  const employeesData = api.mongodb.getEmployees.useQuery();
+  const { data: employeesData, isLoading } =
+    api.mongodb.getEmployees.useQuery();
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
@@ -38,7 +40,7 @@ export const EmployeeContextProvider: React.FC<
   useEffect(() => {
     if (employeesData) {
       // GET employees from MongoDB
-      setEmployees(employeesData.data as Employee[]);
+      setEmployees(employeesData as Employee[]);
     }
   }, [employeesData]);
 
@@ -95,6 +97,7 @@ export const EmployeeContextProvider: React.FC<
         setEmployeeId: setEmployeeId,
         isFiltering: isFiltering,
         setFiltering: setFiltering,
+        isLoading: isLoading,
       }}
     >
       {children}
