@@ -63,3 +63,10 @@ export type DealPhase = {
   // id: string;
   name: string;
 };
+
+export type PM = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
+};
