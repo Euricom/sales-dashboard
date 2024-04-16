@@ -56,7 +56,7 @@ export const getDeals = async (accessToken: string) => {
           status: ["open"],
         },
         page: {
-          size: 20,
+          size: 100,
         },
         include: "lead.customer,responsible_user,current_phase",
       }),
