@@ -73,18 +73,14 @@ export const getDeals = async (accessToken: string) => {
         page: {
           size: 100,
         },
-        include: "lead.customer,responsible_user,current_phase",
+        include: "lead.customer,responsible_user",
       }),
-    };
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        console.error("Failed to fetch data from Teamleader");
-      }
-      const data = (await response.json()) as dataObject;
-      return data;
-    } catch (error) {
-      console.error('Error in getDeals:',error);
+    }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from Teamleader");
     }
     const data = (await response.json()) as dataObject;
     return data;
