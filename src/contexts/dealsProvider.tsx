@@ -9,8 +9,9 @@ type DealContextType = {
   isLoading?: boolean;
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
+  PMId: string | undefined;
   setPMId: React.Dispatch<React.SetStateAction<string>>;
-  AllPMs: PM[] | null | undefined;
+  getAllPMs: PM[] | undefined | null;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -48,6 +49,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     },
   ];
 
+  // Filtering deals
   const [dealIds, setDealIds] = useState<string[]>([]);
   const [PMId, setPMId] = useState<string>("");
   const [filteredDeals, setFilteredDeals] = useState<
@@ -55,36 +57,30 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   >(deals ?? null);
 
   useEffect(() => {
-    setFilteredDeals(
-      (() => {
-        if (dealIds.length === 0 && PMId === "") {
-          return deals;
-        } else {
-          let filteredDeals = deals;
-          if (dealIds.length >= 1) {
-            filteredDeals = filteredDeals?.filter((deal) =>
-              dealIds.includes(deal.id),
-            );
+    setFilteredDeals(() => {
+      if (dealIds.length === 0 && PMId === "") {
+        return deals;
+      } else {
+        return deals?.filter((deal) => {
+          if (dealIds.length >= 1 && PMId !== "") {
+            return dealIds.includes(deal.id) && deal.PM.id === PMId;
+          } else if (dealIds.length >= 1) {
+            return dealIds.includes(deal.id);
+          } else {
+            return deal.PM.id === PMId;
           }
-          if (PMId !== "") {
-            filteredDeals = filteredDeals?.filter(
-              (deal) => deal.PM.id === PMId,
-            );
-          }
-          return filteredDeals;
-        }
-      })(),
-    );
+        });
+      }
+    });
   }, [dealIds, PMId, deals]);
 
-  const getAllPMs = () => {
+  const getAllPMs = useMemo(() => {
     return deals
       ?.map((deal) => deal.PM)
       .filter(
         (pm, index, self) => index === self.findIndex((t) => t.id === pm.id),
       );
-  };
-  const AllPMs = getAllPMs();
+  }, [deals]);
 
   return (
     <DealContext.Provider
@@ -94,8 +90,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         isLoading: isLoading,
         filteredDeals,
         setDealIds,
+        PMId,
         setPMId,
-        AllPMs,
+        getAllPMs,
       }}
     >
       {children}

@@ -1,11 +1,10 @@
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
-import Image from "next/image";
 import { DropContext } from "~/contexts/dndProvider";
 import { useContext } from "react";
 import CompanyLogo from "./companyLogo";
 import afkortingen from "~/lib/Afkortingen.json";
-import { PmAvatar } from "./PMFields";
+import { PmAvatar } from "./pmAvatar";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
   const { activeDealId } = useContext(DropContext);
@@ -60,7 +59,7 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
           ) : (
             <div>no date</div>
           )}
-          <PmAvatar pm={deal.PM} />
+          <PmAvatar pm={deal.PM} size={24} />
         </div>
       </CardContent>
     </Card>

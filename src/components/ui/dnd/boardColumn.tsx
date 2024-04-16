@@ -6,13 +6,10 @@ import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
-import { Filter, FilterX } from "lucide-react";
-import { DealContext } from "~/contexts/dealsProvider";
-import PMFields from "~/components/teamleader/PMFields";
+import { FilterMenu } from "../filterMenu";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
-  const { setPMId } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
     .filter((row) => row.rowId.split("/")[1] === columnTitle);
@@ -26,13 +23,6 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const [columns, setColumns] = useState<NodeListOf<HTMLDivElement> | null>(
     null,
   );
-
-  const [visibleDropdown, setVisibleDropdown] = useState(false);
-  const filterDeals = () => {
-    setVisibleDropdown(!visibleDropdown);
-
-    return null;
-  };
 
   useEffect(() => {
     // Function to update columnsRef and columns state variable
@@ -99,24 +89,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       <CardHeader className="pb-1.5 truncate w-full">
         <CardTitle className="flex flex-row justify-between w-full">
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
-          {isDeals ? (
-            <>
-              <div onClick={filterDeals}>
-                <Filter />
-              </div>
-              {visibleDropdown ? (
-                <div className="absolute z-50 h-fit -right-96 w-[22.938rem]  rounded-[0.875rem] bg-[#445F63] p-2 flex flex-col gap-2 border border-1 border-white">
-                  <div className="flex flex-row justify-between w-full ">
-                    Filter
-                    <FilterX onClick={() => setPMId("")} />
-                  </div>
-                  <div>
-                    <PMFields />
-                  </div>
-                </div>
-              ) : null}
-            </>
-          ) : null}
+          {isDeals ? <FilterMenu /> : null}
         </CardTitle>
       </CardHeader>
       {isDeals ? (
