@@ -66,15 +66,10 @@ export const getDeals = async (accessToken: string) => {
       filter: {
         status: ["open"],
       },
-      body: JSON.stringify({
-        filter: {
-          status: ["open"],
-        },
-        page: {
-          size: 100,
-        },
-        include: "lead.customer,responsible_user",
-      }),
+      page: {
+        size: 100,
+      },
+      include: "lead.customer,responsible_user,current_phase",
     }),
   };
   try {
@@ -119,7 +114,7 @@ export const simplifyDeals = async (
   const users = dealsObject.included.user;
   const companies = dealsObject.included.company;
   const phases = dealsObject.included.dealPhase;
-  console.log(dealsObject);
+
   if (
     !Array.isArray(deals) ||
     !Array.isArray(users) ||
