@@ -190,7 +190,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       return;
     const isOverAnEmployee = overData?.type === "Employee";
     // Dropping Employee over the header
-    if (activeRowId !== "0" && overId.split("_")[1] === "0") {
+    if (
+      (activeRowId !== "0" && overId.split("_")[1] === "0") ||
+      (overId === "0" && activeRowId !== "0")
+    ) {
       removeEmployee(activeEmployee, activeRowId);
     }
 

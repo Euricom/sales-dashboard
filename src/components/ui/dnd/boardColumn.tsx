@@ -87,7 +87,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           </div>
         </div>
       );
-    } else if (isMogelijkheden || isVoorgesteld) {
+    } else if (isMogelijkheden) {
       return (
         <div className="w-[23.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
           <div className="pb-1.5 text-white">{columnTitle}</div>
@@ -96,7 +96,9 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     } else {
       return (
         <div className="flex-1 bg-secondary rounded-14 animate-pulse  px-4 py-2">
-          <div className="pb-1.5 text-white">{columnTitle}</div>
+          <div className="pb-1.5 text-white">
+            {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
+          </div>
         </div>
       );
     }
@@ -114,10 +116,10 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden || isVoorgesteld ? "columnMogelijkheden" : "column"}
+      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
     >
-      <CardHeader className="pb-1.5 truncate w-full">
-        <CardTitle>
+      <CardHeader>
+        <CardTitle className="pb-1.5 truncate">
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
         </CardTitle>
       </CardHeader>

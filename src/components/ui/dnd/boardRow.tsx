@@ -41,7 +41,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       : "row";
 
   const { setNodeRef, transform, transition } = useSortable({
-    id: row.rowId,
+    id: rowStatus ? `${row.rowId}_${rowStatus}` : row.rowId,
     data: {
       type: "Row",
       row,
