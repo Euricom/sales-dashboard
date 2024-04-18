@@ -190,17 +190,19 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     if (activeId === overId || !activeEmployee || activeColumnId === "Deals")
       return;
     const isOverAnEmployee = overData?.type === "Employee";
-    // Dropping Employee over the header FROM Mogelijkheden
+
+    // Dropping Employee over the header FROM Mogelijkheden (Delete Employee)
     if (
       activeRowId !== "0" &&
       overId.split("_")[1] === "0" &&
-      activeColumnId === "Mogelijkheden"
+      (event.active.id as string).split("/")[1] === "Mogelijkheden"
     ) {
       removeEmployee(activeEmployee, activeRowId);
     }
 
-    // Dragging Employee between rows
+    // Dragging Employee between rows (Move employee)
     if (activeRowId !== "0") {
+      // Dropping Employee over the same row or over the header (Do nothing)
       if (!activeRowId || activeRowId === overRowId || overRowId === "0") {
         return;
       }
@@ -224,25 +226,34 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       activeRowId === "0" &&
       ["Mogelijkheden", "Voorgesteld"].includes(activeColumnId as string)
     ) {
+      const employee = findEmployee(activeEmployee);
+      if (!employee) return;
+
+      // over an employee
       if (isOverAnEmployee) {
-        appendEmployee(activeEmployee, overData.sortable.containerId);
+        if (
+          !isAllowedToDrop(
+            activeEmployee,
+            overData.sortable.containerId,
+            employee,
+          )
+        ) {
+          return;
+        }
+        appendEmployee(employee, overData.sortable.containerId);
       } else {
-        appendEmployee(activeEmployee, overId);
+        // over a row
+        if (!isAllowedToDrop(activeEmployee, overId, employee)) {
+          return;
+        }
+        appendEmployee(employee, overId);
       }
     }
-
     setActiveEmployee(undefined);
   }
 
   // Helper function to append an employee to a given row
-  function appendEmployee(draggableEmployee: DraggableEmployee, rowId: string) {
-    const employee = findEmployee(draggableEmployee);
-    if (!employee) return;
-
-    if (!isAllowedToDrop(draggableEmployee, rowId, employee)) {
-      return;
-    }
-
+  function appendEmployee(employee: Employee, rowId: string) {
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
@@ -283,7 +294,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // Find the employee to move
     const employee = findEmployee(draggableEmployee);
     if (!employee) return;
-
     // Check if move is allowed
     if (!isAllowedToDrop(draggableEmployee, targetId, employee)) {
       // Handle special cases
@@ -291,7 +301,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       if (!newTargetId) return;
       targetId = newTargetId;
     }
-
     // Update the employees state
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
@@ -318,13 +327,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     rowIdToCompare: string,
     employee: Employee,
   ) {
-    const initialRowId = (draggableEmployee.dragId as string)
-      .split("_")[1]
-      ?.split("/")[0];
+    const [initialRowId, initialRowStatus] =
+      (draggableEmployee.dragId as string).split("_")[1]?.split("/") ?? [];
     const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
-
     // Inside the same row
-    if (initialRowId === targetRowId) return true;
+    if (initialRowId === targetRowId && initialRowStatus === "Mogelijkheden")
+      return true;
 
     // Not in the same row and row does not exist in employee.rows
     if (
@@ -333,14 +341,16 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         (row) => (row as string).split("/")[0] === targetRowId,
       )
     ) {
-      // Is the target row a "Mogelijkheden" row?
+      // Can you drag into the target row from the header?
       if (
-        targetRowStatus === "Mogelijkheden" ||
-        targetRowStatus === "Voorgesteld"
+        (targetRowStatus === "Mogelijkheden" && initialRowId === "0") ||
+        (targetRowStatus === "Voorgesteld" &&
+          (initialRowStatus === "Mogelijkheden" || initialRowId === "0"))
       ) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -369,18 +379,31 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   function handleSpecialCases(initialRowId: string, targetId: string) {
     // If the target row is not the correct row to drop the employee
     // Check if the target is a column not equal to the initial column
+
+    // If the target is a column and not a row
+    //    AND the initial row is not the same as the target row
+    //    THEN return a new targetId with the same dealId but different status
     if (
-      ["Interview", "Weerhouden", "Niet-Weerhouden"].includes(targetId) &&
+      ["Interview", "Weerhouden", "Niet-Weerhouden", "Voorgesteld"].includes(
+        targetId,
+      ) &&
       initialRowId.split("/")[1] !== targetId
     ) {
       return (targetId = initialRowId.split("/")[0] + "/" + targetId);
-    } else if (
-      targetId.split("/")[1] !== initialRowId.split("/")[1] &&
-      initialRowId.split("/")[1] !== targetId &&
-      (targetId !== "Mogelijkheden" || "Voorgesteld")
+    }
+    // If the target is a row
+    //   AND the initial row status is not the same as the target row status
+    //   AND the target is not "Mogelijkheden" or "Voorgesteld"
+    else if (
+      (targetId.split("/")[1] ?? targetId) !== initialRowId.split("/")[1] &&
+      (targetId.split("/")[1] ?? targetId) !== "Mogelijkheden"
     ) {
       return (targetId =
         initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);
+    }
+    // If the target is a row in "Mogelijkheden"
+    else if ((targetId.split("/")[1] ?? targetId) === "Mogelijkheden") {
+      return (targetId = initialRowId);
     } else {
       return;
     }
