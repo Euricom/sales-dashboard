@@ -120,7 +120,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       size={isMogelijkheden ? "columnMogelijkheden" : "column"}
     >
       <CardHeader>
-        <CardTitle className="pb-1.5 truncate">
+        <CardTitle className="pb-1.5 truncate flex justify-between w-full">
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
           {isDeals ? <FilterMenu /> : null}
         </CardTitle>
