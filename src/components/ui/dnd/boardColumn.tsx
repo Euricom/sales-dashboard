@@ -6,6 +6,7 @@ import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
+import { FilterMenu } from "../filterMenu";
 import { DealContext } from "~/contexts/dealsProvider";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
@@ -121,6 +122,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       <CardHeader>
         <CardTitle className="pb-1.5 truncate">
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
+          {isDeals ? <FilterMenu /> : null}
         </CardTitle>
       </CardHeader>
       {isDeals ? (

@@ -1,10 +1,10 @@
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
-import Image from "next/image";
 import { DropContext } from "~/contexts/dndProvider";
 import { useContext } from "react";
 import CompanyLogo from "./companyLogo";
 import afkortingen from "~/lib/Afkortingen.json";
+import { PmAvatar } from "./pmAvatar";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
   const { activeDealId } = useContext(DropContext);
@@ -59,42 +59,7 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
           ) : (
             <div>no date</div>
           )}
-          <div>
-            {deal.PM.avatar_url ? (
-              <div
-                style={{ width: "1.5rem", height: "1.5rem", display: "flex" }}
-              >
-                <Image
-                  src={deal.PM.avatar_url}
-                  alt="User avatar"
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                  style={{
-                    objectFit: "contain",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                />
-              </div>
-            ) : (
-              <div
-                style={{ width: "1.5rem", height: "1.5rem", display: "flex" }}
-              >
-                <Image
-                  src="https://cdn0.iconfinder.com/data/icons/communication-456/24/account_profile_user_contact_person_avatar_placeholder-512.png"
-                  alt="User avatar"
-                  width={24}
-                  height={24}
-                  style={{
-                    objectFit: "contain",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <PmAvatar pm={deal.PM} size={24} />
         </div>
       </CardContent>
     </Card>
