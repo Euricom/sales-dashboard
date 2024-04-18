@@ -16,7 +16,7 @@ export const handleURLReceived = (
 ): string => {
   let code: string | null = null;
   // Extract the refresh token from the redirected URL
-  if (window.location.href != "http://localhost:3000/") {
+  if (window.location.href != env.NEXTAUTH_URL) {
     const urlParams = new URLSearchParams(window.location.href.split("?")[1]);
     code = urlParams.get("code") ?? "";
   }
