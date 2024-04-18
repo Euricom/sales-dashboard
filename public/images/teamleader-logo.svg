@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg2"
+   xml:space="preserve"
+   width="341.33334"
+   height="341.33334"
+   viewBox="0 0 341.33334 341.33334"
+   sodipodi:docname="teamleader.ai"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <defs id="defs6">
+      <linearGradient
+         x1="0"
+         y1="0"
+         x2="1"
+         y2="0"
+         gradientUnits="userSpaceOnUse"
+         gradientTransform="matrix(-52.475677,-27.259857,-27.259857,52.475693,240.86816,138.64355)"
+         spreadMethod="pad"
+         id="linearGradient30">
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="0"
+            id="stop22" />
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="0.379105"
+            id="stop24" />
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="0.685104"
+            id="stop26" />
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="1"
+            id="stop28" />
+      </linearGradient>
+      <linearGradient
+         x1="0"
+         y1="0"
+         x2="1"
+         y2="0"
+         gradientUnits="userSpaceOnUse"
+         gradientTransform="matrix(0,74.341827,74.341827,0,102.76514,54.616211)"
+         spreadMethod="pad"
+         id="linearGradient52">
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="0"
+            id="stop46" />
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="0.431107"
+            id="stop48" />
+         <stop
+            style="stop-opacity:1;stop-color:#ffffff"
+            offset="1"
+            id="stop50" />
+      </linearGradient>
+   </defs>
+   <sodipodi:namedview
+      id="namedview4"
+      pagecolor="#ffffff"
+      bordercolor="#666666"
+      borderopacity="1.0"
+      inkscape:pageshadow="2"
+      inkscape:pageopacity="0.0"
+      inkscape:pagecheckerboard="0" />
+   <g
+      id="g8"
+      inkscape:groupmode="layer"
+      inkscape:label="teamleader"
+      transform="matrix(1.3333333,0,0,-1.3333333,0,341.33333)">
+      <g id="g10">
+         <g id="g12">
+            <g id="g18">
+               <g id="g20">
+                  <path
+                     d="M 176.905,128.318 197.707,93.32 256,128.318 Z"
+                     style="fill:#ffffff;stroke:none"
+                     id="path32" />
+               </g>
+            </g>
+         </g>
+      </g>
+      <g id="g34">
+         <g id="g36">
+            <g id="g42">
+               <g id="g44">
+                  <path
+                     d="M 123.944,128.898 H 80.602 l 43.921,-74.169 h 0.406 v 74.169 z"
+                     style="fill:#ffffff;stroke:none"
+                     id="path54" />
+               </g>
+            </g>
+         </g>
+      </g>
+      <g
+         id="g56"
+         transform="translate(133.9688,53.8594)">
+         <path
+            d="M 0,0 63.738,39.461 0,148.281 Z"
+            style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+            id="path58" />
+      </g>
+      <g
+         id="g60"
+         transform="translate(0,128.3184)">
+         <path
+            d="M 0,0 H 124.929 V 73.184 Z"
+            style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+            id="path62" />
+      </g>
+   </g>
+</svg>

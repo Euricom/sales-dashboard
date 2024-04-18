@@ -1,23 +1,18 @@
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
-import { Button } from "~/components/ui/button";
 import { BoardColumn } from "~/components/ui/dnd/boardColumn";
 import { DropContextProvider } from "~/contexts/dndProvider";
 import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 import { ActionMenu } from "~/components/ui/actionMenu";
+import Login from "./login";
 
 export default function Home() {
   const { status } = useSession();
 
   if (status === "unauthenticated") {
-    return (
-      <div className="flex flex-col gap-4 justify-center items-center w-screen h-screen">
-        <h1>You are not signed in</h1>
-        <SignInButton />
-      </div>
-    );
+    return <Login />;
   }
 
   if (status === "authenticated") {
@@ -54,11 +49,3 @@ export default function Home() {
 
   return null;
 }
-
-const SignInButton = () => {
-  return (
-    <Button size={"sm"} onClick={() => void signIn()}>
-      Sign in
-    </Button>
-  );
-};
