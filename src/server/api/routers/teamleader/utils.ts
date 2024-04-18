@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase } from "./types";
+import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase, DealInfo } from "./types";
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
@@ -53,7 +53,10 @@ export const getDeals = async (accessToken: string) => {
       },
       body: JSON.stringify({
         filter: {
-          status: ["open"],
+          ids:  ["ebcc7d5f-d585-01de-9373-fb2c11879ee7"
+          ,"bad7b32f-2fcd-0d28-ba76-0a8221879ed5"
+          ,"7725d0fe-cc29-01e1-9a75-f74461879ec1"
+         ],
         },
         page: {
           size: 100,
@@ -158,4 +161,56 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
   }) as SimplifiedDealArray;
 
   return sortedDeals;
+}
+
+export const getDeal = async (accessToken: string, dealId: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.info`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: dealId,
+      include: "custom_fields.definition",
+    }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from Teamleader");
+    }
+    const data = (await response.json()) as DealInfo;
+    return data;
+  } catch (error) {
+    console.error('Error in getDeal:',error);
+  }
+};
+
+export const changeDeal = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
+  let isDuplicate = false;
+  const data = await getDeal(accessToken, dealId);
+  if (!data) return null;
+
+
+  const emailFieldId = data.included.customFieldDefinition.find((field) => field.label=== "E-mail consultant")?.id;
+
+  if (data.data.custom_fields) {
+    data.data.custom_fields.forEach((field) => {
+      if (field.definition.id === emailFieldId) {
+        if (field.value !== null) {
+          isDuplicate = true;
+        }
+        field.value = email;
+      }
+    });
+    data.data.current_phase.id = phaseId;
+  }
+  return {data, isDuplicate};
+}
+
+export const UpdateDeals = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
+  const data = await getDeal(accessToken, dealId);
+  return null;
 }

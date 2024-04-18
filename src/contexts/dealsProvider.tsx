@@ -1,6 +1,9 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import type { DealPhase } from "~/lib/types";
-import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import type {
+  DealInfo,
+  SimplifiedDeal,
+} from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 
 type DealContextType = {
@@ -9,6 +12,14 @@ type DealContextType = {
   isLoading?: boolean;
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
+  getDealInfo: (
+    id: string,
+    email: string,
+    phase_id: string,
+  ) => {
+    data: DealInfo | undefined;
+    isDuplicate: boolean | undefined;
+  };
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -28,20 +39,38 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     [dealsData, isLoading],
   );
 
+  function getDealInfo(id: string, email: string, phase_id: string) {
+    console.log(phase_id);
+    const input = {
+      id: id,
+      email: email,
+      phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
+    };
+    const result = api.teamleader.getDealAndMutate.useQuery(input).data;
+    const data = result?.data;
+    const isDuplicate = result?.isDuplicate;
+    return { data, isDuplicate };
+  }
+
   const dealphases = [
     {
+      id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
       name: "Mogelijkheden",
     },
     {
+      id: "1825bd2c-03bf-097c-8549-686bf8f96f4c",
       name: "Voorgesteld",
     },
     {
+      id: "8125dec5-a0ed-0775-a643-774979b85e23",
       name: "Interview",
     },
     {
+      id: "364b6867-54b9-0694-aa41-cf2ad6617028",
       name: "Weerhouden",
     },
     {
+      id: "a1f0931d-2094-0c3a-9342-98df836a57ce", // dit moet nog nagevraagd worden bij de PM's
       name: "Niet-Weerhouden",
     },
   ];
@@ -67,6 +96,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         isLoading: isLoading,
         filteredDeals,
         setDealIds,
+        getDealInfo,
       }}
     >
       {children}

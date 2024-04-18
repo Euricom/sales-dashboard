@@ -60,6 +60,6 @@ export type LoginProps = {
 
 // Dit binnen halen van teamleader?
 export type DealPhase = {
-  // id: string;
+  id: string | undefined;
   name: string;
 };

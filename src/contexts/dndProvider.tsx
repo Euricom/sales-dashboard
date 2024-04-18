@@ -53,7 +53,8 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { filteredDeals, dealPhases, isLoading } = useContext(DealContext);
+  const { filteredDeals, dealPhases, isLoading, getDealInfo } =
+    useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
   const [rows, setRows] = useState<Row[]>([]);
@@ -189,23 +190,29 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     if (activeId === overId || !activeEmployee || activeColumnId === "Deals")
       return;
     const isOverAnEmployee = overData?.type === "Employee";
-    // Dropping Employee over the header
-    if (activeRowId !== "0" && overId.split("_")[1] === "0") {
+    // Dropping Employee over the header FROM Mogelijkheden
+    if (
+      activeRowId !== "0" &&
+      overId.split("_")[1] === "0" &&
+      activeColumnId === "Mogelijkheden"
+    ) {
       removeEmployee(activeEmployee, activeRowId);
     }
 
     // Dragging Employee between rows
     if (activeRowId !== "0") {
-      if (!activeRowId || activeRowId === overRowId) {
+      if (!activeRowId || activeRowId === overRowId || overRowId === "0") {
         return;
       }
       // Dropping Employee over another Employee in a different row
-      if (isOverAnEmployee) {
+      if (isOverAnEmployee && overId.split("_")[1] !== "0") {
         moveEmployee(
           activeEmployee,
           activeRowId,
           overData.sortable.containerId,
         );
+      } else if (overId.split("_")[1] === "0") {
+        return;
       } else {
         // Dropping Employee over a different row
         moveEmployee(activeEmployee, activeRowId, overId);
