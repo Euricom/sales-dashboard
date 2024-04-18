@@ -36,7 +36,7 @@ const SignInButton = () => {
     <Button
       variant={"login"}
       size={"login"}
-      onClick={() => void signIn()}
+      onClick={() => void signIn("teamleader")}
       className="gap-2"
     >
       <Image
