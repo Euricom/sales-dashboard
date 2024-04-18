@@ -73,7 +73,7 @@ export function FilterMenu() {
                 setPMId("");
                 handleFilter(false);
               }}
-              className="flex items-center justify-center w-full bg-white rounded-14 py-2 px-3 my-2 text-primary"
+              className="flex items-center justify-center w-full bg-primary rounded-14 py-2 px-3 my-2 text-white border-2"
             >
               <FilterX />
             </DropdownMenuLabel>
