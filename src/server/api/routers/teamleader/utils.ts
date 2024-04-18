@@ -2,6 +2,11 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 import { env } from "~/env";
 import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase, DealInfo } from "./types";
 
+interface EditDealFieldsResult {
+  deal: DealInfo; // replace DealType with the actual type of `deal`
+  isEmailPresent: boolean;
+}
+
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
   let code: string | null = null;
   // Extract the refresh token from the redirected URL
@@ -188,29 +193,29 @@ export const getDeal = async (accessToken: string, dealId: string) => {
   }
 };
 
-export const changeDeal = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
-  let isDuplicate = false;
-  const data = await getDeal(accessToken, dealId);
-  if (!data) return null;
+export const editDealFields = async (accessToken: string, dealId: string, phaseId: string, email: string): Promise<EditDealFieldsResult| null>=> {
+  let isEmailPresent = false;
+  const deal = await getDeal(accessToken, dealId);
+  if (!deal) return null;
 
 
-  const emailFieldId = data.included.customFieldDefinition.find((field) => field.label=== "E-mail consultant")?.id;
+  const emailFieldId = deal.included.customFieldDefinition.find((field) => field.label=== "E-mail consultant")?.id;
 
-  if (data.data.custom_fields) {
-    data.data.custom_fields.forEach((field) => {
+  if (deal.data.custom_fields) {
+    deal.data.custom_fields.forEach((field) => {
       if (field.definition.id === emailFieldId) {
         if (field.value !== null) {
-          isDuplicate = true;
+          isEmailPresent = true;
         }
         field.value = email;
       }
     });
-    data.data.current_phase.id = phaseId;
+    deal.data.current_phase.id = phaseId;
   }
-  return {data, isDuplicate};
+  return {deal, isEmailPresent};
 }
 
-export const UpdateDeals = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
-  const data = await getDeal(accessToken, dealId);
+export const updateDeal = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
+
   return null;
 }

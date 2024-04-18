@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { changeDeal, getDeals, simplifyDeals } from "./utils";
+import { editDealFields, getDeals, simplifyDeals } from "./utils";
 import type { SimplifiedDealArray } from "./types";
 import { z } from "zod";
 
@@ -23,7 +23,8 @@ export const teamleaderRouter = createTRPCRouter({
     }
   }),
 
-  getDealAndMutate: protectedProcedure.input(z.object({id: z.string(), email: z.string(), phase_id: z.string()})).query(async (options) => {
+  updateDeal: protectedProcedure.input(z.object({id: z.string(), email: z.string(), phase_id: z.string()})).mutation(async (options) => {
+    // get the right deal info
     const accessToken = options.ctx.session.token.accessToken;
     const dealId: string = options.input.id;
     const email: string = options.input.email;
@@ -32,12 +33,13 @@ export const teamleaderRouter = createTRPCRouter({
       if (!accessToken) {
         throw new Error("Access token not found");
       }
-      const result = await changeDeal(accessToken, dealId, phaseId, email);
+      const result = await editDealFields(accessToken, dealId, phaseId, email);
       if (!result) {
         throw new Error("Failed to fetch data from Teamleader");
       }
-      const { data, isDuplicate } = result;
-      return {data, isDuplicate};
+      const { deal, isEmailPresent } = result;
+      console.log(deal.data.custom_fields, isEmailPresent)
+//    update or create a deal in TL depending on isDuplicate
 
     } catch (error) {
       console.error("Error in getDealInfo:", error);

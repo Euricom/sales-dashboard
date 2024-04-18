@@ -258,7 +258,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
           emp.rows.push(rowId);
-          updateEmployee(emp); // Update the employee in the database
+          updateTeamleader(
+            rowId.split("/")[0],
+            emp.fields.Euricom_x0020_email,
+            rowId.split("/")[1],
+          );
+          updateEmployeeInDB(emp); // Update the employee in the database
           return emp;
         }
         return emp;
@@ -276,7 +281,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
           emp.rows = emp.rows.filter((row) => row !== rowId);
-          updateEmployee(emp); // Update the employee in the database
+          updateEmployeeInDB(emp); // Update the employee in the database
           return emp;
         }
         return emp;
@@ -311,7 +316,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
             const updatedRows = [...emp.rows]; // Create a copy of rows array
             updatedRows.splice(indexOfRowToRemove, 1, targetId); // Replace the row
             emp.rows = updatedRows;
-            updateEmployee(emp); // Update the employee in the database
+            updateTeamleader(
+              targetId.split("/")[0],
+              emp.fields.Euricom_x0020_email,
+              targetId.split("/")[1],
+            );
+            updateEmployeeInDB(emp); // Update the employee in the database
             return emp;
           }
         }
@@ -409,12 +419,24 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
   }
 
-  function updateEmployee(employee: Employee) {
+  function updateEmployeeInDB(employee: Employee) {
     employeeUpdator.mutate({
       employee: {
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
       },
     });
+  }
+
+  function updateTeamleader(
+    dealId: string | undefined,
+    email: string | null,
+    phaseName: string | undefined,
+  ) {
+    if (!dealId || !phaseName) {
+      return;
+    }
+    email = email ?? "";
+    getDealInfo(dealId, email, phaseName);
   }
 };

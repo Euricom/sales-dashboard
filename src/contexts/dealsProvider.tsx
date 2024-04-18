@@ -1,9 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import type { DealPhase } from "~/lib/types";
-import type {
-  DealInfo,
-  SimplifiedDeal,
-} from "~/server/api/routers/teamleader/types";
+import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 
 type DealContextType = {
@@ -12,14 +9,7 @@ type DealContextType = {
   isLoading?: boolean;
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
-  getDealInfo: (
-    id: string,
-    email: string,
-    phase_id: string,
-  ) => {
-    data: DealInfo | undefined;
-    isDuplicate: boolean | undefined;
-  };
+  getDealInfo: (id: string, email: string, phaseName: string) => void;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -34,23 +24,12 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
   const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
+  const dealMutator = api.teamleader.updateDeal.useMutation();
+
   const deals = useMemo(
     () => (isLoading ? null : dealsData),
     [dealsData, isLoading],
   );
-
-  function getDealInfo(id: string, email: string, phase_id: string) {
-    console.log(phase_id);
-    const input = {
-      id: id,
-      email: email,
-      phase_id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
-    };
-    const result = api.teamleader.getDealAndMutate.useQuery(input).data;
-    const data = result?.data;
-    const isDuplicate = result?.isDuplicate;
-    return { data, isDuplicate };
-  }
 
   const dealphases = [
     {
@@ -75,6 +54,24 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     },
   ];
 
+  function getDealInfo(id: string, email: string, phaseName: string) {
+    const phase_id = dealphases.find((phase) => phase.name === phaseName)?.id;
+    if (!phase_id) {
+      throw new Error("Phase not found");
+    }
+    const input = {
+      id: id,
+      email: email,
+      phase_id: phase_id,
+    };
+    dealMutator.mutate(input);
+  }
+  // const [currentDeal, setCurrentDeal] = useState();
+  // const dealInfo = useMemo(() => {
+  //   const phase_id = dealphases.find(
+  //     (phase) => phase.name === currentDeal.phaseName,
+  //   )?.id;
+  // }, [currentDeal]);
   const [dealIds, setDealIds] = useState<string[]>([]);
   const [filteredDeals, setFilteredDeals] = useState<
     SimplifiedDeal[] | undefined | null
