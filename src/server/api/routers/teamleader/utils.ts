@@ -58,7 +58,7 @@ export const getDeals = async (accessToken: string) => {
       },
       body: JSON.stringify({
         filter: {
-          status: ["open"],
+          responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
         },
         page: {
           size: 100,
