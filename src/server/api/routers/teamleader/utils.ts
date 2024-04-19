@@ -4,7 +4,7 @@ import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phas
 
 interface EditDealFieldsResult {
   deal: DealInfo; // replace DealType with the actual type of `deal`
-  isEmailPresent: boolean;
+  shouldCreate: boolean;
 }
 
 export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
@@ -191,7 +191,7 @@ export const getDeal = async (accessToken: string, dealId: string) => {
 };
 
 export const editDealFields = async (accessToken: string, dealId: string, phaseId: string, email: string): Promise<EditDealFieldsResult| null>=> {
-  let isEmailPresent = false;
+  let shouldCreate = false;
   const deal = await getDeal(accessToken, dealId);
   if (!deal) return null;
 
@@ -201,15 +201,15 @@ export const editDealFields = async (accessToken: string, dealId: string, phaseI
   if (deal.data.custom_fields) {
     deal.data.custom_fields.forEach((field) => {
       if (field.definition.id === emailFieldId) {
-        if (field.value !== null) {
-          isEmailPresent = true;
+        if (field.value !== null && field.value !== email) {
+          shouldCreate = true;
         }
         field.value = email;
       }
     });
     deal.data.current_phase.id = phaseId;
   }
-  return {deal, isEmailPresent};
+  return {deal, shouldCreate};
 }
 
 export const updateDeal = async (accessToken: string, deal: DealInfo) => {
@@ -314,7 +314,7 @@ export const createDeal = async (accessToken: string, deal: DealInfo, phase_id:s
         currency: deal.data.estimated_value.currency,
       },
       estimated_probability: deal.data.estimated_probability,
-      estimated_closing_date: deal.data.estimated_closing_date ?? "2024-06-19",
+      estimated_closing_date: deal.data.estimated_closing_date ?? "1950-06-19",
       custom_fields: deal.data.custom_fields.map((field) => ({
         id: field.definition.id,
         value: field.value,

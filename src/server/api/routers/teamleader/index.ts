@@ -37,10 +37,10 @@ export const teamleaderRouter = createTRPCRouter({
       if (!result) {
         throw new Error("Failed to fetch data from Teamleader");
       }
-      const { deal, isEmailPresent } = result;
+      const { deal, shouldCreate } = result;
       let response;
       //    update or create a deal in TL depending on isDuplicate
-      if (isEmailPresent) {
+      if (shouldCreate) {
         // create a new deal
         response = await createDeal(accessToken, deal, phaseId);
         if (!response) {
@@ -53,13 +53,14 @@ export const teamleaderRouter = createTRPCRouter({
         if (!response) {
           throw new Error("Failed to update deal in Teamleader");
         }
-      }
-        
         // move the deal to the right phase
         const moveResponse = await moveDeal(accessToken, dealId, phaseId);
         if (!moveResponse) {
           throw new Error("Failed to move deal in Teamleader");
         }
+
+      }
+        
 
     } catch (error) {
       console.error("Error in getDealInfo:", error);
