@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import type { DealPhase } from "~/lib/types";
+import { useToast } from "~/components/ui/use-toast";
+import type { DealPhase, Employee } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 
@@ -9,7 +10,7 @@ type DealContextType = {
   isLoading?: boolean;
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
-  getDealInfo: (id: string, email: string, phaseName: string) => void;
+  getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -24,7 +25,14 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
   const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
-  const dealMutator = api.teamleader.updateDeal.useMutation();
+  const { toast } = useToast();
+
+  const dealMutator = api.teamleader.updateDeal.useMutation({
+    onSuccess: () => toast({ title: "Deal updated", variant: "success" }),
+    onError: () =>
+      toast({ title: "Deal did not update", variant: "destructive" }),
+  });
+  const employeeUpdator = api.mongodb.updateEmployee.useMutation();
 
   const deals = useMemo(
     () => (isLoading ? null : dealsData),
@@ -54,24 +62,43 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     },
   ];
 
-  function getDealInfo(id: string, email: string, phaseName: string) {
+  type MutateDealResponse = {
+    data: {
+      id: string;
+      type: string;
+    };
+  };
+
+  function getDealInfo(id: string, phaseName: string, employee: Employee) {
     const phase_id = dealphases.find((phase) => phase.name === phaseName)?.id;
-    if (!phase_id) {
+    if (!phase_id || !employee.fields.Euricom_x0020_email) {
       throw new Error("Phase not found");
     }
     const input = {
       id: id,
-      email: email,
+      email: employee.fields.Euricom_x0020_email,
       phase_id: phase_id,
     };
-    dealMutator.mutate(input);
+    dealMutator.mutate(input, {
+      onSuccess: (data) => {
+        const resolvedData = data as unknown as MutateDealResponse;
+        const newId = resolvedData.data.id;
+        if (newId === "shouldNotCreate") return;
+        const rowToEdit = employee.rows.find(
+          (row) => (row as string).split("/")[0] === id,
+        );
+        const newRow = `${newId}/${(rowToEdit as string)?.split("/")[1]}`;
+        employeeUpdator.mutate({
+          employee: {
+            employeeId: employee.employeeId,
+            rows: employee.rows.map((row) =>
+              (row as string).split("/")[0] === id ? newRow : row,
+            ) as string[],
+          },
+        });
+      },
+    });
   }
-  // const [currentDeal, setCurrentDeal] = useState();
-  // const dealInfo = useMemo(() => {
-  //   const phase_id = dealphases.find(
-  //     (phase) => phase.name === currentDeal.phaseName,
-  //   )?.id;
-  // }, [currentDeal]);
   const [dealIds, setDealIds] = useState<string[]>([]);
   const [filteredDeals, setFilteredDeals] = useState<
     SimplifiedDeal[] | undefined | null

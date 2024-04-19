@@ -1,13 +1,25 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { env } from "~/env";
-import type { User, Deal, Company, Tokens, SimplifiedDealArray, dataObject, Phase, DealInfo } from "./types";
+import type {
+  User,
+  Deal,
+  Company,
+  Tokens,
+  SimplifiedDealArray,
+  dataObject,
+  Phase,
+  DealInfo,
+} from "./types";
 
 interface EditDealFieldsResult {
   deal: DealInfo; // replace DealType with the actual type of `deal`
   shouldCreate: boolean;
 }
 
-export const handleURLReceived = (url: string, router: AppRouterInstance): string => {
+export const handleURLReceived = (
+  url: string,
+  router: AppRouterInstance,
+): string => {
   let code: string | null = null;
   // Extract the refresh token from the redirected URL
   if (window.location.href != "http://localhost:3000/") {
@@ -27,7 +39,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
   const options: RequestInit = {
     method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       client_id: `${env.TEAMLEADER_CLIENT_ID}`,
@@ -44,58 +56,64 @@ export const refreshAccessToken = async (refreshToken: string) => {
     const data = (await response.json()) as unknown as Tokens;
     return data;
   } catch (error) {
-    console.error('Error in getDeals:',error);
+    console.error("Error in getDeals:", error);
   }
 };
 
 export const getDeals = async (accessToken: string) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.list`;
-    const options: RequestInit = {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      filter: {
+        responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
       },
-      body: JSON.stringify({
-        filter: {
-          responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
-        },
-        page: {
-          size: 100,
-        },
-        include: "lead.customer,responsible_user,current_phase",
-      }),
-    };
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        console.error("Failed to fetch data from Teamleader");
-      }
-      const data = (await response.json()) as dataObject;
-      return data;
-    } catch (error) {
-      console.error('Error in getDeals:',error);
+      page: {
+        size: 100,
+      },
+      include: "lead.customer,responsible_user,current_phase",
+    }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from Teamleader");
     }
+    const data = (await response.json()) as dataObject;
+    return data;
+  } catch (error) {
+    console.error("Error in getDeals:", error);
+  }
 };
 
-const getCompanyLogo = async (url : string) => {
+const getCompanyLogo = async (url: string) => {
   if (url === "") return null;
   // for some reason the url for this site isn't correct in Teamleader. As soon as it's fixed this will be deleted.
-  if (url === "http:\/\/www.district09.be") url = "http://www.district09.gent";
+  if (url === "http://www.district09.be") url = "http://www.district09.gent";
 
-  const response = await fetch(` http://www.google.com/s2/favicons?domain_url=${url}&sz=64`);
+  const response = await fetch(
+    ` http://www.google.com/s2/favicons?domain_url=${url}&sz=64`,
+  );
   // er zijn nog een aantal favicon urls die niet kunnen worden opgehaald.
   // die ga ik hier proberen ophalen op een andere manier.
   if (!response.ok) {
-    return `${url}/favicon.ico`
+    return `${url}/favicon.ico`;
   }
   return response.url;
 };
 
-export const simplifyDeals = async (dealsObject: dataObject): Promise<SimplifiedDealArray> => {
-  if (!dealsObject || typeof dealsObject !== 'object') {
-      console.error('Data, users, or companies is not an object or is null/undefined');
-      return [];
+export const simplifyDeals = async (
+  dealsObject: dataObject,
+): Promise<SimplifiedDealArray> => {
+  if (!dealsObject || typeof dealsObject !== "object") {
+    console.error(
+      "Data, users, or companies is not an object or is null/undefined",
+    );
+    return [];
   }
   // put deals, users, and companies in variables
   const deals = dealsObject.data;
@@ -103,29 +121,35 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
   const companies = dealsObject.included.company;
   const phases = dealsObject.included.dealPhase;
 
-  if (!Array.isArray(deals) || !Array.isArray(users) || !Array.isArray(companies)) {
-      console.error('deals, users or companies is not an array');
-      return [];
+  if (
+    !Array.isArray(deals) ||
+    !Array.isArray(users) ||
+    !Array.isArray(companies)
+  ) {
+    console.error("deals, users or companies is not an array");
+    return [];
   }
-  
 
-  const simplifiedDeals = await Promise.all(deals.map(async (deal: Deal) => {
+  const simplifiedDeals = await Promise.all(
+    deals.map(async (deal: Deal) => {
       const dealId: string = deal.id;
       const userId: string = deal.responsible_user.id;
       const companyId: string = deal.lead?.customer?.id;
       const phaseId: string = deal.current_phase.id;
       // find the user and company that are responsible for the deal
       const user = users.find((user: User) => user.id === userId);
-      const company = companies.find((company: Company) => company.id === companyId);
+      const company = companies.find(
+        (company: Company) => company.id === companyId,
+      );
       const phase = phases.find((phase: Phase) => phase.id === phaseId);
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
       }
       if (!company) {
-          console.log(`Company not found for deal ID: ${dealId}`);
+        console.log(`Company not found for deal ID: ${dealId}`);
       }
       if (!phase) {
-          console.log(`Phase not found for deal ID: ${dealId}`);
+        console.log(`Phase not found for deal ID: ${dealId}`);
       }
 
       const favicon = await getCompanyLogo(company?.website ?? "");
@@ -136,34 +160,38 @@ export const simplifyDeals = async (dealsObject: dataObject): Promise<Simplified
         title: deal.title,
         estimated_closing_date: deal.estimated_closing_date ?? "",
         deal_phase: {
-            id: phase?.id ?? null,
-            name: phase?.name ?? null,
+          id: phase?.id ?? null,
+          name: phase?.name ?? null,
         },
         company: {
-            id: company?.id ?? null,
-            name: company?.name ?? null,
-            logo_url: favicon,
+          id: company?.id ?? null,
+          name: company?.name ?? null,
+          logo_url: favicon,
         },
         PM: {
-            id: user?.id ?? null,
-            first_name: user?.first_name ?? null,
-            last_name: user?.last_name ?? null,
-            avatar_url: user?.avatar_url ?? null,
+          id: user?.id ?? null,
+          first_name: user?.first_name ?? null,
+          last_name: user?.last_name ?? null,
+          avatar_url: user?.avatar_url ?? null,
         },
       };
-  }));
-  
+    }),
+  );
+
   // remove null values and sort the deals by estimated_closing_date
   const sortedDeals = simplifiedDeals
-  .filter(deal => deal !== null)
-  .sort((a, b) => {
-    if (!a.estimated_closing_date) return 1; // a is put last
-    if (!b.estimated_closing_date) return -1; // b is put last
-    return new Date(a.estimated_closing_date).getTime() - new Date(b.estimated_closing_date).getTime();
-  }) as SimplifiedDealArray;
+    .filter((deal) => deal !== null)
+    .sort((a, b) => {
+      if (!a.estimated_closing_date) return 1; // a is put last
+      if (!b.estimated_closing_date) return -1; // b is put last
+      return (
+        new Date(a.estimated_closing_date).getTime() -
+        new Date(b.estimated_closing_date).getTime()
+      );
+    }) as SimplifiedDealArray;
 
   return sortedDeals;
-}
+};
 
 export const getDeal = async (accessToken: string, dealId: string) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.info`;
@@ -171,7 +199,7 @@ export const getDeal = async (accessToken: string, dealId: string) => {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       id: dealId,
@@ -186,17 +214,23 @@ export const getDeal = async (accessToken: string, dealId: string) => {
     const data = (await response.json()) as DealInfo;
     return data;
   } catch (error) {
-    console.error('Error in getDeal:',error);
+    console.error("Error in getDeal:", error);
   }
 };
 
-export const editDealFields = async (accessToken: string, dealId: string, phaseId: string, email: string): Promise<EditDealFieldsResult| null>=> {
+export const editDealFields = async (
+  accessToken: string,
+  dealId: string,
+  phaseId: string,
+  email: string,
+): Promise<EditDealFieldsResult | null> => {
   let shouldCreate = false;
   const deal = await getDeal(accessToken, dealId);
   if (!deal) return null;
 
-
-  const emailFieldId = deal.included.customFieldDefinition.find((field) => field.label=== "E-mail consultant")?.id;
+  const emailFieldId = deal.included.customFieldDefinition.find(
+    (field) => field.label === "E-mail consultant",
+  )?.id;
 
   if (deal.data.custom_fields) {
     deal.data.custom_fields.forEach((field) => {
@@ -209,8 +243,8 @@ export const editDealFields = async (accessToken: string, dealId: string, phaseI
     });
     deal.data.current_phase.id = phaseId;
   }
-  return {deal, shouldCreate};
-}
+  return { deal, shouldCreate };
+};
 
 export const updateDeal = async (accessToken: string, deal: DealInfo) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.update`;
@@ -218,7 +252,7 @@ export const updateDeal = async (accessToken: string, deal: DealInfo) => {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       id: deal.data.id,
@@ -227,7 +261,7 @@ export const updateDeal = async (accessToken: string, deal: DealInfo) => {
           type: deal.data.lead.customer.type,
           id: deal.data.lead.customer.id,
         },
-        constact_person: null
+        constact_person: null,
       },
       title: deal.data.title,
       summary: deal.data.summary,
@@ -244,7 +278,7 @@ export const updateDeal = async (accessToken: string, deal: DealInfo) => {
         id: field.definition.id,
         value: field.value,
       })),
-    })
+    }),
   };
 
   try {
@@ -252,22 +286,25 @@ export const updateDeal = async (accessToken: string, deal: DealInfo) => {
     if (!response.ok) {
       console.error("Failed to update deal in Teamleader");
     }
-    
+
     const data = response;
     return data;
-
   } catch (error) {
-    console.error('Error in moveDeal:',error);
+    console.error("Error in moveDeal:", error);
   }
-}
+};
 
-export const moveDeal = async (accessToken: string, dealId: string, phaseId: string) => {
+export const moveDeal = async (
+  accessToken: string,
+  dealId: string,
+  phaseId: string,
+) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.move`;
   const options: RequestInit = {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       id: dealId,
@@ -283,17 +320,21 @@ export const moveDeal = async (accessToken: string, dealId: string, phaseId: str
     const data = response;
     return data;
   } catch (error) {
-    console.error('Error in moveDeal:',error);
+    console.error("Error in moveDeal:", error);
   }
 };
 
-export const createDeal = async (accessToken: string, deal: DealInfo, phase_id:string) => {
+export const createDeal = async (
+  accessToken: string,
+  deal: DealInfo,
+  phase_id: string,
+) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.create`;
   const options: RequestInit = {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       lead: {
@@ -301,7 +342,7 @@ export const createDeal = async (accessToken: string, deal: DealInfo, phase_id:s
           type: deal.data.lead.customer.type,
           id: deal.data.lead.customer.id,
         },
-        constact_person: null
+        constact_person: null,
       },
       title: deal.data.title + "2",
       summary: deal.data.summary ?? "",
@@ -319,21 +360,18 @@ export const createDeal = async (accessToken: string, deal: DealInfo, phase_id:s
         id: field.definition.id,
         value: field.value,
       })),
-    })
+    }),
   };
-  console.log(options);
 
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
       console.error("Failed to create deal in Teamleader");
     }
-    
-    const data = response;
-    console.log(data);
-    return data;
 
+    const data = response;
+    return data;
   } catch (error) {
-    console.error('Error in updateDeal:',error);
+    console.error("Error in updateDeal:", error);
   }
-}
+};

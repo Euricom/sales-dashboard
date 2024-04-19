@@ -258,11 +258,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
           emp.rows.push(rowId);
-          updateTeamleader(
-            rowId.split("/")[0],
-            emp.fields.Euricom_x0020_email,
-            rowId.split("/")[1],
-          );
+          updateTeamleader(rowId.split("/")[0], rowId.split("/")[1], emp);
           updateEmployeeInDB(emp); // Update the employee in the database
           return emp;
         }
@@ -318,8 +314,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
             emp.rows = updatedRows;
             updateTeamleader(
               targetId.split("/")[0],
-              emp.fields.Euricom_x0020_email,
               targetId.split("/")[1],
+              emp,
             );
 
             updateEmployeeInDB(emp); // Update the employee in the database
@@ -431,13 +427,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
   function updateTeamleader(
     dealId: string | undefined,
-    email: string | null,
     phaseName: string | undefined,
+    employee: Employee,
   ) {
     if (!dealId || !phaseName || phaseName === "Mogelijkheden") {
       return;
     }
-    email = email ?? "";
-    getDealInfo(dealId, email, phaseName);
+    getDealInfo(dealId, phaseName, employee);
   }
 };
