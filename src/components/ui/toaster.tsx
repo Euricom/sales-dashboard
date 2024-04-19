@@ -1,11 +1,5 @@
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "~/components/ui/toast";
+import { Ban, Check } from "lucide-react";
+import { Toast, ToastProvider, ToastViewport } from "~/components/ui/toast";
 import { useToast } from "~/components/ui/use-toast";
 
 export function Toaster() {
@@ -17,13 +11,8 @@ export function Toaster() {
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
+              {title === "success" ? <Check /> : <Ban />}
             </div>
-            {action}
-            <ToastClose />
           </Toast>
         );
       })}

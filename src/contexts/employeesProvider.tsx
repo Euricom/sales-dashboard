@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import { api } from "~/utils/api";
 import type { DraggableEmployee, Employee } from "~/lib/types";
+import { toast } from "~/components/ui/use-toast";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -31,12 +32,15 @@ export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
   // GET employees data
-  const { data: employeesData, isLoading } =
-    api.mongodb.getEmployees.useQuery();
+  const {
+    data: employeesData,
+    isLoading,
+    refetch,
+  } = api.mongodb.getEmployees.useQuery();
+
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
-
   useEffect(() => {
     if (employeesData) {
       // GET employees from MongoDB
@@ -85,6 +89,15 @@ export const EmployeeContextProvider: React.FC<
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
+
+  // Use the updateDeal mutation hook
+  const dealMutator = api.teamleader.updateDeal.useMutation({
+    onSuccess: async () => {
+      // Refetch employees data when deal update succeeds
+      await refetch();
+    },
+    onError: () => toast({ title: "error", variant: "destructive" }),
+  });
 
   return (
     <EmployeeContext.Provider

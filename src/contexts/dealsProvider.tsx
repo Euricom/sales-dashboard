@@ -1,8 +1,15 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useToast } from "~/components/ui/use-toast";
 import type { DealPhase, Employee } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
+import { EmployeeContext } from "./employeesProvider";
 
 type DealContextType = {
   deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state
@@ -11,6 +18,7 @@ type DealContextType = {
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
   getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
+  isFetched?: boolean;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -24,22 +32,27 @@ type DealContextProviderProps = {
 export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
-  const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
+  const {
+    data: dealsData,
+    isLoading,
+    refetch,
+  } = api.teamleader.getDealsData.useQuery();
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
-    onSuccess: () => toast({ title: "Deal updated", variant: "success" }),
-    onError: () =>
-      toast({ title: "Deal did not update", variant: "destructive" }),
+    onSuccess: async () => {
+      toast({ title: "success", variant: "success" });
+      await refetch();
+    },
+    onError: () => toast({ title: "error", variant: "destructive" }),
   });
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
-
   const deals = useMemo(
     () => (isLoading ? null : dealsData),
     [dealsData, isLoading],
   );
 
-  const dealphases = [
+  const dealPhases = [
     {
       id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
       name: "Mogelijkheden",
@@ -70,7 +83,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   };
 
   function getDealInfo(id: string, phaseName: string, employee: Employee) {
-    const phase_id = dealphases.find((phase) => phase.name === phaseName)?.id;
+    const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
     if (!phase_id || !employee.fields.Euricom_x0020_email) {
       throw new Error("Phase not found");
     }
@@ -116,8 +129,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     <DealContext.Provider
       value={{
         deals,
-        dealPhases: dealphases,
-        isLoading: isLoading,
+        dealPhases,
+        isLoading,
         filteredDeals,
         setDealIds,
         getDealInfo,
