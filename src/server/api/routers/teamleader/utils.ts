@@ -58,10 +58,7 @@ export const getDeals = async (accessToken: string) => {
       },
       body: JSON.stringify({
         filter: {
-          ids:  ["ebcc7d5f-d585-01de-9373-fb2c11879ee7"
-          ,"bad7b32f-2fcd-0d28-ba76-0a8221879ed5"
-          ,"7725d0fe-cc29-01e1-9a75-f74461879ec1"
-         ],
+          status: ["open"],
         },
         page: {
           size: 100,
@@ -215,7 +212,128 @@ export const editDealFields = async (accessToken: string, dealId: string, phaseI
   return {deal, isEmailPresent};
 }
 
-export const updateDeal = async (accessToken: string, dealId: string, phaseId: string, email: string) => {
+export const updateDeal = async (accessToken: string, deal: DealInfo) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.update`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: deal.data.id,
+      lead: {
+        customer: {
+          type: deal.data.lead.customer.type,
+          id: deal.data.lead.customer.id,
+        },
+        constact_person: null
+      },
+      title: deal.data.title,
+      summary: deal.data.summary,
+      source_id: deal.data.source?.id,
+      department_id: deal.data.department?.id,
+      responsible_user_id: deal.data.responsible_user.id,
+      estimated_value: {
+        amount: deal.data.estimated_value.amount,
+        currency: deal.data.estimated_value.currency,
+      },
+      estimated_probability: deal.data.estimated_probability,
+      estimated_closing_date: deal.data.estimated_closing_date,
+      custom_fields: deal.data.custom_fields.map((field) => ({
+        id: field.definition.id,
+        value: field.value,
+      })),
+    })
+  };
 
-  return null;
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to update deal in Teamleader");
+    }
+    
+    const data = response;
+    return data;
+
+  } catch (error) {
+    console.error('Error in moveDeal:',error);
+  }
+}
+
+export const moveDeal = async (accessToken: string, dealId: string, phaseId: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.move`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: dealId,
+      phase_id: phaseId,
+    }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to move deal in Teamleader");
+    }
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error('Error in moveDeal:',error);
+  }
+};
+
+export const createDeal = async (accessToken: string, deal: DealInfo, phase_id:string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.create`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      lead: {
+        customer: {
+          type: deal.data.lead.customer.type,
+          id: deal.data.lead.customer.id,
+        },
+        constact_person: null
+      },
+      title: deal.data.title + "2",
+      summary: deal.data.summary ?? "",
+      source_id: deal.data.source?.id ?? "a33798cb-401f-0a42-b342-ee0d12ab5cf7",
+      department_id: deal.data.department?.id,
+      responsible_user_id: deal.data.responsible_user.id,
+      phase_id: phase_id,
+      estimated_value: {
+        amount: deal.data.estimated_value.amount,
+        currency: deal.data.estimated_value.currency,
+      },
+      estimated_probability: deal.data.estimated_probability,
+      estimated_closing_date: deal.data.estimated_closing_date ?? "2024-06-19",
+      custom_fields: deal.data.custom_fields.map((field) => ({
+        id: field.definition.id,
+        value: field.value,
+      })),
+    })
+  };
+  console.log(options);
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to create deal in Teamleader");
+    }
+    
+    const data = response;
+    console.log(data);
+    return data;
+
+  } catch (error) {
+    console.error('Error in updateDeal:',error);
+  }
 }

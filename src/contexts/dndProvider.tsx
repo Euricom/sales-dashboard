@@ -321,6 +321,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
               emp.fields.Euricom_x0020_email,
               targetId.split("/")[1],
             );
+
             updateEmployeeInDB(emp); // Update the employee in the database
             return emp;
           }
@@ -433,7 +434,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     email: string | null,
     phaseName: string | undefined,
   ) {
-    if (!dealId || !phaseName) {
+    if (!dealId || !phaseName || phaseName === "Mogelijkheden") {
       return;
     }
     email = email ?? "";

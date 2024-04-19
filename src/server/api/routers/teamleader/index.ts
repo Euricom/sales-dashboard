@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { editDealFields, getDeals, simplifyDeals } from "./utils";
+import { createDeal, editDealFields, getDeals, moveDeal, simplifyDeals, updateDeal } from "./utils";
 import type { SimplifiedDealArray } from "./types";
 import { z } from "zod";
 
@@ -38,8 +38,28 @@ export const teamleaderRouter = createTRPCRouter({
         throw new Error("Failed to fetch data from Teamleader");
       }
       const { deal, isEmailPresent } = result;
-      console.log(deal.data.custom_fields, isEmailPresent)
-//    update or create a deal in TL depending on isDuplicate
+      let response;
+      //    update or create a deal in TL depending on isDuplicate
+      if (isEmailPresent) {
+        // create a new deal
+        response = await createDeal(accessToken, deal, phaseId);
+        if (!response) {
+          throw new Error("Failed to create deal in Teamleader");
+        }
+
+      } else {
+        // update the deal
+        response = await updateDeal(accessToken, deal);
+        if (!response) {
+          throw new Error("Failed to update deal in Teamleader");
+        }
+      }
+        
+        // move the deal to the right phase
+        const moveResponse = await moveDeal(accessToken, dealId, phaseId);
+        if (!moveResponse) {
+          throw new Error("Failed to move deal in Teamleader");
+        }
 
     } catch (error) {
       console.error("Error in getDealInfo:", error);
