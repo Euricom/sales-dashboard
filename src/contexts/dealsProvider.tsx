@@ -1,7 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useToast } from "~/components/ui/use-toast";
-import type { DealPhase, Employee } from "~/lib/types";
-import type { DealPhase, PM } from "~/lib/types";
+import type { DealPhase, Employee, PM } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 
