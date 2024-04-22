@@ -23,7 +23,7 @@ export const teamleaderRouter = createTRPCRouter({
         throw new Error("Failed to fetch data from Teamleader");
       }
 
-      const simpleData: SimplifiedDealArray = await simplifyDeals(deals);
+      const simpleData: SimplifiedDealArray = await simplifyDeals(deals, accessToken);
       return simpleData;
     } catch (error) {
       console.error("Error in getDealsData:", error);

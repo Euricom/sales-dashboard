@@ -164,8 +164,6 @@ export interface DealInfo {
   }
 }
 
-
-
 export interface User {
     id: string;
     account: {
@@ -277,6 +275,13 @@ export interface SimplifiedDeal {
     last_name: string;
     avatar_url: string | null;
   };
+  custom_fields: {
+    definition: {
+      type: string;
+      id: string;
+    };
+    value: string |null;
+  }[];
 }
 
 export type SimplifiedDealArray = SimplifiedDeal[];

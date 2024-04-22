@@ -1,15 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useToast } from "~/components/ui/use-toast";
 import type { DealPhase, Employee } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
-import { EmployeeContext } from "./employeesProvider";
 
 type DealContextType = {
   deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state

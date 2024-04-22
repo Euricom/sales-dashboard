@@ -71,6 +71,7 @@ export const getDeals = async (accessToken: string) => {
     body: JSON.stringify({
       filter: {
         responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
+        // status: ["open"],
       },
       page: {
         size: 100,
@@ -108,6 +109,7 @@ const getCompanyLogo = async (url: string) => {
 
 export const simplifyDeals = async (
   dealsObject: dataObject,
+  accessToken: string,
 ): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== "object") {
     console.error(
@@ -142,6 +144,9 @@ export const simplifyDeals = async (
         (company: Company) => company.id === companyId,
       );
       const phase = phases.find((phase: Phase) => phase.id === phaseId);
+
+      const dealInfo = await getDeal(accessToken, dealId);
+
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
       }
@@ -150,6 +155,9 @@ export const simplifyDeals = async (
       }
       if (!phase) {
         console.log(`Phase not found for deal ID: ${dealId}`);
+      }
+      if (!dealInfo) {
+        console.log(`Deal not found for deal ID: ${dealId}`);
       }
 
       const favicon = await getCompanyLogo(company?.website ?? "");
@@ -174,6 +182,13 @@ export const simplifyDeals = async (
           last_name: user?.last_name ?? null,
           avatar_url: user?.avatar_url ?? null,
         },
+        custom_fields: dealInfo?.data.custom_fields.map((field) => ({
+          definition: {
+            type: field.definition.type,
+            id: field.definition.id,
+          },
+          value: field.value,
+        })),
       };
     }),
   );
