@@ -8,7 +8,13 @@ import type {
   SimplifiedDealArray,
   dataObject,
   Phase,
+  DealInfo,
 } from "./types";
+
+interface EditDealFieldsResult {
+  deal: DealInfo; // replace DealType with the actual type of `deal`
+  shouldCreate: boolean;
+}
 
 export const handleURLReceived = (
   url: string,
@@ -64,7 +70,8 @@ export const getDeals = async (accessToken: string) => {
     },
     body: JSON.stringify({
       filter: {
-        status: ["open"],
+        responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
+        // status: ["open"],
       },
       page: {
         size: 100,
@@ -102,6 +109,7 @@ const getCompanyLogo = async (url: string) => {
 
 export const simplifyDeals = async (
   dealsObject: dataObject,
+  accessToken: string,
 ): Promise<SimplifiedDealArray> => {
   if (!dealsObject || typeof dealsObject !== "object") {
     console.error(
@@ -136,6 +144,9 @@ export const simplifyDeals = async (
         (company: Company) => company.id === companyId,
       );
       const phase = phases.find((phase: Phase) => phase.id === phaseId);
+
+      const dealInfo = await getDeal(accessToken, dealId);
+
       if (!user) {
         console.log(`User not found for deal ID: ${dealId}`);
       }
@@ -144,6 +155,9 @@ export const simplifyDeals = async (
       }
       if (!phase) {
         console.log(`Phase not found for deal ID: ${dealId}`);
+      }
+      if (!dealInfo) {
+        console.log(`Deal not found for deal ID: ${dealId}`);
       }
 
       const favicon = await getCompanyLogo(company?.website ?? "");
@@ -168,6 +182,13 @@ export const simplifyDeals = async (
           last_name: user?.last_name ?? null,
           avatar_url: user?.avatar_url ?? null,
         },
+        custom_fields: dealInfo?.data.custom_fields.map((field) => ({
+          definition: {
+            type: field.definition.type,
+            id: field.definition.id,
+          },
+          value: field.value,
+        })),
       };
     }),
   );
@@ -185,4 +206,187 @@ export const simplifyDeals = async (
     }) as SimplifiedDealArray;
 
   return sortedDeals;
+};
+
+export const getDeal = async (accessToken: string, dealId: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.info`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: dealId,
+      include: "custom_fields.definition",
+    }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from Teamleader");
+    }
+    const data = (await response.json()) as DealInfo;
+    return data;
+  } catch (error) {
+    console.error("Error in getDeal:", error);
+  }
+};
+
+export const editDealFields = async (
+  accessToken: string,
+  dealId: string,
+  phaseId: string,
+  email: string,
+): Promise<EditDealFieldsResult | null> => {
+  let shouldCreate = false;
+  const deal = await getDeal(accessToken, dealId);
+  if (!deal) return null;
+
+  const emailFieldId = deal.included.customFieldDefinition.find(
+    (field) => field.label === "E-mail consultant",
+  )?.id;
+
+  if (deal.data.custom_fields) {
+    deal.data.custom_fields.forEach((field) => {
+      if (field.definition.id === emailFieldId) {
+        if (field.value !== null && field.value !== email) {
+          shouldCreate = true;
+        }
+        field.value = email;
+      }
+    });
+    deal.data.current_phase.id = phaseId;
+  }
+  return { deal, shouldCreate };
+};
+
+export const updateDeal = async (accessToken: string, deal: DealInfo) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.update`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: deal.data.id,
+      lead: {
+        customer: {
+          type: deal.data.lead.customer.type,
+          id: deal.data.lead.customer.id,
+        },
+        constact_person: null,
+      },
+      title: deal.data.title,
+      summary: deal.data.summary,
+      source_id: deal.data.source?.id,
+      department_id: deal.data.department?.id,
+      responsible_user_id: deal.data.responsible_user.id,
+      estimated_value: {
+        amount: deal.data.estimated_value.amount,
+        currency: deal.data.estimated_value.currency,
+      },
+      estimated_probability: deal.data.estimated_probability,
+      estimated_closing_date: deal.data.estimated_closing_date,
+      custom_fields: deal.data.custom_fields.map((field) => ({
+        id: field.definition.id,
+        value: field.value,
+      })),
+    }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to update deal in Teamleader");
+    }
+
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in moveDeal:", error);
+  }
+};
+
+export const moveDeal = async (
+  accessToken: string,
+  dealId: string,
+  phaseId: string,
+) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.move`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: dealId,
+      phase_id: phaseId,
+    }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to move deal in Teamleader");
+    }
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in moveDeal:", error);
+  }
+};
+
+export const createDeal = async (
+  accessToken: string,
+  deal: DealInfo,
+  phase_id: string,
+) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.create`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      lead: {
+        customer: {
+          type: deal.data.lead.customer.type,
+          id: deal.data.lead.customer.id,
+        },
+        constact_person: null,
+      },
+      title: deal.data.title + "2",
+      summary: deal.data.summary ?? "",
+      source_id: deal.data.source?.id ?? "a33798cb-401f-0a42-b342-ee0d12ab5cf7",
+      department_id: deal.data.department?.id,
+      responsible_user_id: deal.data.responsible_user.id,
+      phase_id: phase_id,
+      estimated_value: {
+        amount: deal.data.estimated_value.amount,
+        currency: deal.data.estimated_value.currency,
+      },
+      estimated_probability: deal.data.estimated_probability,
+      estimated_closing_date: deal.data.estimated_closing_date ?? "1950-06-19",
+      custom_fields: deal.data.custom_fields.map((field) => ({
+        id: field.definition.id,
+        value: field.value,
+      })),
+    }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to create deal in Teamleader");
+    }
+
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in updateDeal:", error);
+  }
 };

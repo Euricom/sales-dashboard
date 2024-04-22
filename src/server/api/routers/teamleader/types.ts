@@ -65,6 +65,105 @@ export interface Deal {
   web_url: string;
 }
 
+export interface DealInfo {
+  data: {
+  id: string;
+  title: string;
+  summary: string | null;
+  reference: string;
+  status: string;
+  lead: {
+    customer: {
+      type: string;
+      id: string;
+    };
+    contact_person: {
+      type: string;
+      id: string;
+    } | null;
+  };
+  weighted_value: {
+    amount: number;
+    currency: string;
+  };
+  purchase_order_number: string | null;
+  estimated_value: {
+    amount: number;
+    currency: string;
+  };
+  estimated_closing_date: string | null;
+  estimated_probability: number | null;
+  current_phase: {
+    type: string;
+    id: string;
+  };
+  responsible_user: {
+    type: string;
+    id: string;
+  };
+  closed_at: string | null;
+  source: {
+    type: string;
+    id: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+  lost_reason: {
+    reason: {
+      type: string;
+      id: string;
+    };
+    remark: string | null;
+  } | null;
+  pipeline: {
+    type: string;
+    id: string;
+  };
+  department: {
+    type: string;
+    id: string;
+  };
+  web_url: string;
+  custom_fields: {
+    definition: {
+      type: string;
+      id: string;
+    };
+    value: string |null;
+  }[];
+  phase_history: {
+    phase: {
+      type: string;
+      id: string;
+    };
+    started_at: string;
+    started_by: {
+      type: string;
+      id: string;
+    };
+    }[]
+
+  };
+  included: {
+    customFieldDefinition: {
+      id: string;
+      context: string;
+      type: string;
+      label: string;
+      group: string | null;
+      required: boolean;
+      configuration: {
+        options: {
+          id: string,
+          value: string,
+        }[];
+        extra_option_allowed: boolean;
+        default_value: string | null;
+      } | null;
+    }[]
+  }
+}
+
 export interface User {
     id: string;
     account: {
@@ -176,6 +275,13 @@ export interface SimplifiedDeal {
     last_name: string;
     avatar_url: string | null;
   };
+  custom_fields: {
+    definition: {
+      type: string;
+      id: string;
+    };
+    value: string |null;
+  }[];
 }
 
 export type SimplifiedDealArray = SimplifiedDeal[];

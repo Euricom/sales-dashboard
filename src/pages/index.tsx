@@ -6,6 +6,7 @@ import { DealContextProvider } from "~/contexts/dealsProvider";
 import { EmployeeContextProvider } from "~/contexts/employeesProvider";
 import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGroups";
 import { ActionMenu } from "~/components/ui/actionMenu";
+import { Toaster } from "~/components/ui/toaster";
 import Login from "./login";
 
 export default function Home() {
@@ -40,6 +41,7 @@ export default function Home() {
                 </div>
                 <ActionMenu />
               </main>
+              <Toaster />
             </DropContextProvider>
           </EmployeeContextProvider>
         </DealContextProvider>

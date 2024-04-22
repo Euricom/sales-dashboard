@@ -1,6 +1,13 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api } from "~/utils/api";
 import type { DraggableEmployee, Employee } from "~/lib/types";
+import { DealContext } from "./dealsProvider";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -31,12 +38,16 @@ export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
   // GET employees data
-  const { data: employeesData, isLoading } =
-    api.mongodb.getEmployees.useQuery();
+  const {
+    data: employeesData,
+    isLoading,
+    refetch,
+  } = api.mongodb.getEmployees.useQuery();
+  const { isRefetching, setIsRefetching } = useContext(DealContext);
+
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
-
   useEffect(() => {
     if (employeesData) {
       // GET employees from MongoDB
@@ -85,6 +96,19 @@ export const EmployeeContextProvider: React.FC<
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
+
+  // fix for the Teamleader sync. dit zou later eventueel moeten worden herschreven want hij voert dit nu 2 keer uit door zijn dependencies
+  useEffect(() => {
+    if (isRefetching) {
+      refetch()
+        .then(() => {
+          setIsRefetching(false);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [isRefetching, setIsRefetching, refetch]);
 
   return (
     <EmployeeContext.Provider
