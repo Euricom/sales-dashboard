@@ -1,7 +1,13 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api } from "~/utils/api";
 import type { DraggableEmployee, Employee } from "~/lib/types";
-import { toast } from "~/components/ui/use-toast";
+import { DealContext } from "./dealsProvider";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -37,6 +43,7 @@ export const EmployeeContextProvider: React.FC<
     isLoading,
     refetch,
   } = api.mongodb.getEmployees.useQuery();
+  const { isRefetching, setIsRefetching } = useContext(DealContext);
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -90,14 +97,18 @@ export const EmployeeContextProvider: React.FC<
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
 
-  // Use the updateDeal mutation hook
-  const dealMutator = api.teamleader.updateDeal.useMutation({
-    onSuccess: async () => {
-      // Refetch employees data when deal update succeeds
-      await refetch();
-    },
-    onError: () => toast({ title: "error", variant: "destructive" }),
-  });
+  // fix for the Teamleader sync. dit zou later eventueel moeten worden herschreven want hij voert dit nu 2 keer uit door zijn dependencies
+  useEffect(() => {
+    if (isRefetching) {
+      refetch()
+        .then(() => {
+          setIsRefetching(false);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [isRefetching, setIsRefetching, refetch]);
 
   return (
     <EmployeeContext.Provider

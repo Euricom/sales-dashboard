@@ -11,7 +11,8 @@ type DealContextType = {
   filteredDeals: SimplifiedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
   getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
-  isFetched?: boolean;
+  isRefetching?: boolean;
+  setIsRefetching: React.Dispatch<React.SetStateAction<boolean>>;
   moveDeal: (id: string, phase_id: string) => void;
 };
 
@@ -34,9 +35,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       toast({ title: "success", variant: "success" });
-      await refetch();
     },
     onError: () => toast({ title: "error", variant: "destructive" }),
   });
@@ -52,6 +52,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     () => (isLoading ? null : dealsData),
     [dealsData, isLoading],
   );
+  const [isRefetching, setIsRefetching] = useState(false);
 
   const dealPhases = [
     {
@@ -120,6 +121,13 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             ) as string[],
           },
         });
+        refetch()
+          .then(() => {
+            setIsRefetching(true);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       },
     });
   }
@@ -143,6 +151,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         dealPhases,
         isLoading,
         filteredDeals,
+        isRefetching,
+        setIsRefetching,
         setDealIds,
         getDealInfo,
         moveDeal,
