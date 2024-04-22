@@ -1,6 +1,13 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api } from "~/utils/api";
 import type { DraggableEmployee, Employee } from "~/lib/types";
+import { DealContext } from "./dealsProvider";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -12,6 +19,11 @@ type EmployeeContextType = {
     starter: DraggableEmployee[];
     openForNewOpportunities: DraggableEmployee[];
   };
+  employeeId: string;
+  setEmployeeId: React.Dispatch<React.SetStateAction<string>>;
+  isFiltering: boolean;
+  setFiltering: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading?: boolean;
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -26,14 +38,20 @@ export const EmployeeContextProvider: React.FC<
   EmployeeContextProviderProps
 > = ({ children }) => {
   // GET employees data
-  const employeesData = api.mongodb.getEmployees.useQuery();
-  // Instantiatein itial employees
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const {
+    data: employeesData,
+    isLoading,
+    refetch,
+  } = api.mongodb.getEmployees.useQuery();
+  const { isRefetching, setIsRefetching } = useContext(DealContext);
 
+  // Instantiate initial employees
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isFiltering, setFiltering] = useState(false);
   useEffect(() => {
     if (employeesData) {
       // GET employees from MongoDB
-      setEmployees(employeesData.data as Employee[]);
+      setEmployees(employeesData as Employee[]);
     }
   }, [employeesData]);
 
@@ -73,9 +91,24 @@ export const EmployeeContextProvider: React.FC<
     openForNewOpportunities: DraggableEmployee[];
   }>(sortEmployeesData(draggableEmployees));
 
+  const [employeeId, setEmployeeId] = useState<string>("");
+
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
+
+  // fix for the Teamleader sync. dit zou later eventueel moeten worden herschreven want hij voert dit nu 2 keer uit door zijn dependencies
+  useEffect(() => {
+    if (isRefetching) {
+      refetch()
+        .then(() => {
+          setIsRefetching(false);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [isRefetching, setIsRefetching, refetch]);
 
   return (
     <EmployeeContext.Provider
@@ -84,6 +117,11 @@ export const EmployeeContextProvider: React.FC<
         setEmployees: setEmployees,
         draggableEmployees: draggableEmployees,
         sortedData: sortedData,
+        employeeId: employeeId,
+        setEmployeeId: setEmployeeId,
+        isFiltering: isFiltering,
+        setFiltering: setFiltering,
+        isLoading: isLoading,
       }}
     >
       {children}

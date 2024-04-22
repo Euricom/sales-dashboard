@@ -11,6 +11,7 @@ export type BoardRowProps = {
   isOverlay?: boolean;
   isHeader?: boolean;
   rowStatus?: string;
+  isFiltering?: boolean;
 };
 
 export type EmployeeType = "Employee";
@@ -25,6 +26,7 @@ export type Employee = {
     Status: string;
     Contract_x0020_Substatus: string;
     avatar: string | null;
+    Euricom_x0020_email: string | null;
   };
 };
 
@@ -59,6 +61,13 @@ export type LoginProps = {
 
 // Dit binnen halen van teamleader?
 export type DealPhase = {
-  // id: string;
+  id: string | undefined;
   name: string;
+};
+
+export type PM = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
 };
