@@ -75,7 +75,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       name: "Weerhouden",
     },
     {
-      id: "a1f0931d-2094-0c3a-9342-98df836a57ce", // dit moet nog nagevraagd worden bij de PM's
+      id: "7ec460c1-416a-03ce-8460-0299ae10bb38",
       name: "Niet-Weerhouden",
     },
   ];
