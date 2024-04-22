@@ -12,6 +12,7 @@ type DealContextType = {
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
   getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
   isFetched?: boolean;
+  moveDeal: (id: string, phase_id: string) => void;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -33,6 +34,13 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
+    onSuccess: async () => {
+      toast({ title: "success", variant: "success" });
+      await refetch();
+    },
+    onError: () => toast({ title: "error", variant: "destructive" }),
+  });
+  const dealMover = api.teamleader.moveDeal.useMutation({
     onSuccess: async () => {
       toast({ title: "success", variant: "success" });
       await refetch();
@@ -74,6 +82,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       type: string;
     };
   };
+
+  function moveDeal(id: string, phaseName: string) {
+    const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
+    if (!phase_id) throw new Error("Phase not found");
+    const input = {
+      id: id,
+      phase_id: phase_id,
+    };
+    dealMover.mutate(input);
+  }
 
   function getDealInfo(id: string, phaseName: string, employee: Employee) {
     const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
@@ -127,6 +145,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         filteredDeals,
         setDealIds,
         getDealInfo,
+        moveDeal,
       }}
     >
       {children}

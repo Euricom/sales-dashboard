@@ -53,7 +53,7 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { filteredDeals, dealPhases, isLoading, getDealInfo } =
+  const { filteredDeals, dealPhases, isLoading, getDealInfo, moveDeal } =
     useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
@@ -240,25 +240,34 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         ) {
           return;
         }
-        appendEmployee(employee, overData.sortable.containerId);
+        appendEmployee(employee, activeRowId, overData.sortable.containerId);
       } else {
         // over a row
         if (!isAllowedToDrop(activeEmployee, overId, employee)) {
           return;
         }
-        appendEmployee(employee, overId);
+        appendEmployee(employee, activeRowId, overId);
       }
     }
     setActiveEmployee(undefined);
   }
 
   // Helper function to append an employee to a given row
-  function appendEmployee(employee: Employee, rowId: string) {
+  function appendEmployee(
+    employee: Employee,
+    activeRowId: string,
+    rowId: string,
+  ) {
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
           emp.rows.push(rowId);
-          updateTeamleader(rowId.split("/")[0], rowId.split("/")[1], emp);
+          updateTeamleader(
+            rowId.split("/")[0],
+            rowId.split("/")[1],
+            emp,
+            activeRowId.split("/")[1],
+          );
           updateEmployeeInDB(emp); // Update the employee in the database
           return emp;
         }
@@ -316,6 +325,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
               targetId.split("/")[0],
               targetId.split("/")[1],
               emp,
+              initialRowId.split("/")[1],
             );
 
             updateEmployeeInDB(emp); // Update the employee in the database
@@ -429,10 +439,20 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     dealId: string | undefined,
     phaseName: string | undefined,
     employee: Employee,
+    initialPhaseName: string | undefined,
   ) {
     if (!dealId || !phaseName || phaseName === "Mogelijkheden") {
       return;
     }
-    getDealInfo(dealId, phaseName, employee);
+    if (
+      initialPhaseName &&
+      ["Voorgesteld", "Interview", "Niet-Weerhouden", "Weerhouden"].includes(
+        initialPhaseName,
+      )
+    ) {
+      moveDeal(dealId, phaseName);
+    } else {
+      getDealInfo(dealId, phaseName, employee);
+    }
   }
 };

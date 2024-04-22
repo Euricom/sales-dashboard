@@ -30,6 +30,24 @@ export const teamleaderRouter = createTRPCRouter({
     }
   }),
 
+  moveDeal: protectedProcedure.input(z.object({ id: z.string(), phase_id: z.string()})).mutation(async (options) => {
+    const accessToken = options.ctx.session.token.accessToken;
+    const dealId = options.input.id;
+    const phaseId = options.input.phase_id;
+    try {
+      if (!accessToken) {
+        throw new Error("Access token not found");
+      }
+      const response = await moveDeal(accessToken, dealId, phaseId);
+      if (!response) {
+        throw new Error("Failed to move deal in Teamleader");
+      }
+      return Promise.resolve({ data: { id: dealId, type: "move" } });
+    } catch (error) {
+      console.error("Error in moveDeal:", error);
+    }
+  }),
+
   updateDeal: protectedProcedure
     .input(
       z.object({ id: z.string(), email: z.string(), phase_id: z.string() }),
