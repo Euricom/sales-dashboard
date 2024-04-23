@@ -8,12 +8,12 @@ export default function DealsColumn() {
   const { filteredDeals } = useContext(DealContext);
 
   return (
-    <div>
-      <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] w-[22.5rem]">
+    <>
+      <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] min-w-[22.5rem]">
         {filteredDeals?.map((dealObject: SimplifiedDeal, index) => (
           <DealCard deal={dealObject} key={index} />
         ))}
       </CardContent>
-    </div>
+    </>
   );
 }
