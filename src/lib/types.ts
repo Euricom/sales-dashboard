@@ -71,3 +71,8 @@ export type PM = {
   last_name: string;
   avatar_url: string | null;
 };
+
+export type groupedDealObject = {
+  id: string;
+  value: string[];
+}

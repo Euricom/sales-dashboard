@@ -6,8 +6,13 @@ import React, {
   useState,
 } from "react";
 import { api } from "~/utils/api";
-import type { DraggableEmployee, Employee } from "~/lib/types";
+import type {
+  DraggableEmployee,
+  Employee,
+  groupedDealObject,
+} from "~/lib/types";
 import { DealContext } from "./dealsProvider";
+import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -43,17 +48,47 @@ export const EmployeeContextProvider: React.FC<
     isLoading,
     refetch,
   } = api.mongodb.getEmployees.useQuery();
-  const { isRefetching, setIsRefetching } = useContext(DealContext);
+  const mongoMutator = api.mongodb.updateDeals.useMutation();
+  const { isRefetching, setIsRefetching, filteredDeals } =
+    useContext(DealContext);
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
-  useEffect(() => {
+  const [uniqueDeals, setUniqueDeals] = useState<groupedDealObject[]>([]);
+
+  useMemo(() => {
     if (employeesData) {
       // GET employees from MongoDB
       setEmployees(employeesData as Employee[]);
     }
   }, [employeesData]);
+
+  useEffect(() => {
+    if (filteredDeals) {
+      const newUniqueDeals = [] as groupedDealObject[];
+      // Group deals by unique key
+      filteredDeals.forEach((deal) => {
+        const key = generateKey(deal);
+        if (!key) return;
+        const existingDeal = newUniqueDeals.find((entry) => entry.id === key);
+
+        if (existingDeal) {
+          // If a deal with the same key exists, push the deal ID to its value array
+          existingDeal.value.push(deal.id);
+        } else {
+          // If no deal with the same key exists, create a new entry
+          newUniqueDeals.push({ id: key, value: [deal.id] });
+        }
+      });
+      setUniqueDeals(newUniqueDeals);
+    }
+  }, [filteredDeals]);
+
+  useEffect(() => {
+    // Call the mutator function
+    mongoMutator.mutate(uniqueDeals);
+  }, [uniqueDeals]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];
@@ -156,3 +191,10 @@ const sortEmployeesData = (draggableEmployees: DraggableEmployee[]) => {
 
   return { bench, endOfContract, starter, openForNewOpportunities };
 };
+
+function generateKey(deal: SimplifiedDeal | undefined | null) {
+  if (!deal) return;
+  const string = `${deal.title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
+
+  return btoa(string);
+}

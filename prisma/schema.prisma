@@ -11,3 +11,8 @@ model Employee {
     id   String   @id @default(uuid()) @map("_id")
     rows String[] @default(["0"])
 }
+
+model Deals {
+    id      String   @id @default(uuid()) @map("_id")
+    dealIds String[] @default([])
+}

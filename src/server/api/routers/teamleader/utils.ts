@@ -70,8 +70,8 @@ export const getDeals = async (accessToken: string) => {
     },
     body: JSON.stringify({
       filter: {
-        // responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
-        status: ["open"],
+        responsible_user_id: "bcc33953-e3fe-0913-b552-050ab1b47456",
+        // status: ["open"],
       },
       page: {
         size: 100,
@@ -359,7 +359,7 @@ export const createDeal = async (
         },
         constact_person: null,
       },
-      title: deal.data.title + "2",
+      title: deal.data.title,
       summary: deal.data.summary ?? "",
       source_id: deal.data.source?.id ?? "a33798cb-401f-0a42-b342-ee0d12ab5cf7",
       department_id: deal.data.department?.id,
