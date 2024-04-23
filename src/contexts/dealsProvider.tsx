@@ -17,6 +17,8 @@ type DealContextType = {
   PMId: string | undefined;
   setPMId: React.Dispatch<React.SetStateAction<string>>;
   getAllPMs: PM[] | undefined | null;
+  filteringCurrentRole: string;
+  setFilteringCurrentRole: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -137,27 +139,70 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   // Filtering deals
   const [dealIds, setDealIds] = useState<string[]>([]);
   const [PMId, setPMId] = useState<string>("");
+  const [filteringCurrentRole, setFilteringCurrentRole] = useState<string>("");
   const [filteredDeals, setFilteredDeals] = useState<
     SimplifiedDeal[] | undefined | null
   >(deals ?? null);
 
+  // useEffect(() => {
+  //   setFilteredDeals(() => {
+  //     if (dealIds.length === 0 && PMId === "") {
+  //       return deals;
+  //     } else {
+  //       return deals?.filter((deal) => {
+  //         if (dealIds.length >= 1 && PMId !== "") {
+  //           return dealIds.includes(deal.id) && deal.PM.id === PMId;
+  //         } else if (dealIds.length >= 1) {
+  //           return dealIds.includes(deal.id);
+  //         } else {
+  //           return deal.PM.id === PMId;
+  //         }
+  //       });
+  //     }
+  //   });
+  // }, [dealIds, PMId, deals]);
+
   useEffect(() => {
     setFilteredDeals(() => {
-      if (dealIds.length === 0 && PMId === "") {
+      if (dealIds.length === 0 && PMId === "" && filteringCurrentRole === "") {
         return deals;
-      } else {
-        return deals?.filter((deal) => {
-          if (dealIds.length >= 1 && PMId !== "") {
-            return dealIds.includes(deal.id) && deal.PM.id === PMId;
-          } else if (dealIds.length >= 1) {
-            return dealIds.includes(deal.id);
-          } else {
-            return deal.PM.id === PMId;
-          }
-        });
       }
+
+      return deals?.filter((deal) => {
+        const matchesDealIds =
+          dealIds.length === 0 || dealIds.includes(deal.id);
+        const matchesPMId = PMId === "" || deal.PM.id === PMId;
+        const matchesCurrentRole =
+          filteringCurrentRole === "" ||
+          deal.custom_fields[1]?.value === filteringCurrentRole;
+
+        return matchesDealIds && matchesPMId && matchesCurrentRole;
+      });
     });
-  }, [dealIds, PMId, deals]);
+  }, [dealIds, PMId, filteringCurrentRole, deals]);
+
+  // useEffect(() => {
+  //   setFilteredDeals(() => {
+  //     if (dealIds.length === 0 && PMId === "" && filteringCurrentRole === "") {
+  //       return deals;
+  //     } else {
+  //       return deals?.filter((deal) => {
+  //         if (dealIds.length >= 1 && PMId !== "") {
+  //           return dealIds.includes(deal.id) && deal.PM.id === PMId;
+  //         } else if (dealIds.length >= 1 && filteringCurrentRole !== "") {
+  //           return (
+  //             dealIds.includes(deal.id) &&
+  //             deal.custom_fields[1]?.value === filteringCurrentRole
+  //           );
+  //         } else if (dealIds.length >= 1) {
+  //           return dealIds.includes(deal.id);
+  //         } else {
+  //           return deal.PM.id === PMId;
+  //         }
+  //       });
+  //     }
+  //   });
+  // }, [dealIds, PMId, deals, filteringCurrentRole]);
 
   const getAllPMs = useMemo(() => {
     return deals
@@ -182,6 +227,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         PMId,
         setPMId,
         getAllPMs,
+        filteringCurrentRole,
+        setFilteringCurrentRole,
       }}
     >
       {children}
