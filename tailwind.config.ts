@@ -55,6 +55,10 @@ const config = {
         js_dev_role: {
           DEFAULT: "hsl(var(--js-dev-role))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
       },
       borderRadius: {
         14: "0.875rem",
