@@ -327,7 +327,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
               emp,
               initialRowId.split("/")[1],
             );
-
             updateEmployeeInDB(emp); // Update the employee in the database
             return emp;
           }
@@ -347,10 +346,13 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const [initialRowId, initialRowStatus] =
       (draggableEmployee.dragId as string).split("_")[1]?.split("/") ?? [];
     const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
-    // Inside the same row
-    if (initialRowId === targetRowId && initialRowStatus === "Mogelijkheden")
-      return true;
 
+    // Inside the same row OR dragging between rows in "Mogelijkheden" column
+    if (
+      (initialRowId === targetRowId && initialRowStatus === "Mogelijkheden") ||
+      initialRowStatus === "Mogelijkheden"
+    )
+      return true;
     // Not in the same row and row does not exist in employee.rows
     if (
       initialRowId !== targetRowId &&
