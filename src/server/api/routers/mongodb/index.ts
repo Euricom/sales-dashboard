@@ -16,6 +16,7 @@ export const mongodbRouter = createTRPCRouter({
         employee: z.object({
           employeeId: z.string(),
           rows: z.array(z.string()),
+          dealIds: z.array(z.string()),
         }),
       }),
     )

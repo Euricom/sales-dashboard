@@ -77,11 +77,11 @@ export const getInitialEmployees = async () => {
   // if there are missing employees, create missing employees in the db
   if (missingEmployees.length === 1) {
     for (const missingEmployee of missingEmployees) {
-      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"] });
+      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"], dealIds: []});
     }
   }
   if (missingEmployees.length > 1) {
-    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"] })));
+    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"], dealIds: []})));
   }
 
 
@@ -93,6 +93,7 @@ export const getInitialEmployees = async () => {
     return {
       employeeId: employeeDb?.employeeId,
       rows: employeeDb.rows, // Assuming default row is ["0"]
+      dealIds: employeeDb.dealIds, // Assuming default dealIds is []
       fields: employeeFromSharepoint?.fields,
     };
   });
@@ -107,7 +108,7 @@ export const updateEmployee = async (employee: EmployeeFromDB) => {
       .collection("Employee")
       .updateOne(
         { employeeId: employee.employeeId },
-        { $set: { rows: employee.rows } },
+        { $set: { rows: employee.rows, dealIds: employee.dealIds } },
       );
   } catch (error) {
     console.error(error);

@@ -48,8 +48,9 @@ export const EmployeeContextProvider: React.FC<
     isLoading,
     refetch,
   } = api.mongodb.getEmployees.useQuery();
-  const mongoMutator = api.mongodb.updateDeals.useMutation();
-  const { isRefetching, setIsRefetching, filteredDeals } =
+  const mongoDealMutator = api.mongodb.updateDeals.useMutation();
+  const mongoEmployeeUpdater = api.mongodb.updateEmployee.useMutation();
+  const { isRefetching, setIsRefetching, deals, dealPhases } =
     useContext(DealContext);
 
   // Instantiate initial employees
@@ -65,10 +66,10 @@ export const EmployeeContextProvider: React.FC<
   }, [employeesData]);
 
   useEffect(() => {
-    if (filteredDeals) {
+    if (deals) {
       const newUniqueDeals = [] as groupedDealObject[];
       // Group deals by unique key
-      filteredDeals.forEach((deal) => {
+      deals.forEach((deal) => {
         const key = generateKey(deal);
         if (!key) return;
         const existingDeal = newUniqueDeals.find((entry) => entry.id === key);
@@ -83,11 +84,11 @@ export const EmployeeContextProvider: React.FC<
       });
       setUniqueDeals(newUniqueDeals);
     }
-  }, [filteredDeals]);
+  }, [deals]);
 
   useEffect(() => {
     // Call the mutator function
-    mongoMutator.mutate(uniqueDeals);
+    mongoDealMutator.mutate(uniqueDeals);
   }, [uniqueDeals]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
@@ -144,6 +145,60 @@ export const EmployeeContextProvider: React.FC<
         });
     }
   }, [isRefetching, setIsRefetching, refetch]);
+
+  useEffect(() => {
+    if (employees && deals && uniqueDeals) {
+      updateEmployeeData(employees, uniqueDeals, deals);
+    }
+  }, [deals, uniqueDeals]);
+
+  function updateEmployeeData(
+    employees: Employee[],
+    groupedDeals: groupedDealObject[],
+    deals: SimplifiedDeal[],
+  ) {
+    deals.forEach((deal) => {
+      // check if the deal has an email value, if not, skip the deal
+      if (!deal.custom_fields[0]?.value || deal.custom_fields[0].value === "") {
+        return;
+      }
+
+      // add deal to deals array of employees
+      const employee = employees.find(
+        (employee) =>
+          employee.fields.Euricom_x0020_email === deal.custom_fields[0]?.value,
+      );
+      if (!employee?.dealIds.includes(deal.id)) {
+        employee?.dealIds.push(deal.id);
+      }
+
+      // find the groupedDealId of the deal
+      const groupedDeal = groupedDeals.find((groupedDeal) =>
+        groupedDeal.value.includes(deal.id),
+      );
+      // look wether the rows of the employee aren't already accurate
+      // if no, update the rows of the employee
+      if (!groupedDeal) return;
+      const phaseName = dealPhases.find(
+        (phase) => phase.id === deal.deal_phase.id,
+      )?.name;
+      const row = groupedDeal?.id + "/" + phaseName;
+      if (!employee?.rows.includes(row)) {
+        employee?.rows.push(row);
+      }
+
+      // update the employee in the database
+      if (employee?.employeeId && employee?.rows && employee?.dealIds) {
+        mongoEmployeeUpdater.mutate({
+          employee: {
+            employeeId: employee?.employeeId,
+            rows: employee?.rows as string[],
+            dealIds: employee?.dealIds,
+          },
+        });
+      }
+    });
+  }
 
   return (
     <EmployeeContext.Provider

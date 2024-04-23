@@ -8,8 +8,9 @@ datasource db {
 }
 
 model Employee {
-    id   String   @id @default(uuid()) @map("_id")
-    rows String[] @default(["0"])
+    id      String   @id @default(uuid()) @map("_id")
+    rows    String[] @default(["0"])
+    dealIds String[] @default([])
 }
 
 model Deals {

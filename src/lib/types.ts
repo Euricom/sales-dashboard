@@ -18,6 +18,7 @@ export type EmployeeType = "Employee";
 export type Employee = {
   employeeId: string;
   rows: UniqueIdentifier[];
+  dealIds: string[];
   fields: {
     Title: string;
     City: string;
@@ -33,6 +34,7 @@ export type Employee = {
 export type EmployeeFromDB = {
   employeeId: string;
   rows: UniqueIdentifier[];
+  dealIds: string[];
 };
 
 export type DraggableEmployee = {

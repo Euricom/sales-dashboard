@@ -22,7 +22,6 @@ export const getDealsFromDB = async () => {
 
 export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealObject[]) => {
     const exisitingDeals = await getDealsFromDB();
-    console.log("existing deals", deals)
     if (!exisitingDeals) return "No deals found in the database.";
     const newDeals = deals.filter((deal) => {
         return !exisitingDeals.some((existingDeal) => existingDeal.id === deal.id);

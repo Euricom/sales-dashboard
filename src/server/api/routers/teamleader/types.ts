@@ -280,7 +280,7 @@ export interface SimplifiedDeal {
       type: string;
       id: string;
     };
-    value: string |null;
+    value: string | null;
   }[];
 }
 
