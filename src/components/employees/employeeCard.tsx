@@ -8,6 +8,7 @@ import { useContext, useState } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
+import { determineColors } from "~/lib/utils";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -94,6 +95,8 @@ export function EmployeeCardDragged({
     }, 750);
   };
 
+  const colors = determineColors(employee.fields.Job_x0020_title);
+
   return (
     <Card
       ref={setNodeRef}
@@ -145,7 +148,13 @@ export function EmployeeCardDragged({
             </div>
           </div>
         )}
-        <div className="absolute z-10 bottom-0 bg-white/75 text-black w-full rounded-b-14 truncate px-1.5">
+        <div
+          className="absolute z-10 bottom-0 w-full rounded-b-14 truncate px-1.5"
+          style={{
+            backgroundColor: colors?.backgroundColor,
+            color: colors?.color,
+          }}
+        >
           {firstNameOnly(employee.fields.Title)}
         </div>
       </Button>

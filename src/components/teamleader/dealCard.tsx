@@ -5,9 +5,13 @@ import { useContext } from "react";
 import CompanyLogo from "./companyLogo";
 import afkortingen from "~/lib/Afkortingen.json";
 import { PmAvatar } from "./pmAvatar";
+import { determineColors } from "~/lib/utils";
 
 export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
   const { activeDealId } = useContext(DropContext);
+  const colors = determineColors(
+    deal.custom_fields[1]?.value ? deal.custom_fields[1]?.value : null,
+  );
 
   const variant =
     deal.id === (activeDealId as string)?.split("/")[0]
@@ -50,7 +54,13 @@ export default function DealCard({ deal }: { deal: SimplifiedDeal }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end">
-        <div className="text-end text-xs bg-js_dev_role px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit truncate...">
+        <div
+          className="text-end text-xs px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit truncate..."
+          style={{
+            backgroundColor: colors?.backgroundColor,
+            color: colors?.color,
+          }}
+        >
           {deal.custom_fields[1]?.value
             ? deal.custom_fields[1]?.value
             : trimRole(deal.title)}
