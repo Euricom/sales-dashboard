@@ -311,6 +311,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       if (!newTargetId) return;
       targetId = newTargetId;
     }
+    if (initialRowId === targetId) return;
     // Update the employees state
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
