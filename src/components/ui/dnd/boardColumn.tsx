@@ -128,7 +128,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       {isDeals ? (
         <DealsColumn />
       ) : (
-        <CardContent className="flex flex-col p-1 gap-2 column no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] w-full">
+        <CardContent className="flex flex-col p-1 gap-2 column no-scrollbar overflow-inherit h-[calc(100vh-9.625rem)] w-full">
           <SortableContext items={rowsIds}>
             {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
           </SortableContext>

@@ -25,7 +25,8 @@ const cardVariants = cva("text-white rounded-14", {
       deal: "h-15 w-full min-w-80 w-full pl-1.5 pr-1.5 py-1.5",
       row: "min-h-15 h-15",
       employee: "h-15 w-15 justify-center items-center bg-secondary",
-      employeeDragged: "h-15 w-20 justify-center items-center bg-primary",
+      employeeDragged:
+        "h-15 w-20 justify-center items-center bg-primary z-10 relative",
     },
   },
   defaultVariants: {
