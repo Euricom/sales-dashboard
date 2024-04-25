@@ -1,6 +1,6 @@
 import { env } from "~/env";
 import { MongoClient } from "mongodb";
-import { type groupedDealObject } from "~/lib/types";
+import { type groupedDealFromDB } from "~/lib/types";
 
 export const getDealsFromDB = async () => {
     const client = new MongoClient(env.DATABASE_URL);
@@ -9,7 +9,7 @@ export const getDealsFromDB = async () => {
         await client.connect();
     
         const deals = await db
-        .collection<groupedDealObject>("Deals")
+        .collection<groupedDealFromDB>("Deals")
         .find({})
         .toArray();
         return deals;
@@ -20,7 +20,7 @@ export const getDealsFromDB = async () => {
     }
 };
 
-export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealObject[]) => {
+export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealFromDB[]) => {
     const exisitingDeals = await getDealsFromDB();
     if (!exisitingDeals) return "No deals found in the database.";
     const newDeals = deals.filter((deal) => {
@@ -38,7 +38,7 @@ export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealObject[])
     }
 };
   
-  export const createDeal = async (groupedDeal: groupedDealObject) => {
+  export const createDeal = async (groupedDeal: groupedDealFromDB) => {
     const client = new MongoClient(env.DATABASE_URL);
     const db = client.db();
     try {
@@ -52,7 +52,7 @@ export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealObject[])
     }
   }
   
-  export const createMultipleDeals = async (groupedDeals: groupedDealObject[]) => {
+  export const createMultipleDeals = async (groupedDeals: groupedDealFromDB[]) => {
     const client = new MongoClient(env.DATABASE_URL);
     const db = client.db();
     try {
@@ -65,3 +65,17 @@ export const checkWhichDealsNeedToBeCreated = async (deals: groupedDealObject[])
       await client.close();
     }
   };
+
+  export const updateDeal = async (groupedDeal: groupedDealFromDB) => {
+    const client = new MongoClient(env.DATABASE_URL);
+    const db = client.db();
+    try {
+      await client.connect();
+      const postResult = await db.collection("Deals").updateOne({id: groupedDeal.id}, {$set: groupedDeal});
+      return postResult;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await client.close();
+    }
+  }

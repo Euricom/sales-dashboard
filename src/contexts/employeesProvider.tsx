@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
 import type {
   DraggableEmployee,
   Employee,
-  groupedDealObject,
+  groupedDealFromDB,
 } from "~/lib/types";
 import { DealContext } from "./dealsProvider";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
@@ -48,15 +48,13 @@ export const EmployeeContextProvider: React.FC<
     isLoading,
     refetch,
   } = api.mongodb.getEmployees.useQuery();
-  const mongoDealMutator = api.mongodb.updateDeals.useMutation();
   const mongoEmployeeUpdater = api.mongodb.updateEmployee.useMutation();
-  const { isRefetching, setIsRefetching, deals, dealPhases } =
+  const { isRefetching, setIsRefetching, deals, dealPhases, uniqueDeals } =
     useContext(DealContext);
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
-  const [uniqueDeals, setUniqueDeals] = useState<groupedDealObject[]>([]);
 
   useMemo(() => {
     if (employeesData) {
@@ -64,32 +62,6 @@ export const EmployeeContextProvider: React.FC<
       setEmployees(employeesData as Employee[]);
     }
   }, [employeesData]);
-
-  useEffect(() => {
-    if (deals) {
-      const newUniqueDeals = [] as groupedDealObject[];
-      // Group deals by unique key
-      deals.forEach((deal) => {
-        const key = generateKey(deal);
-        if (!key) return;
-        const existingDeal = newUniqueDeals.find((entry) => entry.id === key);
-
-        if (existingDeal) {
-          // If a deal with the same key exists, push the deal ID to its value array
-          existingDeal.value.push(deal.id);
-        } else {
-          // If no deal with the same key exists, create a new entry
-          newUniqueDeals.push({ id: key, value: [deal.id] });
-        }
-      });
-      setUniqueDeals(newUniqueDeals);
-    }
-  }, [deals]);
-
-  useEffect(() => {
-    // Call the mutator function
-    mongoDealMutator.mutate(uniqueDeals);
-  }, [uniqueDeals]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];
@@ -154,7 +126,7 @@ export const EmployeeContextProvider: React.FC<
 
   function updateEmployeeData(
     employees: Employee[],
-    groupedDeals: groupedDealObject[],
+    groupedDeals: groupedDealFromDB[],
     deals: SimplifiedDeal[],
   ) {
     deals.forEach((deal) => {
@@ -246,10 +218,3 @@ const sortEmployeesData = (draggableEmployees: DraggableEmployee[]) => {
 
   return { bench, endOfContract, starter, openForNewOpportunities };
 };
-
-function generateKey(deal: SimplifiedDeal | undefined | null) {
-  if (!deal) return;
-  const string = `${deal.title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
-
-  return btoa(string);
-}

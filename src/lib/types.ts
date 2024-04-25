@@ -1,5 +1,6 @@
 import { type UniqueIdentifier } from "@dnd-kit/core";
 import type { Session } from "next-auth";
+import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 
 export type RowType = "Row";
 export type Row = {
@@ -74,7 +75,12 @@ export type PM = {
   avatar_url: string | null;
 };
 
-export type groupedDealObject = {
+export type groupedDealFromDB = {
   id: string;
   value: string[];
+}
+
+export type GroupedDeal = {
+  deal: SimplifiedDeal;
+  groupedDealId: string;
 }
