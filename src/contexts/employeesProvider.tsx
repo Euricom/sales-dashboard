@@ -111,11 +111,14 @@ export const EmployeeContextProvider: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals, uniqueDeals]);
 
+  const [shouldRefetch, setShouldRefetch] = useState(false);
   function updateEmployeeData(
     employees: Employee[],
     groupedDeals: groupedDealFromDB[],
     deals: SimplifiedDeal[],
   ) {
+    setShouldRefetch(false);
+
     deals.forEach((deal) => {
       // Skip deals without email value
       const emailValue = deal.custom_fields[0]?.value;
@@ -156,10 +159,12 @@ export const EmployeeContextProvider: React.FC<
 
       // update the employee in the database
       if (shouldUpdate) {
+        setShouldRefetch(true);
         updateEmployeeInDatabase(employee);
-        refetch().catch((error) => console.error(error));
       }
     });
+    // console.log(shouldRefetch);
+    shouldRefetch && refetch().catch(console.error);
   }
 
   const updateEmployeeInDatabase = (employee: Employee) => {
