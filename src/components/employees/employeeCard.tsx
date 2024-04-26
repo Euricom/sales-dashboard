@@ -99,6 +99,7 @@ export function EmployeeCardDragged({
         const dealId = String(row);
         return dealId.split("/")[0];
       });
+      console.log(dealIdsWithoutSuffix);
       setDealIds(
         dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
       );
@@ -210,52 +211,6 @@ export function EmployeeCardDragged({
                 }}
               />
             </div>
-            <div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="none"
-                  stroke-width="2"
-                  stroke="black"
-                  stroke-dasharray="calc((66 / 100) * 628.32) 628.32"
-                  transform="rotate(-90) translate(-230)"
-                  stroke-linecap="round"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="none"
-                  stroke-width="2"
-                  stroke="currentColor"
-                />
-
-                {/* <text x="22%" y="68%" fill="white" fontSize={10}>
-                  88
-                </text> */}
-              </svg>
-            </div>
-            {/* <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-circle"
-            >
-              <circle cx="12" cy="12" r="10" />
-            </svg> */}
           </div>
           <div className=" w-full rounded-b-14 truncate text-xs font-normal py-1">
             01/01/2021
