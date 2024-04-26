@@ -6,8 +6,13 @@ import React, {
   useState,
 } from "react";
 import { api } from "~/utils/api";
-import type { DraggableEmployee, Employee } from "~/lib/types";
+import type {
+  DraggableEmployee,
+  Employee,
+  groupedDealFromDB,
+} from "~/lib/types";
 import { DealContext } from "./dealsProvider";
+import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -43,12 +48,14 @@ export const EmployeeContextProvider: React.FC<
     isLoading,
     refetch,
   } = api.mongodb.getEmployees.useQuery();
-  const { isRefetching, setIsRefetching } = useContext(DealContext);
+  const mongoEmployeeUpdater = api.mongodb.updateEmployee.useMutation();
+  const { deals, dealPhases, uniqueDeals } = useContext(DealContext);
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
-  useEffect(() => {
+
+  useMemo(() => {
     if (employeesData) {
       // GET employees from MongoDB
       setEmployees(employeesData as Employee[]);
@@ -97,18 +104,85 @@ export const EmployeeContextProvider: React.FC<
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
 
-  // fix for the Teamleader sync. dit zou later eventueel moeten worden herschreven want hij voert dit nu 2 keer uit door zijn dependencies
   useEffect(() => {
-    if (isRefetching) {
-      refetch()
-        .then(() => {
-          setIsRefetching(false);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    if (employees && deals && uniqueDeals) {
+      updateEmployeeData(employees, uniqueDeals, deals);
     }
-  }, [isRefetching, setIsRefetching, refetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deals, uniqueDeals]);
+
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  function updateEmployeeData(
+    employees: Employee[],
+    groupedDeals: groupedDealFromDB[],
+    deals: SimplifiedDeal[],
+  ) {
+    setShouldRefetch(false);
+
+    deals.forEach((deal) => {
+      // Skip deals without email value
+      const emailValue = deal.custom_fields[0]?.value;
+      if (!emailValue || emailValue === "") {
+        return;
+      }
+
+      // Find employee by email
+      const employee = employees.find(
+        (emp) => emp.fields.Euricom_x0020_email === emailValue,
+      );
+      if (!employee) return;
+
+      // Find groupedDealId of the deal
+      const groupedDeal = groupedDeals.find((groupedDeal) =>
+        groupedDeal.value.includes(deal.id),
+      );
+      if (!groupedDeal) return;
+      // look wether the rows of the employee aren't already accurate
+      // if no, update the rows of the employee
+      // Calculate row identifier
+      const phaseName = dealPhases.find(
+        (phase) => phase.id === deal.deal_phase.id,
+      )?.name;
+      const row = `${groupedDeal.id}/${phaseName}`;
+
+      const shouldUpdate =
+        !employee.dealIds.includes(deal.id) || !employee.rows.includes(row);
+
+      // Update dealIds if necessary
+      if (!employee.dealIds.includes(deal.id)) {
+        employee.dealIds.push(deal.id);
+      }
+      // Update rows if necessary
+      if (!employee?.rows.includes(row)) {
+        employee?.rows.push(row);
+      }
+
+      // update the employee in the database
+      if (shouldUpdate) {
+        setShouldRefetch(true);
+        updateEmployeeInDatabase(employee);
+      }
+    });
+    // console.log(shouldRefetch);
+    shouldRefetch && refetch().catch(console.error);
+  }
+
+  const updateEmployeeInDatabase = (employee: Employee) => {
+    // Validate employee data
+    if (!employee?.employeeId || !employee.rows || !employee.dealIds) {
+      console.error("Invalid employee data");
+      return;
+    }
+
+    // Perform database update
+    mongoEmployeeUpdater.mutate({
+      employee: {
+        employeeId: employee.employeeId,
+        rows: employee.rows as string[],
+        dealIds: employee.dealIds,
+      },
+    });
+  };
 
   return (
     <EmployeeContext.Provider

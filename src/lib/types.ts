@@ -1,5 +1,6 @@
 import { type UniqueIdentifier } from "@dnd-kit/core";
 import type { Session } from "next-auth";
+import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 
 export type RowType = "Row";
 export type Row = {
@@ -18,6 +19,7 @@ export type EmployeeType = "Employee";
 export type Employee = {
   employeeId: string;
   rows: UniqueIdentifier[];
+  dealIds: string[];
   fields: {
     Title: string;
     City: string;
@@ -33,6 +35,7 @@ export type Employee = {
 export type EmployeeFromDB = {
   employeeId: string;
   rows: UniqueIdentifier[];
+  dealIds: string[];
 };
 
 export type DraggableEmployee = {
@@ -71,3 +74,13 @@ export type PM = {
   last_name: string;
   avatar_url: string | null;
 };
+
+export type groupedDealFromDB = {
+  id: string;
+  value: string[];
+}
+
+export type GroupedDeal = {
+  deal: SimplifiedDeal;
+  groupedDealId: string;
+}

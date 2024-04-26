@@ -1,14 +1,12 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import {
-  createDeal,
-  editDealFields,
-  getDeals,
-  moveDeal,
-  simplifyDeals,
-  updateDeal,
-} from "./utils";
+import { createDeal, getDeals, updateDealPhase, updateDeal } from "./utils";
 import type { SimplifiedDealArray } from "./types";
 import { z } from "zod";
+import {
+  simplifyDeals,
+  editDealFields,
+  makeUniqueDeals,
+} from "./teamleaderService";
 
 export const teamleaderRouter = createTRPCRouter({
   getDealsData: protectedProcedure.query(async (options) => {
@@ -23,30 +21,36 @@ export const teamleaderRouter = createTRPCRouter({
         throw new Error("Failed to fetch data from Teamleader");
       }
 
-      const simpleData: SimplifiedDealArray = await simplifyDeals(deals, accessToken);
-      return simpleData;
+      const simpleData: SimplifiedDealArray = await simplifyDeals(
+        deals,
+        accessToken,
+      );
+      const uniqueDeals = await makeUniqueDeals(simpleData);
+      return { deals: simpleData, uniqueDeals: uniqueDeals };
     } catch (error) {
       console.error("Error in getDealsData:", error);
     }
   }),
 
-  moveDeal: protectedProcedure.input(z.object({ id: z.string(), phase_id: z.string()})).mutation(async (options) => {
-    const accessToken = options.ctx.session.token.accessToken;
-    const dealId = options.input.id;
-    const phaseId = options.input.phase_id;
-    try {
-      if (!accessToken) {
-        throw new Error("Access token not found");
+  updateDealPhase: protectedProcedure
+    .input(z.object({ id: z.string(), phase_id: z.string() }))
+    .mutation(async (options) => {
+      const accessToken = options.ctx.session.token.accessToken;
+      const dealId = options.input.id;
+      const phaseId = options.input.phase_id;
+      try {
+        if (!accessToken) {
+          throw new Error("Access token not found");
+        }
+        const response = await updateDealPhase(accessToken, dealId, phaseId);
+        if (!response) {
+          throw new Error("Failed to move deal in Teamleader");
+        }
+        return Promise.resolve({ data: { id: dealId, type: "move" } });
+      } catch (error) {
+        console.error("Error in moveDeal:", error);
       }
-      const response = await moveDeal(accessToken, dealId, phaseId);
-      if (!response) {
-        throw new Error("Failed to move deal in Teamleader");
-      }
-      return Promise.resolve({ data: { id: dealId, type: "move" } });
-    } catch (error) {
-      console.error("Error in moveDeal:", error);
-    }
-  }),
+    }),
 
   updateDeal: protectedProcedure
     .input(
@@ -93,7 +97,11 @@ export const teamleaderRouter = createTRPCRouter({
             throw new Error("Failed to update deal in Teamleader");
           }
           // move the deal to the right phase
-          const moveResponse = await moveDeal(accessToken, dealId, phaseId);
+          const moveResponse = await updateDealPhase(
+            accessToken,
+            dealId,
+            phaseId,
+          );
           if (!moveResponse) {
             throw new Error("Failed to move deal in Teamleader");
           }
