@@ -29,6 +29,8 @@ type EmployeeContextType = {
   isFiltering: boolean;
   setFiltering: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading?: boolean;
+  currentEmployeeDetailsId: string;
+  setCurrentEmployeeDetailsId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -98,7 +100,12 @@ export const EmployeeContextProvider: React.FC<
     openForNewOpportunities: DraggableEmployee[];
   }>(sortEmployeesData(draggableEmployees));
 
+  // Other states
+  // For filtering
   const [employeeId, setEmployeeId] = useState<string>("");
+  // For the employee details
+  const [currentEmployeeDetailsId, setCurrentEmployeeDetailsId] =
+    useState<string>("");
 
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
@@ -187,15 +194,17 @@ export const EmployeeContextProvider: React.FC<
   return (
     <EmployeeContext.Provider
       value={{
-        employees: employees,
-        setEmployees: setEmployees,
-        draggableEmployees: draggableEmployees,
-        sortedData: sortedData,
-        employeeId: employeeId,
-        setEmployeeId: setEmployeeId,
-        isFiltering: isFiltering,
-        setFiltering: setFiltering,
-        isLoading: isLoading,
+        employees,
+        setEmployees,
+        draggableEmployees,
+        sortedData,
+        employeeId,
+        setEmployeeId,
+        isFiltering,
+        setFiltering,
+        isLoading,
+        currentEmployeeDetailsId,
+        setCurrentEmployeeDetailsId,
       }}
     >
       {children}
