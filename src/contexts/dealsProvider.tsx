@@ -1,4 +1,3 @@
-import { cp } from "fs";
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useToast } from "~/components/ui/use-toast";
 import type {
@@ -10,6 +9,7 @@ import type {
 } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
+import { dealPhases } from "~/lib/constants";
 
 type DealContextType = {
   deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state
@@ -18,13 +18,11 @@ type DealContextType = {
   filteredDeals: GroupedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
   getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
-  isRefetching?: boolean;
-  setIsRefetching: React.Dispatch<React.SetStateAction<boolean>>;
   moveDeal: (id: string, phase_id: string, employee: Employee) => void;
   PMId: string | undefined;
   setPMId: React.Dispatch<React.SetStateAction<string>>;
   getAllPMs: PM[] | undefined | null;
-  uniqueDeals: groupedDealFromDB[];
+  uniqueDeals: groupedDealFromDB[] | null | undefined;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -38,11 +36,7 @@ type DealContextProviderProps = {
 export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
-  const {
-    data: dealsData,
-    isLoading,
-    refetch,
-  } = api.teamleader.getDealsData.useQuery();
+  const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
@@ -51,45 +45,25 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     },
     onError: () => toast({ title: "error", variant: "destructive" }),
   });
-  const dealMover = api.teamleader.moveDeal.useMutation({
+  const dealMover = api.teamleader.updateDealPhase.useMutation({
     onSuccess: async () => {
       toast({ title: "success", variant: "success" });
-      await refetch();
+      // await refetch();
     },
     onError: () => toast({ title: "error", variant: "destructive" }),
   });
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
+
   const deals = useMemo(
-    () => (isLoading ? null : dealsData),
+    () => (!isLoading ? dealsData?.deals : null),
     [dealsData, isLoading],
   );
-  const [isRefetching, setIsRefetching] = useState(false);
-  const [uniqueDeals, setUniqueDeals] = useState<groupedDealFromDB[]>([]);
-  const mongoDealMutator = api.mongodb.updateDeals.useMutation();
-  const mongoDealUpdator = api.mongodb.updateDeal.useMutation();
+  const uniqueDeals = useMemo(
+    () => (!isLoading ? dealsData?.uniqueDeals : null),
+    [dealsData, isLoading],
+  );
 
-  const dealPhases = [
-    {
-      id: "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
-      name: "Mogelijkheden",
-    },
-    {
-      id: "1825bd2c-03bf-097c-8549-686bf8f96f4c",
-      name: "Voorgesteld",
-    },
-    {
-      id: "8125dec5-a0ed-0775-a643-774979b85e23",
-      name: "Interview",
-    },
-    {
-      id: "364b6867-54b9-0694-aa41-cf2ad6617028",
-      name: "Weerhouden",
-    },
-    {
-      id: "7ec460c1-416a-03ce-8460-0299ae10bb38",
-      name: "Niet-Weerhouden",
-    },
-  ];
+  const mongoDealUpdator = api.mongodb.updateDeal.useMutation();
 
   type MutateDealResponse = {
     data: {
@@ -106,24 +80,13 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
     if (!phase_id) throw new Error("Phase not found");
 
-    // this still needs to be changed
     const dealId = getCorrectDealId(groupedDealId, employee);
-
+    if (!dealId) return;
     const input = {
       id: dealId,
       phase_id: phase_id,
     };
-    dealMover.mutate(input, {
-      onSuccess: () => {
-        refetch()
-          .then(() => {
-            setIsRefetching(true);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-      },
-    });
+    dealMover.mutate(input);
   }
 
   function getDealInfo(
@@ -135,7 +98,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     if (!phase_id || !employee.fields.Euricom_x0020_email) {
       throw new Error("Phase not found");
     }
-    const dealId = uniqueDeals.find(
+    const dealId = uniqueDeals?.find(
       (groupedDeal) => groupedDeal.id === groupedDealId,
     )?.value[0];
     if (!dealId) return;
@@ -147,19 +110,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     dealMutator.mutate(input, {
       onSuccess: (data) => {
         if (
-          (data as unknown as MutateDealResponse).data.id === "shouldNotCreate"
+          (data as unknown as MutateDealResponse).data.id !== "shouldNotCreate"
         ) {
-          const updatedDealIds = employee.dealIds;
-          updatedDealIds.push(dealId);
-          employeeUpdator.mutate({
-            employee: {
-              employeeId: employee.employeeId,
-              rows: employee.rows as string[],
-              // replace the old deal id with the new one in dealIds
-              dealIds: updatedDealIds,
-            },
-          });
-        } else {
           const resolvedData = data as unknown as MutateDealResponse;
           const newId = resolvedData.data.id;
           // update the dealIds in employee
@@ -189,43 +141,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             value: groupedDeal.value,
           });
         }
-
-        refetch()
-          .then(() => {
-            setIsRefetching(true);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
       },
     });
   }
-
-  useEffect(() => {
-    if (deals) {
-      const newUniqueDeals = [] as groupedDealFromDB[];
-      // Group deals by unique key
-      deals.forEach((deal) => {
-        const key = generateKey(deal);
-        if (!key) return;
-        const existingDeal = newUniqueDeals.find((entry) => entry.id === key);
-
-        if (existingDeal) {
-          // If a deal with the same key exists, push the deal ID to its value array
-          existingDeal.value.push(deal.id);
-        } else {
-          // If no deal with the same key exists, create a new entry
-          newUniqueDeals.push({ id: key, value: [deal.id] });
-        }
-      });
-      setUniqueDeals(newUniqueDeals);
-    }
-  }, [deals]);
-
-  useEffect(() => {
-    // Call the mutator function
-    mongoDealMutator.mutate(uniqueDeals);
-  }, [uniqueDeals]);
 
   // Filtering deals
   const [dealIds, setDealIds] = useState<string[]>([]);
@@ -235,7 +153,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   >(null);
 
   useEffect(() => {
-    if (uniqueDeals.length === 0) return;
+    if (uniqueDeals?.length === 0) return;
     setFilteredDeals(
       deals
         ?.filter((deal, index, self) => {
@@ -252,7 +170,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           );
         })
         .map((deal) => {
-          const groupedDealId = uniqueDeals.find((entry) =>
+          const groupedDealId = uniqueDeals?.find((entry) =>
             entry.value.includes(deal.id),
           )?.id;
           return {
@@ -285,11 +203,12 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   }, [dealIds, PMId, filteredDeals]);
 
   const getAllPMs = useMemo(() => {
-    return deals
-      ?.map((deal) => deal.PM)
-      .filter(
-        (pm, index, self) => index === self.findIndex((t) => t.id === pm.id),
-      );
+    if (deals)
+      return deals
+        ?.map((deal) => deal.PM)
+        .filter(
+          (pm, index, self) => index === self.findIndex((t) => t.id === pm.id),
+        );
   }, [deals]);
 
   const getCorrectDealId = (groupedDealid: string, employee: Employee) => {
@@ -302,7 +221,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         if (
           deal.custom_fields[0]?.value === employee.fields.Euricom_x0020_email
         ) {
-          const groupedDeal = uniqueDeals.find((groupedDeal) =>
+          const groupedDeal = uniqueDeals?.find((groupedDeal) =>
             groupedDeal.value.includes(dealId),
           );
           // check if the groupedDealId of the deal is the same as the groupedDealId you want to move
@@ -322,8 +241,6 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         dealPhases,
         isLoading,
         filteredDeals,
-        isRefetching,
-        setIsRefetching,
         setDealIds,
         getDealInfo,
         moveDeal,
@@ -337,10 +254,3 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     </DealContext.Provider>
   );
 };
-
-function generateKey(deal: SimplifiedDeal | undefined | null) {
-  if (!deal) return;
-  const string = `${deal.title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
-
-  return btoa(string);
-}

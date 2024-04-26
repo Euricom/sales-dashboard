@@ -294,7 +294,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         if (emp.employeeId === employee.employeeId) {
           emp.rows = emp.rows.filter((row) => row !== rowId);
           // find the dealId of the row where the employee is being dropped in uniqueDeals
-          const dealId = uniqueDeals.find(
+          const dealId = uniqueDeals?.find(
             (deal) => deal.id === rowId.split("/")[0],
           )?.value[0];
           emp.dealIds = emp.dealIds.filter((deal) => deal !== dealId);

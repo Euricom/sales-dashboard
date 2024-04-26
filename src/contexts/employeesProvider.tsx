@@ -49,8 +49,7 @@ export const EmployeeContextProvider: React.FC<
     refetch,
   } = api.mongodb.getEmployees.useQuery();
   const mongoEmployeeUpdater = api.mongodb.updateEmployee.useMutation();
-  const { isRefetching, setIsRefetching, deals, dealPhases, uniqueDeals } =
-    useContext(DealContext);
+  const { deals, dealPhases, uniqueDeals } = useContext(DealContext);
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -105,23 +104,11 @@ export const EmployeeContextProvider: React.FC<
     setSortedData(sortEmployeesData(draggableEmployees));
   }, [draggableEmployees]);
 
-  // fix for the Teamleader sync. dit zou later eventueel moeten worden herschreven want hij voert dit nu 2 keer uit door zijn dependencies
-  useEffect(() => {
-    if (isRefetching) {
-      refetch()
-        .then(() => {
-          setIsRefetching(false);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-  }, [isRefetching, setIsRefetching, refetch]);
-
   useEffect(() => {
     if (employees && deals && uniqueDeals) {
       updateEmployeeData(employees, uniqueDeals, deals);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals, uniqueDeals]);
 
   function updateEmployeeData(
@@ -130,47 +117,67 @@ export const EmployeeContextProvider: React.FC<
     deals: SimplifiedDeal[],
   ) {
     deals.forEach((deal) => {
-      // check if the deal has an email value, if not, skip the deal
-      if (!deal.custom_fields[0]?.value || deal.custom_fields[0].value === "") {
+      // Skip deals without email value
+      const emailValue = deal.custom_fields[0]?.value;
+      if (!emailValue || emailValue === "") {
         return;
       }
 
-      // add deal to deals array of employees
+      // Find employee by email
       const employee = employees.find(
-        (employee) =>
-          employee.fields.Euricom_x0020_email === deal.custom_fields[0]?.value,
+        (emp) => emp.fields.Euricom_x0020_email === emailValue,
       );
-      if (!employee?.dealIds.includes(deal.id)) {
-        employee?.dealIds.push(deal.id);
-      }
+      if (!employee) return;
 
-      // find the groupedDealId of the deal
+      // Find groupedDealId of the deal
       const groupedDeal = groupedDeals.find((groupedDeal) =>
         groupedDeal.value.includes(deal.id),
       );
+      if (!groupedDeal) return;
       // look wether the rows of the employee aren't already accurate
       // if no, update the rows of the employee
-      if (!groupedDeal) return;
+      // Calculate row identifier
       const phaseName = dealPhases.find(
         (phase) => phase.id === deal.deal_phase.id,
       )?.name;
-      const row = groupedDeal?.id + "/" + phaseName;
+      const row = `${groupedDeal.id}/${phaseName}`;
+
+      const shouldUpdate =
+        !employee.dealIds.includes(deal.id) || !employee.rows.includes(row);
+
+      // Update dealIds if necessary
+      if (!employee.dealIds.includes(deal.id)) {
+        employee.dealIds.push(deal.id);
+      }
+      // Update rows if necessary
       if (!employee?.rows.includes(row)) {
         employee?.rows.push(row);
       }
 
       // update the employee in the database
-      if (employee?.employeeId && employee?.rows && employee?.dealIds) {
-        mongoEmployeeUpdater.mutate({
-          employee: {
-            employeeId: employee?.employeeId,
-            rows: employee?.rows as string[],
-            dealIds: employee?.dealIds,
-          },
-        });
+      if (shouldUpdate) {
+        updateEmployeeInDatabase(employee);
+        refetch().catch((error) => console.error(error));
       }
     });
   }
+
+  const updateEmployeeInDatabase = (employee: Employee) => {
+    // Validate employee data
+    if (!employee?.employeeId || !employee.rows || !employee.dealIds) {
+      console.error("Invalid employee data");
+      return;
+    }
+
+    // Perform database update
+    mongoEmployeeUpdater.mutate({
+      employee: {
+        employeeId: employee.employeeId,
+        rows: employee.rows as string[],
+        dealIds: employee.dealIds,
+      },
+    });
+  };
 
   return (
     <EmployeeContext.Provider

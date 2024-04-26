@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getInitialEmployees, updateEmployee } from "./mongoEmployeeClient";
 import { z } from "zod";
-import { checkWhichDealsNeedToBeCreated, updateDeal } from "./mongoDealsClient";
+import { updateDeal } from "./mongoDealsClient";
 
 export const mongodbRouter = createTRPCRouter({
   getEmployees: protectedProcedure.query(async () => {
@@ -25,20 +25,27 @@ export const mongodbRouter = createTRPCRouter({
       await updateEmployee(input.employee, input.newRowId ?? undefined);
     }),
 
-    updateDeals: protectedProcedure.input(
-      z.array(
-        z.object({
-          id: z.string(),
-          value: z.array(z.string())
-        })
-      )
-    ).mutation(async ({input}) => {await checkWhichDealsNeedToBeCreated(input)}),
+  // updateDeals: protectedProcedure
+  //   .input(
+  //     z.array(
+  //       z.object({
+  //         id: z.string(),
+  //         value: z.array(z.string()),
+  //       }),
+  //     ),
+  //   )
+  //   .mutation(async ({ input }) => {
+  //     await checkWhichDealsNeedToBeCreated(input);
+  //   }),
 
-    updateDeal: protectedProcedure.input(
+  updateDeal: protectedProcedure
+    .input(
       z.object({
-        id: z.string(), 
-        value: z.array(z.string())
-      })
-    ).mutation(async ({input}) => {await updateDeal(input)}),
-
+        id: z.string(),
+        value: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await updateDeal(input);
+    }),
 });
