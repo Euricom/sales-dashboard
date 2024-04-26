@@ -1,4 +1,4 @@
-import { PM } from "~/lib/types";
+import type { PM } from "~/lib/types";
 import Image from "next/image";
 
 export function PmAvatar({ pm, size }: { pm: PM; size?: number }) {

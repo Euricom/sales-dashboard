@@ -23,6 +23,8 @@ type DealContextType = {
   setPMId: React.Dispatch<React.SetStateAction<string>>;
   getAllPMs: PM[] | undefined | null;
   uniqueDeals: groupedDealFromDB[] | null | undefined;
+  filteringCurrentRole: string;
+  setFilteringCurrentRole: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -146,15 +148,19 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   }
 
   // Filtering deals
+  const [initialDeals, setInitialDeals] = useState<
+    GroupedDeal[] | undefined | null
+  >(null);
   const [dealIds, setDealIds] = useState<string[]>([]);
   const [PMId, setPMId] = useState<string>("");
+  const [filteringCurrentRole, setFilteringCurrentRole] = useState<string>("");
   const [filteredDeals, setFilteredDeals] = useState<
     GroupedDeal[] | undefined | null
   >(null);
 
   useEffect(() => {
     if (uniqueDeals?.length === 0) return;
-    setFilteredDeals(
+    setInitialDeals(
       deals
         ?.filter((deal, index, self) => {
           return (
@@ -182,25 +188,26 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   }, [deals, uniqueDeals]);
 
   useEffect(() => {
-    setFilteredDeals(() => {
-      if (dealIds.length === 0 && PMId === "") {
-        return filteredDeals;
-      } else {
-        return filteredDeals?.filter((groupedDeal) => {
-          if (dealIds.length >= 1 && PMId !== "") {
-            return (
-              dealIds.includes(groupedDeal.deal.id) &&
-              groupedDeal.deal.PM.id === PMId
-            );
-          } else if (dealIds.length >= 1) {
-            return dealIds.includes(groupedDeal.deal.id);
-          } else {
-            return groupedDeal.deal.PM.id === PMId;
-          }
-        });
-      }
+    if (!initialDeals) return;
+
+    if (dealIds.length === 0 && PMId === "" && filteringCurrentRole === "") {
+      setFilteredDeals(initialDeals); // No need to filter if no criteria are set
+      return;
+    }
+
+    const filtered = initialDeals.filter((groupedDeal) => {
+      const matchesDealIds =
+        dealIds.length === 0 || dealIds.includes(groupedDeal.deal.id);
+      const matchesPMId = PMId === "" || groupedDeal.deal.PM.id === PMId;
+      const matchesCurrentRole =
+        filteringCurrentRole === "" ||
+        groupedDeal.deal.custom_fields[1]?.value === filteringCurrentRole;
+
+      return matchesDealIds && matchesPMId && matchesCurrentRole;
     });
-  }, [dealIds, PMId, filteredDeals]);
+
+    setFilteredDeals(filtered);
+  }, [dealIds, PMId, filteringCurrentRole, initialDeals]);
 
   const getAllPMs = useMemo(() => {
     if (deals)
@@ -248,6 +255,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         setPMId,
         getAllPMs,
         uniqueDeals,
+        filteringCurrentRole,
+        setFilteringCurrentRole,
       }}
     >
       {children}
