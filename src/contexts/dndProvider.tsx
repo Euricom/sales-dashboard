@@ -53,8 +53,14 @@ type DndContextProviderProps = {
 export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   children,
 }) => {
-  const { filteredDeals, dealPhases, isLoading, getDealInfo, moveDeal } =
-    useContext(DealContext);
+  const {
+    filteredDeals,
+    dealPhases,
+    isLoading,
+    getDealInfo,
+    moveDeal,
+    uniqueDeals,
+  } = useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
   const [rows, setRows] = useState<Row[]>([]);
@@ -82,7 +88,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         filteredDeals
           .flatMap((deal) =>
             dealPhases.map((phase) => ({
-              rowId: `${deal.id}/${phase.name}`,
+              rowId: `${deal.groupedDealId}/${phase.name}`,
             })),
           )
           .concat({
@@ -261,14 +267,15 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
-          emp.rows.push(rowId);
+          // find the dealId of the row where the employee is being dropped in uniqueDeals
           updateTeamleader(
             rowId.split("/")[0],
             rowId.split("/")[1],
             emp,
             activeRowId.split("/")[1],
           );
-          updateEmployeeInDB(emp); // Update the employee in the database
+          emp.rows.push(rowId);
+          updateEmployeeInDB(emp, rowId); // Update the employee in the database
           return emp;
         }
         return emp;
@@ -286,7 +293,13 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       const updatedEmployees = employees.map((emp) => {
         if (emp.employeeId === employee.employeeId) {
           emp.rows = emp.rows.filter((row) => row !== rowId);
-          updateEmployeeInDB(emp); // Update the employee in the database
+          // find the dealId of the row where the employee is being dropped in uniqueDeals
+          const dealId = uniqueDeals?.find(
+            (deal) => deal.id === rowId.split("/")[0],
+          )?.value[0];
+          emp.dealIds = emp.dealIds.filter((deal) => deal !== dealId);
+
+          updateEmployeeInDB(emp, undefined); // Update the employee in the database
           return emp;
         }
         return emp;
@@ -311,6 +324,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       if (!newTargetId) return;
       targetId = newTargetId;
     }
+    if (initialRowId === targetId) return;
     // Update the employees state
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
@@ -318,17 +332,19 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           const indexOfRowToRemove = emp.rows.indexOf(initialRowId);
 
           if (indexOfRowToRemove !== -1) {
-            const updatedRows = [...emp.rows]; // Create a copy of rows array
-            updatedRows.splice(indexOfRowToRemove, 1, targetId); // Replace the row
+            const updatedRows = emp.rows.filter((id) => {
+              return id !== initialRowId;
+            }); // Create a copy of rows array
+            updatedRows.push(targetId); // Replace the row
             emp.rows = updatedRows;
+
             updateTeamleader(
               targetId.split("/")[0],
               targetId.split("/")[1],
               emp,
               initialRowId.split("/")[1],
             );
-
-            updateEmployeeInDB(emp); // Update the employee in the database
+            updateEmployeeInDB(emp, targetId); // Update the employee in the database
             return emp;
           }
         }
@@ -347,11 +363,22 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const [initialRowId, initialRowStatus] =
       (draggableEmployee.dragId as string).split("_")[1]?.split("/") ?? [];
     const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
-    // Inside the same row
-    if (initialRowId === targetRowId && initialRowStatus === "Mogelijkheden")
-      return true;
 
+    // Inside the same row OR dragging between rows in "Mogelijkheden" column
+
+    // In what situation does this need to be checked?
+    // this is what causes the bug btw
+    if (
+      initialRowId !== targetRowId &&
+      initialRowStatus === "Mogelijkheden" &&
+      !employee?.rows.some(
+        (row) => (row as string).split("/")[0] === targetRowId,
+      )
+      // || initialRowStatus === "Mogelijkheden"
+    )
+      return true;
     // Not in the same row and row does not exist in employee.rows
+
     if (
       initialRowId !== targetRowId &&
       !employee?.rows.some(
@@ -426,22 +453,27 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
   }
 
-  function updateEmployeeInDB(employee: Employee) {
+  function updateEmployeeInDB(
+    employee: Employee,
+    newRowId: string | undefined,
+  ) {
     employeeUpdator.mutate({
       employee: {
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
+        dealIds: employee.dealIds,
       },
+      newRowId: newRowId,
     });
   }
 
   function updateTeamleader(
-    dealId: string | undefined,
+    groupedDealId: string | undefined,
     phaseName: string | undefined,
     employee: Employee,
     initialPhaseName: string | undefined,
   ) {
-    if (!dealId || !phaseName || phaseName === "Mogelijkheden") {
+    if (!groupedDealId || !phaseName || phaseName === "Mogelijkheden") {
       return;
     }
     if (
@@ -450,9 +482,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         initialPhaseName,
       )
     ) {
-      moveDeal(dealId, phaseName);
+      moveDeal(groupedDealId, phaseName, employee);
     } else {
-      getDealInfo(dealId, phaseName, employee);
+      getDealInfo(groupedDealId, phaseName, employee);
     }
   }
 };

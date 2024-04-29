@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Filter, FilterX } from "lucide-react";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
 import {
   DropdownMenu,
@@ -9,21 +9,38 @@ import {
   DropdownMenuLabel,
 } from "./dropdown-menu";
 import { PmAvatar } from "../teamleader/pmAvatar";
+import roles from "~/lib/roles.json";
+import { determineColors } from "~/lib/utils";
 
 export function FilterMenu() {
-  const { PMId, setPMId, getAllPMs } = useContext(DealContext);
+  const {
+    PMId,
+    setPMId,
+    getAllPMs,
+    filteringCurrentRole,
+    setFilteringCurrentRole,
+  } = useContext(DealContext);
   const [isOpenPMs, setIsOpenPMs] = useState(true);
   const [isOpenRoles, setIsOpenRoles] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
   const [clearFilterDisplay, setClearFilterDisplay] = useState(isFiltering);
 
   useEffect(() => {
-    setIsFiltering(PMId !== "" && PMId !== undefined);
-  }, [PMId]);
+    setIsFiltering(
+      (PMId !== "" && PMId !== undefined) ||
+        (filteringCurrentRole !== "" && filteringCurrentRole !== undefined),
+    );
+  }, [PMId, filteringCurrentRole]);
 
   // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
   const handleFilter = (isOpen: boolean) => {
     setClearFilterDisplay(isOpen && isFiltering);
+  };
+
+  const getRoleTitles = () => {
+    return roles.employeeRoles.map((role) =>
+      role.split("_")[0]?.replace(/\[(.*?)\]/, "$1"),
+    );
   };
 
   return (
@@ -67,10 +84,29 @@ export function FilterMenu() {
             <span>Rollen</span>
             {isOpenRoles ? <ChevronDown /> : <ChevronUp />}
           </DropdownMenuLabel>
+          {isOpenRoles && (
+            <div className="flex flex-col gap-2 mt-2">
+              {getRoleTitles().map((role) => (
+                <DropdownMenuItem
+                  key={role}
+                  onClick={() => setFilteringCurrentRole(role ? role : "")}
+                  className={`justify-center w-full`}
+                  style={{
+                    backgroundColor: determineColors(role ? role : "")
+                      ?.backgroundColor,
+                    color: determineColors(role ? role : "")?.color,
+                  }}
+                >
+                  <span>{role}</span>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          )}
           {clearFilterDisplay && (
             <DropdownMenuLabel
               onClick={() => {
                 setPMId("");
+                setFilteringCurrentRole("");
                 handleFilter(false);
               }}
               className="flex items-center justify-center w-full bg-primary rounded-14 py-2 px-3 my-2 text-white border-2"

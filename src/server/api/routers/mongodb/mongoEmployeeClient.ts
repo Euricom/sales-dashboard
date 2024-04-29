@@ -77,11 +77,11 @@ export const getInitialEmployees = async () => {
   // if there are missing employees, create missing employees in the db
   if (missingEmployees.length === 1) {
     for (const missingEmployee of missingEmployees) {
-      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"] });
+      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"], dealIds: []});
     }
   }
   if (missingEmployees.length > 1) {
-    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"] })));
+    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"], dealIds: []})));
   }
 
 
@@ -93,21 +93,42 @@ export const getInitialEmployees = async () => {
     return {
       employeeId: employeeDb?.employeeId,
       rows: employeeDb.rows, // Assuming default row is ["0"]
+      dealIds: employeeDb.dealIds, // Assuming default dealIds is []
       fields: employeeFromSharepoint?.fields,
     };
   });
 };
 
-export const updateEmployee = async (employee: EmployeeFromDB) => {
+export const updateEmployee = async (employee: EmployeeFromDB, newRowId: string | undefined) => {
   const client = new MongoClient(env.DATABASE_URL);
   const db = client.db();
+
+  // Create a map to store rows based on their unique identifiers
+  const rowMap = new Map<string, string[]>();
+
+  // Populate the map
+  employee.rows.forEach(row => {
+    const firstPart = row.toString().split("/")[0]!;
+    if (rowMap.has(firstPart) && newRowId) {
+      // If the unique identifier already exists, replace the existing row(s) with newRowId
+      rowMap.set(firstPart, [newRowId]);
+    } else {
+      // Otherwise, add it to the map
+      rowMap.set(firstPart, [row.toString()]);
+    }
+  });
+
+  // Extract the values of the map to get the filtered rows array
+  const uniqueRows = Array.from(rowMap.values()).flat();
+
+  console.log("rows after the filter", uniqueRows);
   try {
     await client.connect();
     await db
       .collection("Employee")
       .updateOne(
         { employeeId: employee.employeeId },
-        { $set: { rows: employee.rows } },
+        { $set: { rows: uniqueRows, dealIds: employee.dealIds } },
       );
   } catch (error) {
     console.error(error);

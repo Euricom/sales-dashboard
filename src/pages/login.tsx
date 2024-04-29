@@ -16,7 +16,7 @@ export default function Login() {
           priority={true}
           className="absolute"
         />
-        <span className="absolute left-1/2 top-1/2 w-2/3 -translate-x-1/2 -translate-y-1/2 text-center text-3xl text-white bg-accent-foreground p-3">
+        <span className="absolute left-1/2 top-1/2 w-2/3 -translate-x-1/2 -translate-y-1/2 text-center text-3xl text-white bg- bg-success/40 p-3">
           Sales Dashboard
         </span>
       </div>
