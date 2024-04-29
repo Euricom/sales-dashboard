@@ -27,6 +27,7 @@ export function EmployeeCardDragged({
   const { setDealIds } = useContext(DealContext);
   const [filteringVariant, setFilteringVariant] = useState("");
   const [showDetailView, setShowDetailView] = useState(false);
+  const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
 
   const employee = employees.find(
     (employee) =>
@@ -85,11 +86,11 @@ export function EmployeeCardDragged({
 
   if (!employee) return null;
 
-  const handleOnClick = () => {
+  const handleOnClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isHeader) {
       handleFilter();
     } else {
-      handleDetailView();
+      handleDetailView(event);
     }
   };
 
@@ -99,7 +100,6 @@ export function EmployeeCardDragged({
         const dealId = String(row);
         return dealId.split("/")[0];
       });
-      console.log(dealIdsWithoutSuffix);
       setDealIds(
         dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
       );
@@ -121,7 +121,19 @@ export function EmployeeCardDragged({
     }, 750);
   };
 
-  const handleDetailView = () => {
+  const handleDetailView = (event: React.MouseEvent<HTMLDivElement>) => {
+    const clickedElement = event.currentTarget;
+    const clickedElementWidth = clickedElement.offsetWidth;
+
+    // Get position relative to the document
+    const rect = clickedElement.getBoundingClientRect();
+    const positionRelativeToDocument = {
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX + clickedElementWidth,
+    };
+
+    setChildLocation(positionRelativeToDocument);
+
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
       setCurrentEmployeeDetailsId("");
       setShowDetailView(false);
@@ -149,9 +161,7 @@ export function EmployeeCardDragged({
               : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
-        onClick={() => {
-          handleOnClick();
-        }}
+        onClick={handleOnClick}
       >
         <Button
           variant="ghost"
@@ -184,9 +194,7 @@ export function EmployeeCardDragged({
           position: showDetailView ? "clicked" : undefined,
         })}
         size="employeeDragged"
-        onClick={() => {
-          handleOnClick();
-        }}
+        onClick={handleOnClick}
       >
         <Button
           variant="ghost"
@@ -213,11 +221,14 @@ export function EmployeeCardDragged({
             </div>
           </div>
           <div className=" w-full rounded-b-14 truncate text-xs font-normal py-1">
-            01/01/2021
+            01/01/2022
           </div>
         </Button>
         {showDetailView && (
-          <Card className="absolute left-[5.5rem] top-0 h-fit z-100 bg-white text-primary">
+          <Card
+            className="left-[5.5rem] top-0 h-fit z-100 bg-white text-primary fixed"
+            style={{ top: childLocation.top, left: childLocation.left + 8 }}
+          >
             <CardContent className="flex flex-col gap-1">
               <div className="flex justify-between gap-8">
                 <h1>{firstNameOnly(employee.fields.Title)}</h1>
