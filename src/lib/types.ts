@@ -78,9 +78,9 @@ export type PM = {
 export type groupedDealFromDB = {
   id: string;
   value: string[];
-}
+};
 
 export type GroupedDeal = {
   deal: SimplifiedDeal;
   groupedDealId: string;
-}
+};

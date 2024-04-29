@@ -25,6 +25,7 @@ type DealContextType = {
   uniqueDeals: groupedDealFromDB[] | null | undefined;
   filteringCurrentRole: string;
   setFilteringCurrentRole: React.Dispatch<React.SetStateAction<string>>;
+  getCorrectDealId: (groupedDealid: string, employee: Employee) => string;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -265,6 +266,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         uniqueDeals,
         filteringCurrentRole,
         setFilteringCurrentRole,
+        getCorrectDealId,
       }}
     >
       {children}
