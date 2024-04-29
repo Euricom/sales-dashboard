@@ -159,19 +159,27 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   >(null);
 
   useEffect(() => {
-    if (uniqueDeals?.length === 0) return;
+    if (
+      !deals ||
+      !uniqueDeals ||
+      deals.length === 0 ||
+      uniqueDeals.length === 0
+    )
+      return;
+
     setInitialDeals(
       deals
         ?.filter((deal, index, self) => {
           return (
             index ===
             self.findIndex(
-              (t) => (
-                t.title === deal.title,
-                t.company.name === deal.company.name,
-                t.estimated_closing_date === deal.estimated_closing_date,
-                t.custom_fields[1]?.value === deal.custom_fields[1]?.value
-              ),
+              (t) =>
+                t.title === deal.title &&
+                t.company.name === deal.company.name &&
+                (t.estimated_closing_date === deal.estimated_closing_date ||
+                  !t.estimated_closing_date) &&
+                (t.custom_fields[1]?.value === deal.custom_fields[1]?.value ||
+                  !t.custom_fields[1]?.value),
             )
           );
         })

@@ -365,12 +365,20 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
 
     // Inside the same row OR dragging between rows in "Mogelijkheden" column
+
+    // In what situation does this need to be checked?
+    // this is what causes the bug btw
     if (
-      (initialRowId === targetRowId && initialRowStatus === "Mogelijkheden") ||
-      initialRowStatus === "Mogelijkheden"
+      initialRowId !== targetRowId &&
+      initialRowStatus === "Mogelijkheden" &&
+      !employee?.rows.some(
+        (row) => (row as string).split("/")[0] === targetRowId,
+      )
+      // || initialRowStatus === "Mogelijkheden"
     )
       return true;
     // Not in the same row and row does not exist in employee.rows
+
     if (
       initialRowId !== targetRowId &&
       !employee?.rows.some(
