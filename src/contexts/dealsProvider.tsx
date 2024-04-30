@@ -38,7 +38,11 @@ type DealContextProviderProps = {
 export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   children,
 }) => {
-  const { data: dealsData, isLoading } = api.teamleader.getDealsData.useQuery();
+  const {
+    data: dealsData,
+    isLoading,
+    refetch,
+  } = api.teamleader.getDealsData.useQuery();
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
@@ -73,6 +77,27 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       type: string;
     };
   };
+
+  // this should refetch the deals every 5 minutes
+  useEffect(() => {
+    const intervalId = setInterval(
+      () => {
+        refetch()
+          .then(() => {
+            console.log("Refetched deals");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+      5 * 60 * 1000,
+    ); // 5 minutes in milliseconds
+
+    // Clear interval on component unmount
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   function moveDeal(
     groupedDealId: string,
