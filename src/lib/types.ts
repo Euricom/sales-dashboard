@@ -27,6 +27,7 @@ export type Employee = {
     Level: string;
     Status: string;
     Contract_x0020_Substatus: string;
+    Contract_x0020_Status_x0020_Date: string | null;
     avatar: string | null;
     Euricom_x0020_email: string | null;
   };

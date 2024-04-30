@@ -180,6 +180,24 @@ export function EmployeeCardDragged({
     console.log(procent);
   };
 
+  const weeksLeft = () => {
+    if (!employee.fields.Contract_x0020_Status_x0020_Date) return;
+    const date = new Date(employee.fields.Contract_x0020_Status_x0020_Date);
+    const now = new Date();
+
+    // Get the difference in milliseconds
+    const diff = date.getTime() - now.getTime();
+
+    // Convert milliseconds to weeks
+    const weeks = Math.round(diff / (1000 * 60 * 60 * 24 * 7));
+
+    return { time: Math.abs(weeks), color: weeks > 0 ? "green" : "red" };
+  };
+
+  const weeksLeftData = weeksLeft();
+  const bgColorClass =
+    weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
+
   if (isHeader) {
     return (
       <Card
@@ -206,6 +224,11 @@ export function EmployeeCardDragged({
           className="w-full h-full relative"
           onClick={handleOnClick}
         >
+          <div
+            className={`${bgColorClass} absolute top-0 -right-[0.375rem] flex justify-center items-center min-w-[1.25rem] h-[1.25rem] rounded-bl-[0.3rem] px-0.5 rounded-r-[0.3rem] font-normal text-white`}
+          >
+            {weeksLeftData?.time}
+          </div>
           <div
             className="absolute z-10 bottom-0 w-full rounded-b-14 truncate px-1.5 font-normal"
             style={{
