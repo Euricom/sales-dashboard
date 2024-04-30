@@ -19,7 +19,10 @@ export type EmployeeType = "Employee";
 export type Employee = {
   employeeId: string;
   rows: UniqueIdentifier[];
-  dealIds: string[];
+  deals: {
+    dealId: string;
+    datum: Date | null;
+  }[];
   fields: {
     Title: string;
     City: string;
@@ -36,8 +39,14 @@ export type Employee = {
 export type EmployeeFromDB = {
   employeeId: string;
   rows: UniqueIdentifier[];
-  dealIds: string[];
+  deals: MongoEmployeeDeal[];
 };
+
+export type MongoEmployeeDeal =  {
+  dealId: string;
+  datum: Date | null;
+}
+
 
 export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`

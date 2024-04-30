@@ -16,6 +16,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import { set } from "zod";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -35,6 +36,7 @@ export function EmployeeCardDragged({
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
+  const [datum, setDatum] = useState<Date | null>(null);
 
   const employee = employees.find(
     (employee) =>
@@ -101,6 +103,11 @@ export function EmployeeCardDragged({
       if (!groupedDealId || !employee) return;
       const correctDealId = getCorrectDealId(groupedDealId, employee);
       setCorrectDealInfo(deals?.find((deal) => deal.id === correctDealId));
+
+      const empDeal = employee.deals.find(
+        (deal) => deal.dealId === correctDealId,
+      );
+      setDatum(empDeal?.datum ?? null);
     }
   }, [employee, deals, draggableEmployee.dragId, getCorrectDealId, isHeader]);
 
@@ -304,9 +311,13 @@ export function EmployeeCardDragged({
             </div>
           </div>
           <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
-            {correctDealInfo?.estimated_closing_date === ""
-              ? "no date"
-              : correctDealInfo?.estimated_closing_date}
+            {datum
+              ? datum.toLocaleDateString("fr-BE", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+              : "no date"}
           </div>
         </Button>
         {showDetailView && (

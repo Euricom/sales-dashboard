@@ -8,12 +8,17 @@ datasource db {
 }
 
 model Employee {
-    id      String   @id @default(uuid()) @map("_id")
-    rows    String[] @default(["0"])
-    dealIds String[] @default([])
+    id    String   @id @default(uuid()) @map("_id")
+    rows  String[] @default(["0"])
+    deals Deal[]
 }
 
 model Deals {
     id      String   @id @default(uuid()) @map("_id")
     dealIds String[] @default([])
+}
+
+type Deal {
+    id    String
+    datum DateTime
 }

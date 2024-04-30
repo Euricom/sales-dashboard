@@ -9,7 +9,7 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:init": "docker compose exec mongo mongo --eval \"rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});\"",
-    "db:regenerate": "pnpm run db:push && pnpm run prima generate",
+    "db:regenerate": "pnpm run db:push && prisma generate",
     "dev": "next dev",
     "build": "next build",
     "postinstall": "prisma generate",

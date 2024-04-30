@@ -6,6 +6,7 @@ import type {
   groupedDealFromDB,
   PM,
   GroupedDeal,
+  MongoEmployeeDeal,
 } from "~/lib/types";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
@@ -25,7 +26,10 @@ type DealContextType = {
   uniqueDeals: groupedDealFromDB[] | null | undefined;
   filteringCurrentRole: string;
   setFilteringCurrentRole: React.Dispatch<React.SetStateAction<string>>;
-  getCorrectDealId: (groupedDealid: string, employee: Employee) => string;
+  getCorrectDealId: (
+    groupedDealid: string,
+    employee: Employee,
+  ) => string | undefined;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -114,7 +118,32 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       id: dealId,
       phase_id: phase_id,
     };
-    dealMover.mutate(input);
+    dealMover.mutate(input, {
+      onSuccess: () => {
+        const updatedDealIds = [...employee.deals];
+        const newDeal: MongoEmployeeDeal = {
+          dealId: dealId,
+          datum: new Date(),
+        };
+
+        const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter(
+          (deal) => {
+            return deal.dealId !== dealId;
+          },
+        );
+
+        filteredDeals.push(newDeal);
+
+        employeeUpdator.mutate({
+          employee: {
+            employeeId: employee.employeeId,
+            rows: employee.rows as string[],
+            // replace the old deal with the new one in deals
+            deals: filteredDeals,
+          },
+        });
+      },
+    });
   }
 
   function getDealInfo(
@@ -144,20 +173,26 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           const resolvedData = data as unknown as MutateDealResponse;
           const newId = resolvedData.data.id;
           // update the dealIds in employee
-          const updatedDealIds = [...employee.dealIds];
-          let newDealIds: string[] = [dealId];
+          const updatedDealIds = [...employee.deals];
+          const newDeal: MongoEmployeeDeal = {
+            dealId: newId,
+            datum: new Date(),
+          };
 
-          updatedDealIds.push(newId);
-          newDealIds = updatedDealIds.filter((id) => {
-            return id !== dealId;
-          });
+          const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter(
+            (deal) => {
+              return deal.dealId !== dealId;
+            },
+          );
+
+          filteredDeals.push(newDeal);
 
           employeeUpdator.mutate({
             employee: {
               employeeId: employee.employeeId,
               rows: employee.rows as string[],
               // replace the old deal id with the new one in dealIds
-              dealIds: newDealIds,
+              deals: filteredDeals,
             },
           });
           const groupedDeal = uniqueDeals.find(
@@ -265,16 +300,17 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
 
   const getCorrectDealId = (groupedDealid: string, employee: Employee) => {
     let correctDealId = "";
-    employee.dealIds.forEach((dealId) => {
+    if (!employee.deals) return;
+    employee.deals.forEach((EmployeeDeal) => {
       // get the deal from the deals array that has the same id as the dealId
-      const deal = deals?.find((deal) => deal.id === dealId);
+      const deal = deals?.find((deal) => deal.id === EmployeeDeal.dealId);
       if (deal) {
         // check if the email of the deal is the same as the email of the employee
         if (
           deal.custom_fields[0]?.value === employee.fields.Euricom_x0020_email
         ) {
           const groupedDeal = uniqueDeals?.find((groupedDeal) =>
-            groupedDeal.value.includes(dealId),
+            groupedDeal.value.includes(EmployeeDeal.dealId),
           );
           // check if the groupedDealId of the deal is the same as the groupedDealId you want to move
           if (groupedDeal?.id === groupedDealid) {

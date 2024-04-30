@@ -82,7 +82,7 @@ export const getInitialEmployees = async () => {
       await createEmployee({
         employeeId: missingEmployee.id,
         rows: ["0"],
-        dealIds: [],
+        deals: [],
       });
     }
   }
@@ -91,7 +91,7 @@ export const getInitialEmployees = async () => {
       missingEmployees.map((employee) => ({
         employeeId: employee.id,
         rows: ["0"],
-        dealIds: [],
+        deals: [],
       })),
     );
   }
@@ -104,7 +104,7 @@ export const getInitialEmployees = async () => {
     return {
       employeeId: employeeDb?.employeeId,
       rows: employeeDb.rows, // Assuming default row is ["0"]
-      dealIds: employeeDb.dealIds, // Assuming default dealIds is []
+      deals: employeeDb.deals, // Assuming default dealIds is []
       fields: employeeFromSharepoint?.fields,
     };
   });
@@ -141,7 +141,7 @@ export const updateEmployee = async (
       .collection("Employee")
       .updateOne(
         { employeeId: employee.employeeId },
-        { $set: { rows: uniqueRows, dealIds: employee.dealIds } },
+        { $set: { rows: uniqueRows, deals: employee.deals } },
       );
   } catch (error) {
     console.error(error);
