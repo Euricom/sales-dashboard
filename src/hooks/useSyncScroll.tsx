@@ -1,10 +1,16 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
+  const { currentEmployeeDetailsId, setCurrentEmployeeDetailsId } =
+    useContext(EmployeeContext);
+
   useEffect(() => {
     if (!columns) return;
 
     function syncScroll(event: Event) {
+      if (currentEmployeeDetailsId) setCurrentEmployeeDetailsId("");
+
       const targetColumn = event.currentTarget as HTMLDivElement;
       const scrollRatio =
         targetColumn.scrollTop /

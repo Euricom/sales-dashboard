@@ -324,7 +324,7 @@ export function EmployeeCardDragged({
                   <Button
                     variant={"percentagePicker"}
                     size={"sm"}
-                    className="bg-[#ff6e6e]"
+                    className="bg-[#ff5000]"
                     onClick={(e) => handleProcentPicker(e, 20)}
                   >
                     20
@@ -332,7 +332,7 @@ export function EmployeeCardDragged({
                   <Button
                     variant={"percentagePicker"}
                     size={"sm"}
-                    className="bg-[#ff8a8a]"
+                    className="bg-[#fea600]"
                     onClick={(e) => handleProcentPicker(e, 40)}
                   >
                     40
@@ -340,7 +340,7 @@ export function EmployeeCardDragged({
                   <Button
                     variant={"percentagePicker"}
                     size={"sm"}
-                    className="bg-[#8aff8a] text-primary hover:text-white focus:text-white"
+                    className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
                     onClick={(e) => handleProcentPicker(e, 60)}
                   >
                     60
@@ -348,7 +348,7 @@ export function EmployeeCardDragged({
                   <Button
                     variant={"percentagePicker"}
                     size={"sm"}
-                    className="bg-[#6eff6e] text-primary hover:text-white focus:text-white"
+                    className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
                     onClick={(e) => handleProcentPicker(e, 80)}
                   >
                     80
