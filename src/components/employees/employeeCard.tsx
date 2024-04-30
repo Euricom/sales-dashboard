@@ -1,10 +1,10 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS, getWindow } from "@dnd-kit/utilities";
+import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
@@ -181,7 +181,11 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeft = () => {
-    if (!employee.fields.Contract_x0020_Status_x0020_Date) return;
+    if (!employee.fields.Contract_x0020_Status_x0020_Date)
+      return {
+        time: -1,
+        color: "white",
+      };
     const date = new Date(employee.fields.Contract_x0020_Status_x0020_Date);
     const now = new Date();
 
@@ -206,6 +210,7 @@ export function EmployeeCardDragged({
           ...style,
           backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
           backgroundSize: "cover",
+          backgroundColor: colors?.backgroundColor,
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
@@ -230,13 +235,13 @@ export function EmployeeCardDragged({
             {weeksLeftData?.time}
           </div>
           <div
-            className="absolute z-10 bottom-0 w-full rounded-b-14 truncate px-1.5 font-normal"
+            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1.5 font-normal"
             style={{
               backgroundColor: colors?.backgroundColor,
               color: colors?.color,
             }}
           >
-            {firstNameOnly(employee.fields.Title)}
+            {truncateName(firstNameOnly(employee.fields.Title)!)}
           </div>
         </Button>
       </Card>
@@ -265,7 +270,11 @@ export function EmployeeCardDragged({
           <div className="w-full flex flex-row justify-between mt-1 px-2">
             <div className="flex w-7 h-7 justify-between">
               <Image
-                src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+                src={
+                  employee.fields.avatar && employee.employeeId !== "108"
+                    ? `data:image/jpeg;base64,${employee.fields.avatar}`
+                    : "https://cdn3.iconfinder.com/data/icons/feather-5/24/user-512.png"
+                }
                 alt={employee.fields.Title}
                 className="object-cover rounded-14 border-2"
                 width={30}
@@ -275,6 +284,7 @@ export function EmployeeCardDragged({
                   width: "100%",
                   height: "100%",
                   borderColor: colors?.backgroundColor,
+                  backgroundColor: colors?.backgroundColor,
                 }}
               />
             </div>
@@ -401,4 +411,13 @@ export function EmployeeCardDragged({
 
 const firstNameOnly = (name: string) => {
   return name.split(" ")[0];
+};
+
+const truncateName = (name: string) => {
+  const MAX_NAME_LENGTH = 4;
+  if (name.length > MAX_NAME_LENGTH) {
+    return name.slice(0, MAX_NAME_LENGTH) + ".";
+  } else {
+    return name;
+  }
 };

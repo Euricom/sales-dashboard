@@ -47,7 +47,6 @@ export const getAllEmployeeData = async () => {
       }),
     );
   }
-
   return employeesWithAvatars;
 };
 
@@ -91,7 +90,7 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
     "Contract_x0020_Status_x0020_Date",
   ];
   const fieldsString = fields.join(",");
-  const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${env.AZURE_AD_CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=${fieldsString})&$filter=fields/Status eq 'Bench' or fields/Status eq 'Starter' or fields/Contract_x0020_Substatus eq 'End Of Contract' or fields/Contract_x0020_Substatus eq 'Open For New Opportunities'`;
+  const url = `${env.AZURE_AD_GRAPH_API_BASE_URL_SUBSITE_LIST}items?$select=id&$expand=fields($select=${fieldsString})&$filter=fields/Status eq 'Bench' or fields/Status eq 'Starter' or fields/Contract_x0020_Substatus eq 'End Of Contract' or fields/Contract_x0020_Substatus eq 'Open For New Opportunities'`;
 
   const options = {
     method: "GET",
@@ -100,7 +99,6 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
       Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly", // Bypass the warning for non-indexed queries
     },
   };
-
   try {
     const response = await fetch(url, options);
     if (!response.ok) {

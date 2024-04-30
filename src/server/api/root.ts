@@ -1,5 +1,4 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { sharePointRouter } from "./routers/sharepoint";
 import { teamleaderRouter } from "./routers/teamleader";
 import { mongodbRouter } from "./routers/mongodb";
 /**
@@ -8,7 +7,6 @@ import { mongodbRouter } from "./routers/mongodb";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  sharePoint: sharePointRouter,
   teamleader: teamleaderRouter,
   mongodb: mongodbRouter,
 });
