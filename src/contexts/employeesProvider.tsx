@@ -103,6 +103,10 @@ export const EmployeeContextProvider: React.FC<
   // Other states
   // For filtering
   const [employeeId, setEmployeeId] = useState<string>("");
+  useEffect(() => {
+    const employeeIdFromStorage = localStorage.getItem("employeeId");
+    setEmployeeId(employeeIdFromStorage ? employeeIdFromStorage : "");
+  }, [deals]);
   // For the employee details
   const [currentEmployeeDetailsId, setCurrentEmployeeDetailsId] =
     useState<string>("");

@@ -219,6 +219,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           };
         }),
     );
+    const dealIdsInStorage = localStorage.getItem("dealIds");
+    const dealids = dealIdsInStorage
+      ? (JSON.parse(dealIdsInStorage) as string[])
+      : ([] as string[]);
+    const PMID = localStorage.getItem("PMId");
+    const ROLe = localStorage.getItem("filteringCurrentRole");
+
+    setDealIds(dealids);
+    setPMId(PMID ?? "");
+    setFilteringCurrentRole(ROLe ?? "");
   }, [deals, uniqueDeals]);
 
   useEffect(() => {
