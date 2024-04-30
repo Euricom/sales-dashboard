@@ -156,11 +156,20 @@ export const EmployeeContextProvider: React.FC<
       const row = `${groupedDeal.id}/${phaseName}`;
 
       const shouldUpdate =
-        !employee.dealIds.includes(deal.id) || !employee.rows.includes(row);
+        !employee.deals ||
+        !employee.deals.some(
+          (EmployeeDeal) => EmployeeDeal.dealId === deal.id,
+        ) ||
+        !employee.rows.includes(row);
 
       // Update dealIds if necessary
-      if (!employee.dealIds.includes(deal.id)) {
-        employee.dealIds.push(deal.id);
+      if (
+        !employee.deals?.some((EmployeeDeal) => EmployeeDeal.dealId === deal.id)
+      ) {
+        employee.deals?.push({
+          dealId: deal.id,
+          datum: null,
+        });
       }
       // Update rows if necessary
       if (!employee?.rows.includes(row)) {
@@ -178,7 +187,7 @@ export const EmployeeContextProvider: React.FC<
 
   const updateEmployeeInDatabase = (employee: Employee) => {
     // Validate employee data
-    if (!employee?.employeeId || !employee.rows || !employee.dealIds) {
+    if (!employee?.employeeId || !employee.rows || !employee.deals) {
       console.error("Invalid employee data");
       return;
     }
@@ -188,7 +197,7 @@ export const EmployeeContextProvider: React.FC<
       employee: {
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
-        dealIds: employee.dealIds,
+        deals: employee.deals,
       },
     });
   };

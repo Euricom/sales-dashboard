@@ -60,6 +60,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     getDealInfo,
     moveDeal,
     uniqueDeals,
+    getCorrectDealId,
   } = useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
@@ -275,6 +276,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
             activeRowId.split("/")[1],
           );
           emp.rows.push(rowId);
+          emp.deals?.push({
+            dealId:
+              uniqueDeals?.find((deal) => deal.id === rowId.split("/")[0])
+                ?.value[0] ?? "",
+            datum: new Date(),
+          });
           updateEmployeeInDB(emp, rowId); // Update the employee in the database
           return emp;
         }
@@ -297,7 +304,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           const dealId = uniqueDeals?.find(
             (deal) => deal.id === rowId.split("/")[0],
           )?.value[0];
-          emp.dealIds = emp.dealIds.filter((deal) => deal !== dealId);
+          emp.deals =
+            emp.deals?.filter((deal) => deal.dealId !== dealId) ?? null;
 
           updateEmployeeInDB(emp, undefined); // Update the employee in the database
           return emp;
@@ -461,7 +469,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       employee: {
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
-        dealIds: employee.dealIds,
+        deals: employee.deals,
       },
       newRowId: newRowId,
     });

@@ -71,9 +71,17 @@ export default function DealCard({
             ? groupedDeal.deal.custom_fields[1]?.value
             : trimRole(groupedDeal.deal.title)}
         </div>
-        <div className="flex gap-3 justify-end font-normal text-sm items-end">
+        <div className="flex gap-2 justify-end font-normal text-sm items-end">
           {groupedDeal.deal.estimated_closing_date ? (
-            <div>{groupedDeal.deal.estimated_closing_date}</div>
+            <div>
+              {new Date(
+                groupedDeal.deal.estimated_closing_date,
+              ).toLocaleDateString("fr-BE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </div>
           ) : (
             <div>no date</div>
           )}

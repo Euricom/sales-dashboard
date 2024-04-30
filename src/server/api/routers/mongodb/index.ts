@@ -22,7 +22,11 @@ export const mongodbRouter = createTRPCRouter({
         employee: z.object({
           employeeId: z.string(),
           rows: z.array(z.string()),
-          dealIds: z.array(z.string()),
+          deals: z.array(z.object({
+            dealId: z.string(),
+            datum: z.date().nullable(),
+          })),
+          
         }),
         newRowId: z.string().optional(),
       }),
