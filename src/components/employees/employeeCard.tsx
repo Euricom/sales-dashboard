@@ -99,7 +99,10 @@ export function EmployeeCardDragged({
         const dealId = String(row);
         return dealId.split("/")[0];
       });
-      console.log(dealIdsWithoutSuffix);
+      //console.log(dealIdsWithoutSuffix);
+      localStorage.setItem("dealIds", JSON.stringify(dealIdsWithoutSuffix));
+      localStorage.setItem("employeeId", employee.employeeId);
+
       setDealIds(
         dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
       );
@@ -109,6 +112,8 @@ export function EmployeeCardDragged({
     } else if (!isFilterPossible) {
       handleFilterNotPossible();
     }
+    localStorage.setItem("dealIds", JSON.stringify([]));
+    localStorage.setItem("employeeId", "");
     setDealIds([]);
     setEmployeeId("");
     setFiltering(false);

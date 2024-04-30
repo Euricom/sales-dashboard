@@ -103,6 +103,10 @@ export const EmployeeContextProvider: React.FC<
   // Other states
   // For filtering
   const [employeeId, setEmployeeId] = useState<string>("");
+  useEffect(() => {
+    const employeeIdFromStorage = localStorage.getItem("employeeId");
+    setEmployeeId(employeeIdFromStorage ? employeeIdFromStorage : "");
+  }, [deals]);
   // For the employee details
   const [currentEmployeeDetailsId, setCurrentEmployeeDetailsId] =
     useState<string>("");
@@ -118,13 +122,12 @@ export const EmployeeContextProvider: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals, uniqueDeals]);
 
-  const [shouldRefetch, setShouldRefetch] = useState(false);
   function updateEmployeeData(
     employees: Employee[],
     groupedDeals: groupedDealFromDB[],
     deals: SimplifiedDeal[],
   ) {
-    setShouldRefetch(false);
+    let shouldRefetch = false;
 
     deals.forEach((deal) => {
       // Skip deals without email value
@@ -166,11 +169,10 @@ export const EmployeeContextProvider: React.FC<
 
       // update the employee in the database
       if (shouldUpdate) {
-        setShouldRefetch(true);
+        shouldRefetch = true;
         updateEmployeeInDatabase(employee);
       }
     });
-    // console.log(shouldRefetch);
     shouldRefetch && refetch().catch(console.error);
   }
 

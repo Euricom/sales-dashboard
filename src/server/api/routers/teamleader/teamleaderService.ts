@@ -118,6 +118,7 @@ export const editDealFields = async (
   dealId: string,
   phaseId: string,
   email: string,
+  name: string,
 ): Promise<EditDealFieldsResult | null> => {
   let shouldCreate = false;
   const deal = await getDeal(accessToken, dealId);
@@ -137,6 +138,9 @@ export const editDealFields = async (
       }
     });
     deal.data.current_phase.id = phaseId;
+  }
+  if(deal.data.title) {
+    deal.data.title = deal.data.title + " (" + name + ")";
   }
   return { deal, shouldCreate };
 };
@@ -166,7 +170,8 @@ export const makeUniqueDeals = async (deals: SimplifiedDealArray) => {
 
 const generateKey = (deal: SimplifiedDeal | undefined | null) => {
   if (!deal) return;
-  const string = `${deal.title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
+  const title = deal.title.split("(")[0];
+  const string = `${title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
 
   return btoa(string);
 };

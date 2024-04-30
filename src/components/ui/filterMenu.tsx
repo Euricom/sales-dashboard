@@ -67,7 +67,10 @@ export function FilterMenu() {
               {getAllPMs?.map((pm) => (
                 <DropdownMenuItem
                   key={pm.id}
-                  onClick={() => setPMId(pm.id)}
+                  onClick={() => {
+                    localStorage.setItem("PMId", pm.id);
+                    setPMId(pm.id);
+                  }}
                   className="flex justify-between"
                 >
                   <span>{pm.first_name + " " + pm.last_name}</span>
@@ -89,7 +92,13 @@ export function FilterMenu() {
               {getRoleTitles().map((role) => (
                 <DropdownMenuItem
                   key={role}
-                  onClick={() => setFilteringCurrentRole(role ? role : "")}
+                  onClick={() => {
+                    localStorage.setItem(
+                      "filteringCurrentRole",
+                      role ? role : "",
+                    );
+                    setFilteringCurrentRole(role ? role : "");
+                  }}
                   className={`justify-center w-full`}
                   style={{
                     backgroundColor: determineColors(role ? role : "")
@@ -105,6 +114,8 @@ export function FilterMenu() {
           {clearFilterDisplay && (
             <DropdownMenuLabel
               onClick={() => {
+                localStorage.setItem("PMId", "");
+                localStorage.setItem("filteringCurrentRole", "");
                 setPMId("");
                 setFilteringCurrentRole("");
                 handleFilter(false);
