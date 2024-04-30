@@ -80,11 +80,11 @@ export const getEmployeesData = async (accessToken: string | undefined) => {
     "Level",
     "Status",
     "Contract_x0020_Substatus",
+    "Contract_x0020_Status_x0020_Date",
   ];
   const fieldsString = fields.join(",");
   const url = `https://graph.microsoft.com/v1.0/sites/root/lists/${CONTACT_LIST_ID}/items?$select=id&$expand=fields($select=${fieldsString})&$filter=fields/Status eq 'Bench' or fields/Status eq 'Starter' or fields/Contract_x0020_Substatus eq 'End Of Contract' or fields/Contract_x0020_Substatus eq 'Open For New Opportunities'`;
 
-  //console.log(url, "url in azureClient.ts");
   const options = {
     method: "GET",
     headers: {
