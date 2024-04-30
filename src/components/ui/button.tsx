@@ -22,7 +22,7 @@ const buttonVariants = cva(
           "bg-white text-primary hover:text-primary/70 hover:bg-primary/10 hover:text-accent-foreground rounded-2xl",
         filter: "bg-primary rounded-14 text-white",
         login: "bg-[#648290] text-white hover:bg-primary/90 rounded-[2px] px-4",
-        percentagePicker:
+        probabilityPicker:
           "bg-primary focus:bg-primary text-white hover:bg-primary/80 rounded-sm",
         icon: "",
       },

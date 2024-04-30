@@ -141,7 +141,7 @@ export const editDealFields = async (
     });
     deal.data.current_phase.id = phaseId;
   }
-  if(deal.data.title) {
+  if (deal.data.title) {
     deal.data.title = deal.data.title + " (" + name + ")";
   }
   return { deal, shouldCreate };
@@ -176,4 +176,16 @@ const generateKey = (deal: SimplifiedDeal | undefined | null) => {
   const string = `${title}, ${deal.company.name}, ${deal.estimated_closing_date}, ${deal.custom_fields[1]?.value}`;
 
   return btoa(string);
+};
+
+export const editDealProbablity = async (
+  accessToken: string,
+  dealId: string,
+  probability: number,
+) => {
+  const deal = await getDeal(accessToken, dealId);
+  if (!deal) return null;
+
+  deal.data.estimated_probability = probability / 100;
+  return deal;
 };

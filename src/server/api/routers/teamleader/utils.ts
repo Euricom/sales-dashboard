@@ -139,7 +139,6 @@ export const updateDeal = async (accessToken: string, deal: DealInfo) => {
     if (!response.ok) {
       console.error("Failed to update deal in Teamleader");
     }
-
     const data = response;
     return data;
   } catch (error) {
