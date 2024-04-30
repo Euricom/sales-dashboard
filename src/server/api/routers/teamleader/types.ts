@@ -259,6 +259,7 @@ export interface SimplifiedDeal {
   id: string;
   title: string;
   estimated_closing_date: string;
+  estimated_probability: number | null;
   deal_phase: {
     id: string;
     name: string;
