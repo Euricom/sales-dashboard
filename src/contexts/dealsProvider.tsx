@@ -108,6 +108,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       id: dealId,
       email: employee.fields.Euricom_x0020_email,
       phase_id: phase_id,
+      name: employee.fields.Title.split(" ")[0]!,
     };
     dealMutator.mutate(input, {
       onSuccess: (data) => {
@@ -174,7 +175,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             index ===
             self.findIndex(
               (t) =>
-                t.title === deal.title &&
+                t.title.split("(")[0] === deal.title.split("(")[0] &&
                 t.company.name === deal.company.name &&
                 (t.estimated_closing_date === deal.estimated_closing_date ||
                   !t.estimated_closing_date) &&
