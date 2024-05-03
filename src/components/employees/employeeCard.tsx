@@ -16,7 +16,6 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-import { set } from "zod";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -36,7 +35,8 @@ export function EmployeeCardDragged({
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
-  const [datum, setDatum] = useState<Date | null>(null);
+  const [TLDatum, setTLDatum] = useState<Date | null>(null);
+  const [mongoDatum, setMongoDatum] = useState<Date | null>(null);
 
   const employee = employees.find(
     (employee) =>
@@ -107,9 +107,21 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
-      setDatum(empDeal?.datum ?? null);
+      setTLDatum(
+        correctDealInfo?.updated_at
+          ? new Date(correctDealInfo?.updated_at)
+          : null,
+      );
+      setMongoDatum(empDeal?.datum ?? null);
     }
-  }, [employee, deals, draggableEmployee.dragId, getCorrectDealId, isHeader]);
+  }, [
+    employee,
+    deals,
+    draggableEmployee.dragId,
+    getCorrectDealId,
+    isHeader,
+    correctDealInfo?.updated_at,
+  ]);
 
   // Close detail view when dragging or scrolling
   useEffect(() => {
@@ -162,11 +174,18 @@ export function EmployeeCardDragged({
   const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
     const clickedElement = event.currentTarget;
     const clickedElementWidth = clickedElement.offsetWidth;
-
+    const windowHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    const detailViewHeight = 140;
     // Get position relative to the document
     const rect = clickedElement.getBoundingClientRect();
+    let top = rect.top + window.scrollY;
+    if (rect.bottom + detailViewHeight > windowHeight) {
+      top = top - detailViewHeight;
+    }
+
     const positionRelativeToDocument = {
-      top: rect.top + window.scrollY,
+      top: top,
       left: rect.left + window.scrollX + clickedElementWidth,
     };
 
@@ -321,13 +340,19 @@ export function EmployeeCardDragged({
             </div>
           </div>
           <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
-            {datum
-              ? datum.toLocaleDateString("fr-BE", {
+            {TLDatum
+              ? TLDatum.toLocaleDateString("fr-BE", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric",
                 })
-              : "no date"}
+              : mongoDatum
+                ? mongoDatum.toLocaleDateString("fr-BE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "No Date"}
           </div>
         </Button>
         {showDetailView && (

@@ -6,7 +6,7 @@ import {
 } from "./dropdown-menu";
 import { Plus, LogOut, RotateCcw, Expand, Shrink, FilterX } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 
@@ -14,7 +14,20 @@ export function ActionMenu() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { isFiltering, setFiltering, setEmployeeId } =
     useContext(EmployeeContext);
-  const { setDealIds } = useContext(DealContext);
+  const {
+    setDealIds,
+    PMId,
+    setPMId,
+    filteringCurrentRole,
+    setFilteringCurrentRole,
+  } = useContext(DealContext);
+  const [displayFilter, setDisplayFilter] = useState(false);
+
+  useEffect(() => {
+    if (PMId !== "" || filteringCurrentRole !== "" || isFiltering) {
+      setDisplayFilter(true);
+    }
+  }, [PMId, filteringCurrentRole, isFiltering]);
 
   const handleRefresh = () => {
     window.location.replace(window.location.href);
@@ -33,6 +46,8 @@ export function ActionMenu() {
   const handleRemoveFiltering = () => {
     setDealIds([]);
     setEmployeeId("");
+    setPMId("");
+    setFilteringCurrentRole("");
     setFiltering(false);
   };
 
@@ -47,14 +62,17 @@ export function ActionMenu() {
           side="top"
           align="end"
         >
-          {isFiltering ? (
-            <DropdownMenuItem
-              className="w-fit border-primary border-2 bg-white cursor-pointer"
-              onClick={handleRemoveFiltering}
-            >
-              <FilterX />
-            </DropdownMenuItem>
-          ) : null}
+          {
+            // this doesn't work, Ruben moet hiernaar kijken
+            displayFilter ? (
+              <DropdownMenuItem
+                className="w-fit border-primary border-2 bg-white cursor-pointer"
+                onClick={handleRemoveFiltering}
+              >
+                <FilterX />
+              </DropdownMenuItem>
+            ) : null
+          }
 
           <DropdownMenuItem
             className="w-fit border-primary border-2 bg-white cursor-pointer"

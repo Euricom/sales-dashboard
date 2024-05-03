@@ -37,6 +37,10 @@ export const env = createEnv({
     TEAMLEADER_ACCESS_TOKEN_URL: z.string().trim(),
     TEAMLEADER_REDIRECT_URL: z.string().trim(),
     TEAMLEADER_API_URL: z.string().trim(),
+
+    MAIL_USER: z.string().trim(),
+    MAIL_PASS: z.string().trim(),
+    MAIL_RECEIVER: z.string().trim(),
   },
 
   /**
@@ -69,6 +73,10 @@ export const env = createEnv({
     TEAMLEADER_ACCESS_TOKEN_URL: process.env.TEAMLEADER_ACCESS_TOKEN_URL,
     TEAMLEADER_REDIRECT_URL: process.env.TEAMLEADER_REDIRECT_URL,
     TEAMLEADER_API_URL: process.env.TEAMLEADER_API_URL,
+
+    MAIL_USER: process.env.MAIL_USER,
+    MAIL_PASS: process.env.MAIL_PASSWORD,
+    MAIL_RECEIVER: process.env.MAIL_RECEIVER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

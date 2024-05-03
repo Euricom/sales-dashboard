@@ -8,6 +8,7 @@ import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGro
 import { ActionMenu } from "~/components/ui/actionMenu";
 import { Toaster } from "~/components/ui/toaster";
 import Login from "./login";
+import { BugReport } from "~/components/ui/bugReport";
 
 export default function Home() {
   const { status } = useSession();
@@ -39,6 +40,7 @@ export default function Home() {
                     <BoardColumn columnTitle="Niet-Weerhouden" />
                   </div>
                 </div>
+                <BugReport />
                 <ActionMenu />
               </main>
               <Toaster />

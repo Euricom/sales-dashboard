@@ -73,6 +73,7 @@ export const simplifyDeals = async (
         title: deal.title,
         estimated_closing_date: deal.estimated_closing_date ?? "",
         estimated_probability: deal.estimated_probability ?? null,
+        updated_at: deal.updated_at,
         deal_phase: {
           id: phase?.id ?? null,
           name: phase?.name ?? null,
