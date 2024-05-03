@@ -60,7 +60,7 @@ export const EmployeeContextProvider: React.FC<
   useMemo(() => {
     if (employeesData) {
       // GET employees from MongoDB
-      setEmployees(employeesData as Employee[]);
+      setEmployees(employeesData);
     }
   }, [employeesData]);
 

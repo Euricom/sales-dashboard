@@ -26,6 +26,9 @@ type DropContextType = {
   activeDealId: UniqueIdentifier | undefined;
   activeColumnId: UniqueIdentifier | undefined;
   isDeletable: boolean;
+  groupedDealsToWrap: string[];
+  appendGroupedDeal: (groupedDealId: string) => void;
+  removeGroupedDeal: (groupedDealId: string) => void;
 };
 
 type Sortable = {
@@ -60,7 +63,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     getDealInfo,
     moveDeal,
     uniqueDeals,
-    getCorrectDealId,
   } = useContext(DealContext);
   const { employees, setEmployees, draggableEmployees } =
     useContext(EmployeeContext);
@@ -69,6 +71,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const [isDeletable, setDeletable] = useState<boolean>(false);
+  const [groupedDealsToWrap, setGroupedDealsToWrap] = useState<string[]>([]);
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -99,13 +103,26 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
   }, [isLoading, filteredDeals, dealPhases]);
 
+  // Add & remove id to groupedDealsToWrap
+  const appendGroupedDeal = (groupedDealId: string) => {
+    setGroupedDealsToWrap([...groupedDealsToWrap, groupedDealId]);
+  };
+  const removeGroupedDeal = (groupedDealId: string) => {
+    setGroupedDealsToWrap(
+      groupedDealsToWrap.filter((id) => id !== groupedDealId),
+    );
+  };
+
   return (
     <DropContext.Provider
       value={{
-        rows: rows,
-        activeDealId: activeDealId,
-        activeColumnId: activeColumnId,
-        isDeletable: isDeletable,
+        rows,
+        activeDealId,
+        activeColumnId,
+        isDeletable,
+        groupedDealsToWrap,
+        appendGroupedDeal,
+        removeGroupedDeal,
       }}
     >
       <DndContext
