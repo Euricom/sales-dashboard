@@ -8,6 +8,7 @@ import {
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
 import TeamleaderProvider from "./teamleaderProvider";
+import { optional } from "zod";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -114,19 +115,20 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
     if (!token.refreshToken) {
       throw new Error("No refresh token available.");
     }
-
-    const response = await fetch(`${env.TEAMLEADER_ACCESS_TOKEN_URL}`, {
+    const url = env.TEAMLEADER_ACCESS_TOKEN_URL;
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        client_id: `${env.TEAMLEADER_CLIENT_ID}`,
-        client_secret: `${env.TEAMLEADER_CLIENT_SECRET}`,
+        client_id: env.TEAMLEADER_CLIENT_ID,
+        client_secret: env.TEAMLEADER_CLIENT_SECRET,
         refresh_token: token.refreshToken,
         grant_type: "refresh_token",
       }),
-    });
+    }
+    const response = await fetch(url, options);
 
     const data = (await response.json()) as RefreshTokenPayload;
     if ("error" in data) {
@@ -138,7 +140,7 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
     return {
       ...token,
       accessToken: data.access_token,
-      expiresAt: Date.now() + data.expires_in * 1000,
+      expiresAt: Date.now() + data.expires_in * 1000 - 60 * 10 * 1000,
       refreshToken: data.refresh_token,
     };
   } catch (error) {
@@ -182,7 +184,7 @@ export const authOptions: NextAuthOptions = {
       // console.log("jwt: %o", { account, profile });
       // Initial sign in
       if (profile && account) {
-        const clockSkew = 60 * 10 * 1000; // 10 minutes
+        const clockSkew = 60 * 10 * 100; // 10 minutes
         const expiresAt = account.expires_at * 1000 - clockSkew; // ms
 
         // Update token object
@@ -194,11 +196,14 @@ export const authOptions: NextAuthOptions = {
           email: profile.data.email,
         };
       }
+
       // Check if the access token has expired or about to expire
       if (Date.now() < token.expiresAt) {
+        
         return token;
       }
       return await refreshAccessToken(token);
+      
     },
     session({ session, token }) {
       if (session.user) {

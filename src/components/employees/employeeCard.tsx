@@ -10,6 +10,12 @@ import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
 import { determineColors } from "~/lib/utils";
 import { Briefcase, Home, X } from "lucide-react";
+import {
+  CircularProgressbarWithChildren,
+  buildStyles,
+} from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
+import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -24,9 +30,13 @@ export function EmployeeCardDragged({
     currentEmployeeDetailsId,
     setCurrentEmployeeDetailsId,
   } = useContext(EmployeeContext);
-  const { setDealIds } = useContext(DealContext);
+  const { setDealIds, getCorrectDealId, deals } = useContext(DealContext);
   const [filteringVariant, setFilteringVariant] = useState("");
   const [showDetailView, setShowDetailView] = useState(false);
+  const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
+  const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
+  const [TLDatum, setTLDatum] = useState<Date | null>(null);
+  const [mongoDatum, setMongoDatum] = useState<Date | null>(null);
 
   const employee = employees.find(
     (employee) =>
@@ -75,6 +85,7 @@ export function EmployeeCardDragged({
     },
   });
 
+  // Show detail view when clicked
   useEffect(() => {
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
       setShowDetailView(true);
@@ -83,13 +94,48 @@ export function EmployeeCardDragged({
     }
   }, [currentEmployeeDetailsId, draggableEmployee.dragId]);
 
-  if (!employee) return null;
+  // Get correct deal info for employee
+  useEffect(() => {
+    if (!isHeader) {
+      const groupedDealId = (draggableEmployee.dragId as string)
+        .split("_")[1]
+        ?.split("/")?.[0];
+      if (!groupedDealId || !employee) return;
+      const correctDealId = getCorrectDealId(groupedDealId, employee);
+      setCorrectDealInfo(deals?.find((deal) => deal.id === correctDealId));
 
-  const handleOnClick = () => {
+      const empDeal = employee.deals.find(
+        (deal) => deal.dealId === correctDealId,
+      );
+      setTLDatum(
+        correctDealInfo?.updated_at
+          ? new Date(correctDealInfo?.updated_at)
+          : null,
+      );
+      setMongoDatum(empDeal?.datum ?? null);
+    }
+  }, [
+    employee,
+    deals,
+    draggableEmployee.dragId,
+    getCorrectDealId,
+    isHeader,
+    correctDealInfo?.updated_at,
+  ]);
+
+  // Close detail view when dragging or scrolling
+  useEffect(() => {
+    setShowDetailView(false);
+  }, [isDragging]);
+
+  if (!employee) return null;
+  const colors = determineColors(employee.fields.Job_x0020_title);
+
+  const handleOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isHeader) {
       handleFilter();
     } else {
-      handleDetailView();
+      handleDetailView(event);
     }
   };
 
@@ -99,7 +145,9 @@ export function EmployeeCardDragged({
         const dealId = String(row);
         return dealId.split("/")[0];
       });
-      console.log(dealIdsWithoutSuffix);
+      localStorage.setItem("dealIds", JSON.stringify(dealIdsWithoutSuffix));
+      localStorage.setItem("employeeId", employee.employeeId);
+
       setDealIds(
         dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
       );
@@ -109,6 +157,8 @@ export function EmployeeCardDragged({
     } else if (!isFilterPossible) {
       handleFilterNotPossible();
     }
+    localStorage.setItem("dealIds", JSON.stringify([]));
+    localStorage.setItem("employeeId", "");
     setDealIds([]);
     setEmployeeId("");
     setFiltering(false);
@@ -121,7 +171,26 @@ export function EmployeeCardDragged({
     }, 750);
   };
 
-  const handleDetailView = () => {
+  const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const clickedElement = event.currentTarget;
+    const clickedElementWidth = clickedElement.offsetWidth;
+    const windowHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    const detailViewHeight = 140;
+    // Get position relative to the document
+    const rect = clickedElement.getBoundingClientRect();
+    let top = rect.top + window.scrollY;
+    if (rect.bottom + detailViewHeight > windowHeight) {
+      top = top - detailViewHeight;
+    }
+
+    const positionRelativeToDocument = {
+      top: top,
+      left: rect.left + window.scrollX + clickedElementWidth,
+    };
+
+    setChildLocation(positionRelativeToDocument);
+
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
       setCurrentEmployeeDetailsId("");
       setShowDetailView(false);
@@ -130,7 +199,34 @@ export function EmployeeCardDragged({
     setCurrentEmployeeDetailsId(draggableEmployee.dragId as string);
   };
 
-  const colors = determineColors(employee.fields.Job_x0020_title);
+  const handleProcentPicker = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    procent: number,
+  ) => {
+    console.log(procent);
+  };
+
+  const weeksLeft = () => {
+    if (!employee.fields.Contract_x0020_Status_x0020_Date)
+      return {
+        time: -1,
+        color: "white",
+      };
+    const date = new Date(employee.fields.Contract_x0020_Status_x0020_Date);
+    const now = new Date();
+
+    // Get the difference in milliseconds
+    const diff = date.getTime() - now.getTime();
+
+    // Convert milliseconds to weeks
+    const weeks = Math.round(diff / (1000 * 60 * 60 * 24 * 7));
+
+    return { time: Math.abs(weeks), color: weeks > 0 ? "green" : "red" };
+  };
+
+  const weeksLeftData = weeksLeft();
+  const bgColorClass =
+    weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
 
   if (isHeader) {
     return (
@@ -140,6 +236,7 @@ export function EmployeeCardDragged({
           ...style,
           backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
           backgroundSize: "cover",
+          backgroundColor: colors?.backgroundColor,
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
@@ -149,9 +246,6 @@ export function EmployeeCardDragged({
               : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
-        onClick={() => {
-          handleOnClick();
-        }}
       >
         <Button
           variant="ghost"
@@ -159,15 +253,21 @@ export function EmployeeCardDragged({
           {...attributes}
           {...listeners}
           className="w-full h-full relative"
+          onClick={handleOnClick}
         >
           <div
-            className="absolute z-10 bottom-0 w-full rounded-b-14 truncate px-1.5 font-normal"
+            className={`${bgColorClass} absolute top-0 -right-[0.375rem] flex justify-center items-center min-w-[1.25rem] h-[1.25rem] rounded-bl-[0.3rem] px-0.5 rounded-r-[0.3rem] font-normal text-white`}
+          >
+            {weeksLeftData?.time}
+          </div>
+          <div
+            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1.5 font-normal"
             style={{
               backgroundColor: colors?.backgroundColor,
               color: colors?.color,
             }}
           >
-            {firstNameOnly(employee.fields.Title)}
+            {truncateName(firstNameOnly(employee.fields.Title)!)}
           </div>
         </Button>
       </Card>
@@ -184,9 +284,6 @@ export function EmployeeCardDragged({
           position: showDetailView ? "clicked" : undefined,
         })}
         size="employeeDragged"
-        onClick={() => {
-          handleOnClick();
-        }}
       >
         <Button
           variant="ghost"
@@ -194,11 +291,16 @@ export function EmployeeCardDragged({
           {...attributes}
           {...listeners}
           className="w-full h-full hover:text-white flex flex-col justify-between p-0"
+          onClick={handleOnClick}
         >
           <div className="w-full flex flex-row justify-between mt-1 px-2">
             <div className="flex w-7 h-7 justify-between">
               <Image
-                src={`data:image/jpeg;base64,${employee.fields.avatar}`}
+                src={
+                  employee.fields.avatar && employee.employeeId !== "108"
+                    ? `data:image/jpeg;base64,${employee.fields.avatar}`
+                    : "https://cdn3.iconfinder.com/data/icons/feather-5/24/user-512.png"
+                }
                 alt={employee.fields.Title}
                 className="object-cover rounded-14 border-2"
                 width={30}
@@ -208,20 +310,65 @@ export function EmployeeCardDragged({
                   width: "100%",
                   height: "100%",
                   borderColor: colors?.backgroundColor,
+                  backgroundColor: colors?.backgroundColor,
                 }}
               />
             </div>
+            <div className="w-7 h-7">
+              <CircularProgressbarWithChildren
+                value={
+                  correctDealInfo?.estimated_probability
+                    ? Number(correctDealInfo?.estimated_probability * 100)
+                    : 0
+                }
+                strokeWidth={8}
+                styles={buildStyles({
+                  strokeLinecap: "butt",
+                  pathColor: "#00C800",
+                  trailColor: "#FFFFFF",
+                })}
+                className="shadow-[inset_0_3px_10px_rgba(0,0,0,.6)] rounded-full"
+              >
+                <div className="mt-[1px] text-xs">
+                  {correctDealInfo?.estimated_probability ? (
+                    Number(correctDealInfo?.estimated_probability * 100)
+                  ) : (
+                    <div className="text-[9px]">N/A</div>
+                  )}
+                </div>
+              </CircularProgressbarWithChildren>
+            </div>
           </div>
-          <div className=" w-full rounded-b-14 truncate text-xs font-normal py-1">
-            01/01/2021
+          <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
+            {TLDatum
+              ? TLDatum.toLocaleDateString("fr-BE", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+              : mongoDatum
+                ? mongoDatum.toLocaleDateString("fr-BE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "No Date"}
           </div>
         </Button>
         {showDetailView && (
-          <Card className="absolute left-[5.5rem] top-0 h-fit z-100 bg-white text-primary">
-            <CardContent className="flex flex-col gap-1">
-              <div className="flex justify-between gap-8">
+          <Card
+            className="left-[5.5rem] top-0 h-fit z-100 bg-white text-primary fixed"
+            style={{
+              top: childLocation.top,
+              left: childLocation.left + 8,
+            }}
+          >
+            <CardContent className="flex flex-col gap-2">
+              <div className="flex justify-between gap-8 h-fit">
                 <h1>{firstNameOnly(employee.fields.Title)}</h1>
-                <X width={20} className="cursor-pointer" />
+                <Button variant={"icon"} size={"clear"} onClick={handleOnClick}>
+                  <X width={20} className="cursor-pointer" />
+                </Button>
               </div>
               <div className="h-0.5 bg-primary rounded-full" />
               <div className="flex gap-2">
@@ -234,6 +381,62 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
+              <div className="h-0.5 bg-primary rounded-full" />
+              <div>
+                <div className="mb-2">
+                  <p className="font-light">Percentage</p>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#ff0000]"
+                    onClick={(e) => handleProcentPicker(e, 0)}
+                  >
+                    0
+                  </Button>
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#ff5000]"
+                    onClick={(e) => handleProcentPicker(e, 20)}
+                  >
+                    20
+                  </Button>
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#fea600]"
+                    onClick={(e) => handleProcentPicker(e, 40)}
+                  >
+                    40
+                  </Button>
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
+                    onClick={(e) => handleProcentPicker(e, 60)}
+                  >
+                    60
+                  </Button>
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
+                    onClick={(e) => handleProcentPicker(e, 80)}
+                  >
+                    80
+                  </Button>
+                  <Button
+                    variant={"percentagePicker"}
+                    size={"sm"}
+                    className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
+                    onClick={(e) => handleProcentPicker(e, 100)}
+                  >
+                    100
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -244,4 +447,13 @@ export function EmployeeCardDragged({
 
 const firstNameOnly = (name: string) => {
   return name.split(" ")[0];
+};
+
+const truncateName = (name: string) => {
+  const MAX_NAME_LENGTH = 4;
+  if (name.length > MAX_NAME_LENGTH) {
+    return name.slice(0, MAX_NAME_LENGTH) + ".";
+  } else {
+    return name;
+  }
 };

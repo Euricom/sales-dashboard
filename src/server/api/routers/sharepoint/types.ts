@@ -29,6 +29,7 @@ export interface SharePointEmployee {
       Level: string;
       Status: string;
       Contract_x0020_Substatus: string;
+      Contract_x0020_Status_x0020_Date: string | null;
     }
 }
 
@@ -42,6 +43,7 @@ export interface SharePointEmployeeWithAvatar {
       Level: string;
       Status: string;
       Contract_x0020_Substatus: string;
+      Contract_x0020_Status_x0020_Date: string | null;
       avatar: string | null;
     }  
 }

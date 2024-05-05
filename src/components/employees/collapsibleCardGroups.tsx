@@ -69,7 +69,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
     return (
       <div className="flex bg-white bg-opacity-75 pt-1.5 border-x-4 border-b-4 tv:border-x-8 tv:border-b-[6px] border-grey h-fit w-fit rounded-b-2xl top-0 items-center justify-between">
         <div
-          className={`h-[76px] tv:h-[152px] p-0 text-primary inline-flex items-center justify-center`}
+          className={`h-[4.75rem] p-0 text-primary inline-flex items-center justify-center`}
         >
           <h4 className="text-sm font-semibold -rotate-90">{label}</h4>
         </div>

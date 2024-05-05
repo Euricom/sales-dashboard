@@ -19,7 +19,10 @@ export type EmployeeType = "Employee";
 export type Employee = {
   employeeId: string;
   rows: UniqueIdentifier[];
-  dealIds: string[];
+  deals: {
+    dealId: string;
+    datum: Date | null;
+  }[];
   fields: {
     Title: string;
     City: string;
@@ -27,6 +30,7 @@ export type Employee = {
     Level: string;
     Status: string;
     Contract_x0020_Substatus: string;
+    Contract_x0020_Status_x0020_Date: string | null;
     avatar: string | null;
     Euricom_x0020_email: string | null;
   };
@@ -35,8 +39,14 @@ export type Employee = {
 export type EmployeeFromDB = {
   employeeId: string;
   rows: UniqueIdentifier[];
-  dealIds: string[];
+  deals: MongoEmployeeDeal[];
 };
+
+export type MongoEmployeeDeal =  {
+  dealId: string;
+  datum: Date | null;
+}
+
 
 export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
@@ -78,9 +88,9 @@ export type PM = {
 export type groupedDealFromDB = {
   id: string;
   value: string[];
-}
+};
 
 export type GroupedDeal = {
   deal: SimplifiedDeal;
   groupedDealId: string;
-}
+};

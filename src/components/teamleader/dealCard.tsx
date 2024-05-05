@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
 import { DropContext } from "~/contexts/dndProvider";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import CompanyLogo from "./companyLogo";
 import afkortingen from "~/lib/Afkortingen.json";
 import { PmAvatar } from "./pmAvatar";
@@ -12,7 +12,7 @@ export default function DealCard({
 }: {
   groupedDeal: GroupedDeal;
 }) {
-  const { activeDealId } = useContext(DropContext);
+  const { activeDealId, groupedDealsToWrap } = useContext(DropContext);
   const colors = determineColors(
     groupedDeal.deal.custom_fields[1]?.value
       ? groupedDeal.deal.custom_fields[1]?.value
@@ -24,8 +24,22 @@ export default function DealCard({
       ? "dealhighlight"
       : "deal";
 
+  const [shouldWrap, setShouldWrap] = useState(false);
+
+  useEffect(() => {
+    if (groupedDealsToWrap.includes(groupedDeal.groupedDealId)) {
+      setShouldWrap(true);
+    } else {
+      setShouldWrap(false);
+    }
+  }, [groupedDealsToWrap]);
+
   return (
-    <Card variant={variant} size={"deal"}>
+    <Card
+      variant={variant}
+      size={"deal"}
+      className={`${shouldWrap ? "mb-[4.25rem]" : ""}`}
+    >
       <CardHeader>
         <CardTitle className="text-sm font-medium flex max-w-40 items-center">
           {groupedDeal.deal.company.logo_url ? (
@@ -71,9 +85,17 @@ export default function DealCard({
             ? groupedDeal.deal.custom_fields[1]?.value
             : trimRole(groupedDeal.deal.title)}
         </div>
-        <div className="flex gap-3 justify-end font-normal text-sm items-end">
+        <div className="flex gap-2 justify-end font-normal text-sm items-end">
           {groupedDeal.deal.estimated_closing_date ? (
-            <div>{groupedDeal.deal.estimated_closing_date}</div>
+            <div>
+              {new Date(
+                groupedDeal.deal.estimated_closing_date,
+              ).toLocaleDateString("fr-BE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </div>
           ) : (
             <div>no date</div>
           )}

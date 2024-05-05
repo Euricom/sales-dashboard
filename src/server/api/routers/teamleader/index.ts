@@ -54,7 +54,7 @@ export const teamleaderRouter = createTRPCRouter({
 
   updateDeal: protectedProcedure
     .input(
-      z.object({ id: z.string(), email: z.string(), phase_id: z.string() }),
+      z.object({ id: z.string(), email: z.string(), phase_id: z.string(), name: z.string() }),
     )
     .output(
       z.promise(
@@ -67,6 +67,7 @@ export const teamleaderRouter = createTRPCRouter({
       const dealId: string = options.input.id;
       const email: string = options.input.email;
       const phaseId: string = options.input.phase_id;
+      const name: string = options.input.name;
       try {
         if (!accessToken) {
           throw new Error("Access token not found");
@@ -76,6 +77,7 @@ export const teamleaderRouter = createTRPCRouter({
           dealId,
           phaseId,
           email,
+          name,
         );
         if (!result) {
           throw new Error("Failed to fetch data from Teamleader");

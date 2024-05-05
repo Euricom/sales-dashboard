@@ -26,6 +26,9 @@ type DropContextType = {
   activeDealId: UniqueIdentifier | undefined;
   activeColumnId: UniqueIdentifier | undefined;
   isDeletable: boolean;
+  groupedDealsToWrap: string[];
+  appendGroupedDeal: (groupedDealId: string) => void;
+  removeGroupedDeal: (groupedDealId: string) => void;
 };
 
 type Sortable = {
@@ -68,6 +71,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const [isDeletable, setDeletable] = useState<boolean>(false);
+  const [groupedDealsToWrap, setGroupedDealsToWrap] = useState<string[]>([]);
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -98,13 +103,26 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
   }, [isLoading, filteredDeals, dealPhases]);
 
+  // Add & remove id to groupedDealsToWrap
+  const appendGroupedDeal = (groupedDealId: string) => {
+    setGroupedDealsToWrap([...groupedDealsToWrap, groupedDealId]);
+  };
+  const removeGroupedDeal = (groupedDealId: string) => {
+    setGroupedDealsToWrap(
+      groupedDealsToWrap.filter((id) => id !== groupedDealId),
+    );
+  };
+
   return (
     <DropContext.Provider
       value={{
-        rows: rows,
-        activeDealId: activeDealId,
-        activeColumnId: activeColumnId,
-        isDeletable: isDeletable,
+        rows,
+        activeDealId,
+        activeColumnId,
+        isDeletable,
+        groupedDealsToWrap,
+        appendGroupedDeal,
+        removeGroupedDeal,
       }}
     >
       <DndContext
@@ -275,6 +293,12 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
             activeRowId.split("/")[1],
           );
           emp.rows.push(rowId);
+          emp.deals?.push({
+            dealId:
+              uniqueDeals?.find((deal) => deal.id === rowId.split("/")[0])
+                ?.value[0] ?? "",
+            datum: new Date(),
+          });
           updateEmployeeInDB(emp, rowId); // Update the employee in the database
           return emp;
         }
@@ -297,7 +321,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           const dealId = uniqueDeals?.find(
             (deal) => deal.id === rowId.split("/")[0],
           )?.value[0];
-          emp.dealIds = emp.dealIds.filter((deal) => deal !== dealId);
+          emp.deals =
+            emp.deals?.filter((deal) => deal.dealId !== dealId) ?? null;
 
           updateEmployeeInDB(emp, undefined); // Update the employee in the database
           return emp;
@@ -461,7 +486,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       employee: {
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
-        dealIds: employee.dealIds,
+        deals: employee.deals,
       },
       newRowId: newRowId,
     });

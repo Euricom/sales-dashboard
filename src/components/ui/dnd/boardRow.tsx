@@ -1,6 +1,6 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { EmployeeCardDragged } from "../../employees/employeeCard";
 import { Card, CardContent } from "../card";
 import type { BoardRowProps, DraggableEmployee } from "~/lib/types";
@@ -8,7 +8,13 @@ import { DropContext } from "~/contexts/dndProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
-  const { activeDealId, activeColumnId } = useContext(DropContext);
+  const {
+    activeDealId,
+    activeColumnId,
+    groupedDealsToWrap,
+    appendGroupedDeal,
+    removeGroupedDeal,
+  } = useContext(DropContext);
   const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
 
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
@@ -40,7 +46,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       ? "rowhighlight"
       : "row";
 
-  const { setNodeRef, transform, transition } = useSortable({
+  const { setNodeRef, transform, transition, node } = useSortable({
     id: rowStatus ? `${row.rowId}_${rowStatus}` : row.rowId,
     data: {
       type: "Row",
@@ -53,9 +59,49 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     transform: CSS.Translate.toString(transform),
   };
 
+  const [shouldWrap, setShouldWrap] = useState(false);
+  useEffect(() => {
+    const cardElement = node.current as unknown as HTMLElement;
+    if (cardElement) {
+      const isWrapping = cardElement.scrollHeight > cardElement.clientHeight;
+      const groupedDealId = row.rowId.split("/")[0];
+      if (groupedDealId && !isHeader) {
+        if (isWrapping && !groupedDealsToWrap.includes(groupedDealId)) {
+          // Content is wrapping AKA too many employees in this row
+          appendGroupedDeal(groupedDealId);
+        } else if (!isWrapping && groupedDealsToWrap.includes(groupedDealId)) {
+          const isNotWrappingAnymore =
+            cardElement.scrollHeight < cardElement.clientHeight;
+          if (isNotWrappingAnymore) {
+            // Content is not wrapping anymore and should be unwrapped
+            removeGroupedDeal(groupedDealId);
+          }
+          // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
+        }
+      }
+    }
+  }, [dragItemIds]);
+
+  useEffect(() => {
+    if (!isHeader) {
+      const groupedDealId = row.rowId.split("/")[0];
+      if (groupedDealId) {
+        setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
+      }
+    }
+  }, [groupedDealsToWrap]);
+
   return (
-    <Card ref={setNodeRef} style={style} variant={variant} size={"row"}>
-      <CardContent className={`flex gap-2 h-15 ${isHeader ? "" : "flex-wrap"}`}>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      variant={variant}
+      size={"row"}
+      className={`${shouldWrap ? "h-32" : ""}`}
+    >
+      <CardContent
+        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : "flex-wrap"}`}
+      >
         <SortableContext
           items={dragItemIds}
           id={row.rowId}

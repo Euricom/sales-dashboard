@@ -35,7 +35,9 @@ export const createEmployee = async (newEmployee: EmployeeFromDB) => {
   }
 };
 
-export const createMultipleEmployees = async (newEmployees: EmployeeFromDB[]) => {
+export const createMultipleEmployees = async (
+  newEmployees: EmployeeFromDB[],
+) => {
   const client = new MongoClient(env.DATABASE_URL);
   const db = client.db();
   try {
@@ -47,7 +49,7 @@ export const createMultipleEmployees = async (newEmployees: EmployeeFromDB[]) =>
   } finally {
     await client.close();
   }
-}
+};
 
 // Uses getEmployeesFromDB and createEmployee
 export const getInitialEmployees = async () => {
@@ -77,13 +79,22 @@ export const getInitialEmployees = async () => {
   // if there are missing employees, create missing employees in the db
   if (missingEmployees.length === 1) {
     for (const missingEmployee of missingEmployees) {
-      await createEmployee({ employeeId: missingEmployee.id, rows: ["0"], dealIds: []});
+      await createEmployee({
+        employeeId: missingEmployee.id,
+        rows: ["0"],
+        deals: [],
+      });
     }
   }
   if (missingEmployees.length > 1) {
-    await createMultipleEmployees(missingEmployees.map((employee) => ({ employeeId: employee.id, rows: ["0"], dealIds: []})));
+    await createMultipleEmployees(
+      missingEmployees.map((employee) => ({
+        employeeId: employee.id,
+        rows: ["0"],
+        deals: [],
+      })),
+    );
   }
-
 
   // return db employees with fields from sharepoint
   return employeesFromDb.map((employeeDb) => {
@@ -93,13 +104,16 @@ export const getInitialEmployees = async () => {
     return {
       employeeId: employeeDb?.employeeId,
       rows: employeeDb.rows, // Assuming default row is ["0"]
-      dealIds: employeeDb.dealIds, // Assuming default dealIds is []
+      deals: employeeDb.deals, // Assuming default dealIds is []
       fields: employeeFromSharepoint?.fields,
     };
   });
 };
 
-export const updateEmployee = async (employee: EmployeeFromDB, newRowId: string | undefined) => {
+export const updateEmployee = async (
+  employee: EmployeeFromDB,
+  newRowId: string | undefined,
+) => {
   const client = new MongoClient(env.DATABASE_URL);
   const db = client.db();
 
@@ -107,7 +121,7 @@ export const updateEmployee = async (employee: EmployeeFromDB, newRowId: string 
   const rowMap = new Map<string, string[]>();
 
   // Populate the map
-  employee.rows.forEach(row => {
+  employee.rows.forEach((row) => {
     const firstPart = row.toString().split("/")[0]!;
     if (rowMap.has(firstPart) && newRowId) {
       // If the unique identifier already exists, replace the existing row(s) with newRowId
@@ -121,14 +135,13 @@ export const updateEmployee = async (employee: EmployeeFromDB, newRowId: string 
   // Extract the values of the map to get the filtered rows array
   const uniqueRows = Array.from(rowMap.values()).flat();
 
-  console.log("rows after the filter", uniqueRows);
   try {
     await client.connect();
     await db
       .collection("Employee")
       .updateOne(
         { employeeId: employee.employeeId },
-        { $set: { rows: uniqueRows, dealIds: employee.dealIds } },
+        { $set: { rows: uniqueRows, deals: employee.deals } },
       );
   } catch (error) {
     console.error(error);
