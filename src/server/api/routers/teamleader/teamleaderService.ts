@@ -142,7 +142,8 @@ export const editDealFields = async (
     deal.data.current_phase.id = phaseId;
   }
   if (deal.data.title) {
-    deal.data.title = deal.data.title + " (" + name + ")";
+    const originalTitle = deal.data.title.split("(")[0]?.trim();
+    deal.data.title = originalTitle + " (" + name + ")";
   }
   return { deal, shouldCreate };
 };
