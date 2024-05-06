@@ -6,6 +6,7 @@ import {
   simplifyDeals,
   editDealFields,
   makeUniqueDeals,
+  editDealProbablity,
 } from "./teamleaderService";
 
 export const teamleaderRouter = createTRPCRouter({
@@ -54,7 +55,12 @@ export const teamleaderRouter = createTRPCRouter({
 
   updateDeal: protectedProcedure
     .input(
-      z.object({ id: z.string(), email: z.string(), phase_id: z.string(), name: z.string() }),
+      z.object({
+        id: z.string(),
+        email: z.string(),
+        phase_id: z.string(),
+        name: z.string(),
+      }),
     )
     .output(
       z.promise(
@@ -112,7 +118,39 @@ export const teamleaderRouter = createTRPCRouter({
           });
         }
       } catch (error) {
-        console.error("Error in getDealInfo:", error);
+        console.error("Error in updateDeal:", error);
+      }
+    }),
+
+  updateDealProbability: protectedProcedure
+    .input(z.object({ id: z.string(), probability: z.number() }))
+    .mutation(async (options) => {
+      // get the right deal info
+      const accessToken = options.ctx.session.token.accessToken;
+      const dealId: string = options.input.id;
+      const probability: number = options.input.probability;
+
+      try {
+        if (!accessToken) {
+          throw new Error("Access token not found");
+        }
+        const result = await editDealProbablity(
+          accessToken,
+          dealId,
+          probability,
+        );
+        if (!result) {
+          throw new Error("Failed to fetch data from Teamleader");
+        }
+        const deal = result;
+
+        // update the deal
+        const response = await updateDeal(accessToken, deal);
+        if (!response) {
+          throw new Error("Failed to update deal in Teamleader");
+        }
+      } catch (error) {
+        console.error("Error in updateDealProbability:", error);
       }
     }),
 });

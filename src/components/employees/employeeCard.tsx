@@ -30,13 +30,16 @@ export function EmployeeCardDragged({
     currentEmployeeDetailsId,
     setCurrentEmployeeDetailsId,
   } = useContext(EmployeeContext);
-  const { setDealIds, getCorrectDealId, deals } = useContext(DealContext);
+  const { setDealIds, getCorrectDealId, deals, updateDealProbability } =
+    useContext(DealContext);
   const [filteringVariant, setFilteringVariant] = useState("");
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
   const [TLDatum, setTLDatum] = useState<Date | null>(null);
   const [mongoDatum, setMongoDatum] = useState<Date | null>(null);
+
+  const phase = (draggableEmployee.dragId as string).split("/")[1];
 
   const employee = employees.find(
     (employee) =>
@@ -199,11 +202,14 @@ export function EmployeeCardDragged({
     setCurrentEmployeeDetailsId(draggableEmployee.dragId as string);
   };
 
-  const handleProcentPicker = (
+  const handleProbabilityPicker = (
     e: React.MouseEvent<HTMLButtonElement>,
-    procent: number,
+    probability: number,
   ) => {
-    console.log(procent);
+    if (!correctDealInfo || (isHeader && phase !== "Mogelijkheden")) return;
+    updateDealProbability(correctDealInfo?.id, probability);
+    // instead of refetch
+    correctDealInfo.estimated_probability = probability / 100;
   };
 
   const weeksLeft = () => {
@@ -381,62 +387,67 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
-              <div className="h-0.5 bg-primary rounded-full" />
-              <div>
-                <div className="mb-2">
-                  <p className="font-light">Percentage</p>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#ff0000]"
-                    onClick={(e) => handleProcentPicker(e, 0)}
-                  >
-                    0
-                  </Button>
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#ff5000]"
-                    onClick={(e) => handleProcentPicker(e, 20)}
-                  >
-                    20
-                  </Button>
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#fea600]"
-                    onClick={(e) => handleProcentPicker(e, 40)}
-                  >
-                    40
-                  </Button>
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
-                    onClick={(e) => handleProcentPicker(e, 60)}
-                  >
-                    60
-                  </Button>
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
-                    onClick={(e) => handleProcentPicker(e, 80)}
-                  >
-                    80
-                  </Button>
-                  <Button
-                    variant={"percentagePicker"}
-                    size={"sm"}
-                    className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
-                    onClick={(e) => handleProcentPicker(e, 100)}
-                  >
-                    100
-                  </Button>
-                </div>
-              </div>
+              {phase !== "Mogelijkheden" && (
+                <>
+                  <div className="h-0.5 bg-primary rounded-full" />
+
+                  <div>
+                    <div className="mb-2">
+                      <p className="font-light">Probability</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#ff0000]"
+                        onClick={(e) => handleProbabilityPicker(e, 0)}
+                      >
+                        0
+                      </Button>
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#ff5000]"
+                        onClick={(e) => handleProbabilityPicker(e, 20)}
+                      >
+                        20
+                      </Button>
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#fea600]"
+                        onClick={(e) => handleProbabilityPicker(e, 40)}
+                      >
+                        40
+                      </Button>
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
+                        onClick={(e) => handleProbabilityPicker(e, 60)}
+                      >
+                        60
+                      </Button>
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
+                        onClick={(e) => handleProbabilityPicker(e, 80)}
+                      >
+                        80
+                      </Button>
+                      <Button
+                        variant={"probabilityPicker"}
+                        size={"sm"}
+                        className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
+                        onClick={(e) => handleProbabilityPicker(e, 100)}
+                      >
+                        100
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         )}

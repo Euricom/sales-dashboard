@@ -30,6 +30,7 @@ type DealContextType = {
     groupedDealid: string,
     employee: Employee,
   ) => string | undefined;
+  updateDealProbability: (dealId: string, probability: number) => void;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -59,10 +60,17 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   const dealMover = api.teamleader.updateDealPhase.useMutation({
     onSuccess: async () => {
       toast({ title: "success", variant: "success" });
-      // await refetch();
     },
     onError: () => toast({ title: "error", variant: "destructive" }),
   });
+  const dealProbabilityMutator =
+    api.teamleader.updateDealProbability.useMutation({
+      onSuccess: async () => {
+        toast({ title: "success", variant: "success" });
+      },
+      onError: () => toast({ title: "error", variant: "destructive" }),
+    });
+
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
 
   const deals = useMemo(
@@ -87,13 +95,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   useEffect(() => {
     const intervalId = setInterval(
       () => {
-        refetch()
-          .then(() => {
-            console.log("Refetched deals");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        refetch().catch((error) => {
+          console.log(error);
+        });
       },
       5 * 60 * 1000,
     ); // 5 minutes in milliseconds
@@ -102,7 +106,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [refetch]);
 
   function moveDeal(
     groupedDealId: string,
@@ -322,6 +326,11 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     return correctDealId;
   };
 
+  // Update probability of the deal
+  const updateDealProbability = (dealId: string, probability: number) => {
+    dealProbabilityMutator.mutate({ id: dealId, probability: probability });
+  };
+
   return (
     <DealContext.Provider
       value={{
@@ -339,6 +348,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         filteringCurrentRole,
         setFilteringCurrentRole,
         getCorrectDealId,
+        updateDealProbability,
       }}
     >
       {children}
