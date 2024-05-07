@@ -4,7 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
@@ -92,8 +92,6 @@ export function EmployeeCardDragged({
   useEffect(() => {
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
       setShowDetailView(true);
-    } else {
-      setShowDetailView(false);
     }
   }, [currentEmployeeDetailsId, draggableEmployee.dragId]);
 
@@ -130,6 +128,31 @@ export function EmployeeCardDragged({
   useEffect(() => {
     setShowDetailView(false);
   }, [isDragging]);
+
+  // Close detail view when clicking outside
+  const detailViewRef = useRef<HTMLDivElement>(null);
+
+  // Add mousedown event listener to document
+  useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      // Check if the clicked element is outside of the detail view card
+      if (
+        detailViewRef.current &&
+        !detailViewRef.current.contains(event.target as Node)
+      ) {
+        // Close the detail view
+        setCurrentEmployeeDetailsId("");
+        setShowDetailView(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleMouseDown);
+
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [setCurrentEmployeeDetailsId]);
 
   if (!employee) return null;
   const colors = determineColors(employee.fields.Job_x0020_title);
@@ -380,6 +403,7 @@ export function EmployeeCardDragged({
               top: childLocation.top,
               left: childLocation.left + 8,
             }}
+            ref={detailViewRef}
           >
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between gap-8 h-fit">
