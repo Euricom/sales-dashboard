@@ -115,7 +115,7 @@ export const CollapsibleCardGroups = () => {
         status="starter"
       />
       <CollapsibleCardGroup
-        label="Nieuw"
+        label="Open"
         data={sortedData.openForNewOpportunities}
         status="openForNewOpportunities"
       />

@@ -9,8 +9,9 @@ export function BugReport() {
   const mailMutator = api.mailer.sendMail.useMutation();
 
   const handleBugReport = () => {
-    const input: { name: string; description: string } = { name, description };
-    mailMutator.mutate(input);
+    mailMutator.mutate(description, {
+      onSuccess: () => setDescription(""),
+    });
   };
 
   return (
@@ -30,23 +31,10 @@ export function BugReport() {
             <Dialog.Description className="mt-[0.625rem] mb-5 text-sm] leading-normal">
               Beschrijf hier de bug die je hebt gevonden
             </Dialog.Description>
-            <fieldset className="mb-[0.938rem] flex items-center gap-5">
-              <label className="w-[5.625rem] text-right text-[0.938rem]">
-                Naam
-              </label>
-              <input
-                className=" inline-flex h-[2.188rem] w-full flex-1 items-center justify-center rounded-[0.25rem] px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </fieldset>
-            <fieldset className="mb-[0.938rem] flex items-center gap-5">
-              <label className="w-[5.625rem] text-right text-[0.938rem]">
-                Beschrijving
-              </label>
+            <fieldset className="mb-[0.938rem] flex flex-col items-center gap-2 h-32">
+              <label className="w-full text-[0.938rem]">Beschrijving</label>
               <textarea
-                className="inline-flex h-[8rem] w-full flex-1 rounded-[0.25rem] p-2 px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                className="inline-flex w-full flex-1 rounded-[0.25rem] p-2 px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="username"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
