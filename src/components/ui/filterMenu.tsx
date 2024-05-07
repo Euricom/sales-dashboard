@@ -68,10 +68,20 @@ export function FilterMenu() {
                 <DropdownMenuItem
                   key={pm.id}
                   onClick={() => {
-                    localStorage.setItem("PMId", pm.id);
-                    setPMId(pm.id);
+                    if (pm.id === PMId) {
+                      localStorage.setItem("PMId", "");
+                      setPMId("");
+                    } else {
+                      localStorage.setItem("PMId", pm.id);
+                      setPMId(pm.id);
+                    }
                   }}
-                  className="flex justify-between"
+                  className={
+                    pm.id === PMId
+                      ? "outline outline-white-400 outline-offset-1 flex justify-between"
+                      : "flex justify-between"
+                  }
+                  // className="flex justify-between"
                 >
                   <span>{pm.first_name + " " + pm.last_name}</span>
                   <PmAvatar pm={pm} />
@@ -93,13 +103,22 @@ export function FilterMenu() {
                 <DropdownMenuItem
                   key={role}
                   onClick={() => {
-                    localStorage.setItem(
-                      "filteringCurrentRole",
-                      role ? role : "",
-                    );
-                    setFilteringCurrentRole(role ? role : "");
+                    if (role === filteringCurrentRole) {
+                      localStorage.setItem("filteringCurrentRole", "");
+                      setFilteringCurrentRole("");
+                    } else {
+                      localStorage.setItem(
+                        "filteringCurrentRole",
+                        role ? role : "",
+                      );
+                      setFilteringCurrentRole(role ? role : "");
+                    }
                   }}
-                  className={`justify-center w-full`}
+                  className={
+                    role === filteringCurrentRole
+                      ? "outline outline-white-400 outline-offset-1 justify-center w-full"
+                      : "justify-center w-full"
+                  }
                   style={{
                     backgroundColor: determineColors(role ? role : "")
                       ?.backgroundColor,

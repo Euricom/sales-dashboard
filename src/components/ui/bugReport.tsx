@@ -16,7 +16,7 @@ export function BugReport() {
   return (
     <>
       <Dialog.Root>
-        <div className="flex justify-center items-center absolute bottom-6 right-[5.5rem] z-50 p-1.5 border-primary border-2 bg-white cursor-pointer rounded-14 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+        <div className="flex justify-center items-center absolute bottom-6 right-[5.5rem] z-20 p-1.5 border-primary border-2 bg-white cursor-pointer rounded-14 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
           <Dialog.Trigger asChild>
             <Bug size={32} />
           </Dialog.Trigger>
