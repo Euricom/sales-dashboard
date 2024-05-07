@@ -29,7 +29,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
         return rowId === "0" && status === rowStatus;
       })
       .sort((a, b) => {
-        return a.name.localeCompare(b.name);
+        return a.weeksLeft - b.weeksLeft;
       });
   }, [draggableEmployees, row.rowId, isHeader, rowStatus]);
 

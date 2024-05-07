@@ -16,12 +16,11 @@ export function BugReport() {
   return (
     <>
       <Dialog.Root>
-        <Dialog.Trigger
-          className="absolute bottom-6 right-[5.5rem] z-50 w-12 h-12 border-primary border-2 bg-white cursor-pointer rounded-14 px-2 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-          asChild
-        >
-          <Bug />
-        </Dialog.Trigger>
+        <div className="flex justify-center items-center absolute bottom-6 right-[5.5rem] z-50 p-1.5 border-primary border-2 bg-white cursor-pointer rounded-14 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+          <Dialog.Trigger asChild>
+            <Bug size={32} />
+          </Dialog.Trigger>
+        </div>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-black/50 data-[state=open]:animate-overlayShow fixed inset-0 z-20" />
           <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[28.125rem] translate-x-[-50%] translate-y-[-50%] rounded-[0.375rem] bg-white p-[1.563rem] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-20">

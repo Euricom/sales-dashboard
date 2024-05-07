@@ -81,12 +81,14 @@ export const EmployeeContextProvider: React.FC<
             dragId: `${employee.employeeId}_${row}_${statusIndicator}`,
             type: "Employee",
             name: employee.fields.Title,
+            weeksLeft: employee.weeksLeft,
           };
         }
         return {
           dragId: `${employee.employeeId}_${row}`,
           type: "Employee",
           name: employee.fields.Title,
+          weeksLeft: employee.weeksLeft,
         };
       }),
     );

@@ -173,7 +173,7 @@ export const createDeal = async (
       responsible_user_id: deal.data.responsible_user.id,
       phase_id: phase_id,
       estimated_value: {
-        amount: deal.data.estimated_value.amount,
+        amount: 0,
         currency: deal.data.estimated_value.currency,
       },
       estimated_probability: deal.data.estimated_probability,

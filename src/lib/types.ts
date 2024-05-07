@@ -23,6 +23,7 @@ export type Employee = {
     dealId: string;
     datum: Date | null;
   }[];
+  weeksLeft: number;
   fields: {
     Title: string;
     City: string;
@@ -52,6 +53,7 @@ export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
   type: EmployeeType;
   name: string;
+  weeksLeft: number;
 };
 
 export type EmployeeCardProps = {

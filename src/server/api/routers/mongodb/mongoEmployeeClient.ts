@@ -101,11 +101,26 @@ export const getInitialEmployees = async () => {
     const employeeFromSharepoint = employeesFromSharepoint.find(
       (e) => e.id === employeeDb.employeeId,
     );
+    let weeksLeft = 0;
+  if (employeeFromSharepoint?.fields.Contract_x0020_Status_x0020_Date) {
+    const date = new Date(employeeFromSharepoint.fields.Contract_x0020_Status_x0020_Date);
+    const now = new Date();
+
+    // Get the difference in milliseconds
+    const diff = date.getTime() - now.getTime();
+
+    // Convert milliseconds to weeks
+   weeksLeft = Math.round(diff / (1000 * 60 * 60 * 24 * 7));
+  } else {
+    weeksLeft = -1;
+  }
+
     return {
       employeeId: employeeDb?.employeeId,
       rows: employeeDb.rows, // Assuming default row is ["0"]
       deals: employeeDb.deals, // Assuming default dealIds is []
       fields: employeeFromSharepoint?.fields,
+      weeksLeft: weeksLeft,
     };
   });
 };

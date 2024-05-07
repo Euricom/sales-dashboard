@@ -213,21 +213,16 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeft = () => {
-    if (!employee.fields.Contract_x0020_Status_x0020_Date)
+    if (employee.weeksLeft === -1)
       return {
         time: -1,
         color: "white",
       };
-    const date = new Date(employee.fields.Contract_x0020_Status_x0020_Date);
-    const now = new Date();
 
-    // Get the difference in milliseconds
-    const diff = date.getTime() - now.getTime();
-
-    // Convert milliseconds to weeks
-    const weeks = Math.round(diff / (1000 * 60 * 60 * 24 * 7));
-
-    return { time: Math.abs(weeks), color: weeks > 0 ? "green" : "red" };
+    return {
+      time: Math.abs(employee.weeksLeft),
+      color: employee.weeksLeft > 0 ? "green" : "red",
+    };
   };
 
   const weeksLeftData = weeksLeft();

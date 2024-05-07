@@ -4,7 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "./dropdown-menu";
-import { Plus, LogOut, RotateCcw, Expand, Shrink, FilterX } from "lucide-react";
+import { LogOut, RotateCcw, Expand, Shrink, FilterX, Menu } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useContext, useEffect, useState } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
@@ -44,6 +44,10 @@ export function ActionMenu() {
   };
 
   const handleRemoveFiltering = () => {
+    localStorage.setItem("dealIds", JSON.stringify([]));
+    localStorage.setItem("employeeId", "");
+    localStorage.setItem("PMId", "");
+    localStorage.setItem("filteringCurrentRole", "");
     setDealIds([]);
     setEmployeeId("");
     setPMId("");
@@ -55,7 +59,7 @@ export function ActionMenu() {
     <div className="absolute bottom-6 right-9 z-20">
       <DropdownMenu>
         <DropdownMenuTrigger className="bg-primary text-white rounded-14 hover:bg-white hover:text-primary p-2">
-          <Plus size={32} />
+          <Menu size={32} />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-fit flex flex-col gap-0.5 bg-transparent border-none shadow-none"
