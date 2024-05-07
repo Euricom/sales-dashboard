@@ -12,7 +12,8 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
     let touchMoveRaf: number | null = null;
 
     function syncScroll(event: Event) {
-      if (currentEmployeeDetailsId) setCurrentEmployeeDetailsId("");
+      if (currentEmployeeDetailsId || currentEmployeeDetailsId !== "")
+        setCurrentEmployeeDetailsId("");
 
       const targetColumn = event.currentTarget as HTMLDivElement;
       const scrollRatio =
