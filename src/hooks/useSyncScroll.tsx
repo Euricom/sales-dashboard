@@ -7,12 +7,13 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
 
   useEffect(() => {
     if (!columns) return;
-
+    console.log(columns);
     let startTouchPosition: number | null = null;
     let touchMoveRaf: number | null = null;
 
     function syncScroll(event: Event) {
-      if (currentEmployeeDetailsId) setCurrentEmployeeDetailsId("");
+      if (currentEmployeeDetailsId || currentEmployeeDetailsId !== "")
+        setCurrentEmployeeDetailsId("");
 
       const targetColumn = event.currentTarget as HTMLDivElement;
       const scrollRatio =
@@ -77,5 +78,6 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
         cancelAnimationFrame(touchMoveRaf);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns]);
 }

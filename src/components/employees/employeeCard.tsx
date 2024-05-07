@@ -92,6 +92,8 @@ export function EmployeeCardDragged({
   useEffect(() => {
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
       setShowDetailView(true);
+    } else {
+      setShowDetailView(false);
     }
   }, [currentEmployeeDetailsId, draggableEmployee.dragId]);
 
