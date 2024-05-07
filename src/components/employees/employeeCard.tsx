@@ -275,6 +275,7 @@ export function EmployeeCardDragged({
               : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
+        title={employee.fields.Title}
       >
         <Button
           variant="ghost"
@@ -368,7 +369,7 @@ export function EmployeeCardDragged({
               </CircularProgressbarWithChildren>
             </div>
           </div>
-          <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
+          <div className=" w-full truncate text-[0.688rem] font-normal py-1">
             {employeeDate()}
           </div>
         </Button>

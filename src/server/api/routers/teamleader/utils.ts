@@ -60,8 +60,6 @@ export const getDeals = async (accessToken: string) => {
 
 export const getCompanyLogo = async (url: string) => {
   if (url === "") return null;
-  // for some reason the url for this site isn't correct in Teamleader. As soon as it's fixed this will be deleted.
-  if (url === "http://www.district09.be") url = "http://www.district09.gent";
 
   const response = await fetch(
     ` http://www.google.com/s2/favicons?domain_url=${url}&sz=64`,
