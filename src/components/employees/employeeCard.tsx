@@ -177,21 +177,29 @@ export function EmployeeCardDragged({
   const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
     const clickedElement = event.currentTarget;
     const clickedElementWidth = clickedElement.offsetWidth;
+    const windowWidth =
+      window.innerWidth || document.documentElement.clientWidth;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
     const detailViewHeight = 140;
+    const detailViewWidth = 315; // Assuming the detail view is also 140px wide
     // Get position relative to the document
     const rect = clickedElement.getBoundingClientRect();
     let top = rect.top + window.scrollY;
+    let left = rect.left + window.scrollX + clickedElementWidth;
+
     if (rect.bottom + detailViewHeight > windowHeight) {
       top = top - detailViewHeight;
     }
 
+    if (rect.right + detailViewWidth > windowWidth) {
+      left = rect.left + window.scrollX - detailViewWidth;
+    }
+
     const positionRelativeToDocument = {
       top: top,
-      left: rect.left + window.scrollX + clickedElementWidth,
+      left: left,
     };
-
     setChildLocation(positionRelativeToDocument);
 
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
@@ -223,6 +231,26 @@ export function EmployeeCardDragged({
       time: Math.abs(employee.weeksLeft),
       color: employee.weeksLeft > 0 ? "green" : "red",
     };
+  };
+
+  const employeeDate = () => {
+    const phase = (draggableEmployee.dragId as string).split("/")[1];
+    if (phase === "Mogelijkheden") return "No Date";
+    if (TLDatum) {
+      return TLDatum.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } else if (mongoDatum) {
+      return mongoDatum.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } else {
+      return "No Date";
+    }
   };
 
   const weeksLeftData = weeksLeft();
@@ -341,19 +369,7 @@ export function EmployeeCardDragged({
             </div>
           </div>
           <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
-            {TLDatum
-              ? TLDatum.toLocaleDateString("fr-BE", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
-              : mongoDatum
-                ? mongoDatum.toLocaleDateString("fr-BE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
-                : "No Date"}
+            {employeeDate()}
           </div>
         </Button>
         {showDetailView && (
@@ -366,7 +382,7 @@ export function EmployeeCardDragged({
           >
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between gap-8 h-fit">
-                <h1>{firstNameOnly(employee.fields.Title)}</h1>
+                <h1>{employee.fields.Title}</h1>
                 <Button variant={"icon"} size={"clear"} onClick={handleOnClick}>
                   <X width={20} className="cursor-pointer" />
                 </Button>
@@ -388,7 +404,7 @@ export function EmployeeCardDragged({
 
                   <div>
                     <div className="mb-2">
-                      <p className="font-light">Probability</p>
+                      <p className="font-light">Slaagkans (%)</p>
                     </div>
                     <div className="flex gap-1">
                       <Button
