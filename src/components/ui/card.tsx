@@ -11,7 +11,7 @@ const cardVariants = cva("text-white rounded-14", {
       columnHighlight:
         "flex flex-col bg-primary-foreground outline outline-white-400 outline-offset-1",
       deal: "flex justify-between bg-primary gap-3",
-      row: "bg-none",
+      row: "bg-white bg-opacity-5",
       dealhighlight:
         "flex justify-between bg-secondary gap-3 outline outline-white-400 outline-offset-1",
       rowhighlight: "bg-none outline-dashed outline-white-400 outline-offset-1",
