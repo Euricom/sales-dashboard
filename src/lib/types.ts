@@ -43,11 +43,10 @@ export type EmployeeFromDB = {
   deals: MongoEmployeeDeal[];
 };
 
-export type MongoEmployeeDeal =  {
+export type MongoEmployeeDeal = {
   dealId: string;
   datum: Date | null;
-}
-
+};
 
 export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
@@ -74,7 +73,6 @@ export type LoginProps = {
   };
 };
 
-// Dit binnen halen van teamleader?
 export type DealPhase = {
   id: string | undefined;
   name: string;
