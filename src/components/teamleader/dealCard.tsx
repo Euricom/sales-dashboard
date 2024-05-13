@@ -73,7 +73,7 @@ export default function DealCard({
           {trimDealTitle(groupedDeal.deal.company.name)}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1 items-end">
+      <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
         <div className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit">
           {trimRole(groupedDeal.deal.title)}
         </div>
