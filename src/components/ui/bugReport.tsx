@@ -9,19 +9,19 @@ export function BugReport() {
   const mailMutator = api.mailer.sendMail.useMutation();
 
   const handleBugReport = () => {
-    const input: { name: string; description: string } = { name, description };
-    mailMutator.mutate(input);
+    mailMutator.mutate(description, {
+      onSuccess: () => setDescription(""),
+    });
   };
 
   return (
     <>
       <Dialog.Root>
-        <Dialog.Trigger
-          className="absolute bottom-6 right-[5.5rem] z-50 w-12 h-12 border-primary border-2 bg-white cursor-pointer rounded-14 px-2 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-          asChild
-        >
-          <Bug />
-        </Dialog.Trigger>
+        <div className="flex justify-center items-center absolute bottom-6 right-[5.5rem] z-20 p-1.5 border-primary border-2 bg-white cursor-pointer rounded-14 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+          <Dialog.Trigger asChild>
+            <Bug size={32} />
+          </Dialog.Trigger>
+        </div>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-black/50 data-[state=open]:animate-overlayShow fixed inset-0 z-20" />
           <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[28.125rem] translate-x-[-50%] translate-y-[-50%] rounded-[0.375rem] bg-white p-[1.563rem] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-20">
@@ -31,23 +31,10 @@ export function BugReport() {
             <Dialog.Description className="mt-[0.625rem] mb-5 text-sm] leading-normal">
               Beschrijf hier de bug die je hebt gevonden
             </Dialog.Description>
-            <fieldset className="mb-[0.938rem] flex items-center gap-5">
-              <label className="w-[5.625rem] text-right text-[0.938rem]">
-                Naam
-              </label>
-              <input
-                className=" inline-flex h-[2.188rem] w-full flex-1 items-center justify-center rounded-[0.25rem] px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </fieldset>
-            <fieldset className="mb-[0.938rem] flex items-center gap-5">
-              <label className="w-[5.625rem] text-right text-[0.938rem]">
-                Beschrijving
-              </label>
+            <fieldset className="mb-[0.938rem] flex flex-col items-center gap-2 h-32">
+              <label className="w-full text-[0.938rem]">Beschrijving</label>
               <textarea
-                className="inline-flex h-[8rem] w-full flex-1 rounded-[0.25rem] p-2 px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                className="inline-flex w-full flex-1 rounded-[0.25rem] p-2 px-[0.625rem] text-[0.938rem] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="username"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

@@ -28,7 +28,7 @@ export default function Home() {
         <DealContextProvider>
           <EmployeeContextProvider>
             <DropContextProvider>
-              <main className="flex justify-between mx-4 ">
+              <main className="flex justify-between mx-4 no-scrollbar overflow-hidden">
                 <div className="flex flex-col w-full">
                   <CollapsibleCardGroups />
                   <div className="flex w-full  my-2 gap-4 h-[calc(100vh-6.375rem)]">

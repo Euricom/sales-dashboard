@@ -8,10 +8,18 @@ import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
 import { FilterMenu } from "../filterMenu";
 import { DealContext } from "~/contexts/dealsProvider";
+import { X } from "lucide-react";
 
 export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const { rows, activeColumnId } = useContext(DropContext);
-  const { isLoading } = useContext(DealContext);
+  const {
+    isLoading,
+    PMId,
+    setPMId,
+    filteringCurrentRole,
+    setFilteringCurrentRole,
+    getAllPMs,
+  } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
     .filter((row) => row.rowId.split("/")[1] === columnTitle);
@@ -67,6 +75,46 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     transform: CSS.Translate.toString(transform),
   };
 
+  const handlePMPill = () => {
+    if (PMId !== "" && PMId !== undefined) {
+      const pmName = getAllPMs?.find((pm) => pm.id === PMId)?.first_name;
+
+      return (
+        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
+          <div>{pmName}</div>
+          <div className="rounded-full bg-white text-black">
+            <X
+              size={16}
+              onClick={() => {
+                localStorage.setItem("PMId", "");
+                setPMId("");
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const handleRolePill = () => {
+    if (filteringCurrentRole !== "" && filteringCurrentRole !== undefined) {
+      return (
+        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
+          <div>{filteringCurrentRole}</div>
+          <div className="rounded-full bg-white text-black">
+            <X
+              size={16}
+              onClick={() => {
+                localStorage.setItem("filteringCurrentRole", "");
+                setFilteringCurrentRole("");
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+
   const isDeals = columnTitle === "Deals";
   const isMogelijkheden = columnTitle === "Mogelijkheden";
   const isVoorgesteld = columnTitle === "Voorgesteld";
@@ -117,12 +165,22 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
+      size={
+        isMogelijkheden || isVoorgesteld
+          ? "columnMogelijkhedenEnVoorgesteld"
+          : "column"
+      }
     >
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
           {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
-          {isDeals ? <FilterMenu /> : null}
+          {isDeals ? (
+            <div className="flex flex-row gap-1">
+              {handlePMPill()}
+              {handleRolePill()}
+              <FilterMenu />
+            </div>
+          ) : null}
         </CardTitle>
       </CardHeader>
       {isDeals ? (

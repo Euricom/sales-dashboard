@@ -73,19 +73,11 @@ export default function DealCard({
           {trimDealTitle(groupedDeal.deal.company.name)}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1 items-end">
-        <div
-          className="text-end text-xs px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit truncate..."
-          style={{
-            backgroundColor: colors?.backgroundColor,
-            color: colors?.color,
-          }}
-        >
-          {groupedDeal.deal.custom_fields[1]?.value
-            ? groupedDeal.deal.custom_fields[1]?.value
-            : trimRole(groupedDeal.deal.title)}
+      <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
+        <div className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit">
+          {trimRole(groupedDeal.deal.title)}
         </div>
-        <div className="flex gap-2 justify-end font-normal text-sm items-end">
+        <div className="flex items-center gap-2 justify-end font-normal text-sm">
           {groupedDeal.deal.estimated_closing_date ? (
             <div>
               {new Date(
@@ -93,12 +85,23 @@ export default function DealCard({
               ).toLocaleDateString("fr-BE", {
                 day: "2-digit",
                 month: "2-digit",
-                year: "numeric",
+                year: "2-digit",
               })}
             </div>
           ) : (
             <div>no date</div>
           )}
+          <div
+            className="text-end text-xs px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit"
+            style={{
+              backgroundColor: colors?.backgroundColor,
+              color: colors?.color,
+            }}
+          >
+            {groupedDeal.deal.custom_fields[1]?.value
+              ? groupedDeal.deal.custom_fields[1]?.value
+              : "other"}
+          </div>
           <PmAvatar pm={groupedDeal.deal.PM} size={24} />
         </div>
       </CardContent>
@@ -115,7 +118,7 @@ const trimDealTitle = (title: string) => {
 const trimRole = (role: string) => {
   let newRole = role.split("[")[0]?.split("(")[0];
   newRole = newRole?.replace(/\b[A-Z]*[0-9]+[A-Z]+|[A-Z]+[0-9]+[A-Z]*\b/g, "");
-  newRole = replaceWords(newRole);
+  //newRole = replaceWords(newRole);
   return newRole;
 };
 
