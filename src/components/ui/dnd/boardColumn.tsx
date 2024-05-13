@@ -165,7 +165,11 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
+      size={
+        isMogelijkheden || isVoorgesteld
+          ? "columnMogelijkhedenEnVoorgesteld"
+          : "column"
+      }
     >
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
