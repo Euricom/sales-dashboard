@@ -22,7 +22,7 @@ const cardVariants = cva("text-white rounded-14", {
       column: "h-full px-4 py-2 flex-1",
       columnDeals: "h-full px-4 py-2 basis-[22.5rem]", // Neemt breedte van de content
       columnMogelijkheden: "h-full w-[24rem] px-4 py-2", // Breedte is voor 4 employees, +1 employee is 76px extra en 152px extra voor tv
-      deal: "h-15 w-full min-w-80 w-full pl-1.5 pr-1.5 py-1.5",
+      deal: "h-[3.75rem] w-full min-w-[24rem] w-full pl-1.5 pr-1.5 py-1.5",
       row: "min-h-15 h-15",
       employee: "h-15 w-15 justify-center items-center bg-secondary",
       employeeDragged:
