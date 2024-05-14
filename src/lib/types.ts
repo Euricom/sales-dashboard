@@ -23,6 +23,7 @@ export type Employee = {
     dealId: string;
     datum: Date | null;
   }[];
+  weeksLeft: number;
   fields: {
     Title: string;
     City: string;
@@ -42,16 +43,16 @@ export type EmployeeFromDB = {
   deals: MongoEmployeeDeal[];
 };
 
-export type MongoEmployeeDeal =  {
+export type MongoEmployeeDeal = {
   dealId: string;
   datum: Date | null;
-}
-
+};
 
 export type DraggableEmployee = {
   dragId: UniqueIdentifier; // `${employeeId}_0_${statusIndicator}` for the header OR `${employeeId}_${row}`
   type: EmployeeType;
   name: string;
+  weeksLeft: number;
 };
 
 export type EmployeeCardProps = {
@@ -72,7 +73,6 @@ export type LoginProps = {
   };
 };
 
-// Dit binnen halen van teamleader?
 export type DealPhase = {
   id: string | undefined;
   name: string;
@@ -94,3 +94,13 @@ export type GroupedDeal = {
   deal: SimplifiedDeal;
   groupedDealId: string;
 };
+
+export type datePickerReturnProps= {
+  calendar: {
+    id: string;
+  }
+  day: number
+  era: string
+  month: number
+  year: number
+}

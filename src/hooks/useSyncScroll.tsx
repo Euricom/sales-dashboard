@@ -8,74 +8,50 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
   useEffect(() => {
     if (!columns) return;
 
-    let startTouchPosition: number | null = null;
-    let touchMoveRaf: number | null = null;
-
-    function syncScroll(event: Event) {
-      if (currentEmployeeDetailsId) setCurrentEmployeeDetailsId("");
-
-      const targetColumn = event.currentTarget as HTMLDivElement;
-      const scrollRatio =
-        targetColumn.scrollTop /
-        (targetColumn.scrollHeight - targetColumn.clientHeight);
-
-      columns?.forEach((column) => {
-        if (column !== targetColumn) {
-          column.scrollTop =
-            scrollRatio * (column.scrollHeight - column.clientHeight);
-        }
+    const syncScroll = (scrolledEle: HTMLElement, ele: HTMLElement) => {
+      const top = scrolledEle.scrollTop;
+      const left = scrolledEle.scrollLeft;
+      ele.scrollTo({
+        behavior: "instant",
+        top,
+        left,
       });
-    }
+    };
 
-    function touchStart(e: TouchEvent) {
-      if (!e.touches[0]) return;
-      startTouchPosition = e.touches[0].clientY;
-    }
+    const handleScroll = (e: Event) => {
+      const scrolledEle = e.target as HTMLElement;
+      const columnsArray = Array.from(columns);
 
-    function touchMove(e: TouchEvent) {
-      if (startTouchPosition === null) return;
+      columnsArray
+        .filter((item) => item !== scrolledEle)
+        .forEach((ele) => {
+          syncScroll(scrolledEle, ele);
+        });
+    };
 
-      // Cancel the previous requestAnimationFrame, if there is one
-      if (touchMoveRaf !== null) {
-        cancelAnimationFrame(touchMoveRaf);
-      }
+    const handleTouchMove = (e: TouchEvent) => {
+      const touchedEle = e.target as HTMLElement;
+      const columnsArray = Array.from(columns);
 
-      touchMoveRaf = requestAnimationFrame(() => {
-        if (!startTouchPosition) return;
-        if (!e.touches[0]) return;
-        const touchMoveDistance = startTouchPosition - e?.touches[0].clientY;
-        const targetColumn = e.currentTarget as HTMLDivElement;
-        if (targetColumn === null) return;
-        targetColumn.scrollBy(0, touchMoveDistance);
+      columnsArray
+        .filter((item) => item !== touchedEle)
+        .forEach((ele) => {
+          syncScroll(touchedEle, ele);
+        });
+    };
 
-        startTouchPosition = e.touches[0].clientY;
-
-        syncScroll(e);
-      });
-    }
-
-    function touchEnd() {
-      startTouchPosition = null;
-    }
-
-    columns.forEach((column) => {
-      column.addEventListener("scroll", syncScroll);
-      column.addEventListener("touchstart", touchStart);
-      column.addEventListener("touchmove", touchMove);
-      column.addEventListener("touchend", touchEnd);
+    // Add scroll event listener to all columns once
+    columns.forEach((ele: HTMLElement) => {
+      ele.addEventListener("scroll", handleScroll);
+      ele.addEventListener("touchmove", handleTouchMove, { passive: true });
     });
 
+    // Clean up event listeners when the component unmounts
     return () => {
-      columns.forEach((column) => {
-        column.removeEventListener("scroll", syncScroll);
-        column.removeEventListener("touchstart", touchStart);
-        column.removeEventListener("touchmove", touchMove);
-        column.removeEventListener("touchend", touchEnd);
+      columns.forEach((ele: HTMLElement) => {
+        ele.removeEventListener("scroll", handleScroll);
+        ele.removeEventListener("touchmove", handleTouchMove);
       });
-
-      if (touchMoveRaf !== null) {
-        cancelAnimationFrame(touchMoveRaf);
-      }
     };
   }, [columns]);
 }

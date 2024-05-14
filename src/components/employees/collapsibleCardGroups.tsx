@@ -40,15 +40,11 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
       >
         <CollapsibleTrigger
           className={`h-[4.75rem] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
-          title="CollapsibleTrigger"
         >
           <h4 className="text-sm font-semibold -rotate-90">{label}</h4>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div
-            className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
-            title="CollapsibleContent"
-          >
+          <div className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl">
             <div className="bg-primary rounded-14 animate-pulse">
               <div className="flex flex-row gap-2">
                 {Array.from({ length: amountOfSkeletons }).map((_, index) => (
@@ -85,15 +81,11 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
       >
         <CollapsibleTrigger
           className={`h-[4.75rem] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
-          title="CollapsibleTrigger"
         >
           <h4 className="text-sm font-semibold -rotate-90">{label}</h4>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div
-            className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl"
-            title="CollapsibleContent"
-          >
+          <div className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl">
             <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
           </div>
         </CollapsibleContent>
@@ -123,7 +115,7 @@ export const CollapsibleCardGroups = () => {
         status="starter"
       />
       <CollapsibleCardGroup
-        label="Nieuw"
+        label="Open"
         data={sortedData.openForNewOpportunities}
         status="openForNewOpportunities"
       />

@@ -60,8 +60,6 @@ export const getDeals = async (accessToken: string) => {
 
 export const getCompanyLogo = async (url: string) => {
   if (url === "") return null;
-  // for some reason the url for this site isn't correct in Teamleader. As soon as it's fixed this will be deleted.
-  if (url === "http://www.district09.be") url = "http://www.district09.gent";
 
   const response = await fetch(
     ` http://www.google.com/s2/favicons?domain_url=${url}&sz=64`,
@@ -173,10 +171,10 @@ export const createDeal = async (
       responsible_user_id: deal.data.responsible_user.id,
       phase_id: phase_id,
       estimated_value: {
-        amount: deal.data.estimated_value.amount,
+        amount: 0,
         currency: deal.data.estimated_value.currency,
       },
-      estimated_probability: deal.data.estimated_probability,
+      estimated_probability: 0,
       estimated_closing_date: deal.data.estimated_closing_date ?? "1950-06-19",
       custom_fields: deal.data.custom_fields.map((field) => ({
         id: field.definition.id,
@@ -213,6 +211,38 @@ export const updateDealPhase = async (
     body: JSON.stringify({
       id: dealId,
       phase_id: phaseId,
+    }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to update deal phase in Teamleader");
+    }
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in updateDealPhase:", error);
+  }
+};
+
+export const updateDealPhaseDate = async (
+  id: string,
+  phaseId: string,
+  date: string,
+  accessToken: string,
+) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.move`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
+      phase_id: phaseId,
+      started_at: date,
     }),
   };
 

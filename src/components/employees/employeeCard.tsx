@@ -4,7 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
@@ -16,7 +16,8 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-
+import { DatePickerComponent } from "../ui/datePicker";
+import { ProbabilityPicker } from "../ui/probabilityPicker";
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -110,11 +111,20 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
-      setTLDatum(
-        correctDealInfo?.updated_at
-          ? new Date(correctDealInfo?.updated_at)
-          : null,
-      );
+
+      if (correctDealInfo && employee) {
+        const lastIndex = correctDealInfo.phase_history.length - 1;
+        // needs better name but i don't know which date it is
+        const lastDate = correctDealInfo.phase_history[lastIndex];
+        if (lastDate) {
+          const datum = new Date(lastDate.started_at);
+          if (!TLDatum) {
+            // only set TLDatum if it hasn't been set yet
+            setTLDatum(new Date(datum));
+          }
+        }
+      }
+
       setMongoDatum(empDeal?.datum ?? null);
     }
   }, [
@@ -123,13 +133,40 @@ export function EmployeeCardDragged({
     draggableEmployee.dragId,
     getCorrectDealId,
     isHeader,
-    correctDealInfo?.updated_at,
+    correctDealInfo,
   ]);
 
   // Close detail view when dragging or scrolling
   useEffect(() => {
     setShowDetailView(false);
   }, [isDragging]);
+
+  // Close detail view when clicking outside
+  const detailViewRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
+
+  // Add mousedown event listener to document
+  useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      // Check if the clicked element is outside of the detail view card
+      if (
+        detailViewRef.current &&
+        !detailViewRef.current.contains(event.target as Node) &&
+        !dateRef.current?.contains(event.target as Node)
+      ) {
+        // Close the detail view
+        setCurrentEmployeeDetailsId("");
+        setShowDetailView(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleMouseDown);
+
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [setCurrentEmployeeDetailsId]);
 
   if (!employee) return null;
   const colors = determineColors(employee.fields.Job_x0020_title);
@@ -177,21 +214,29 @@ export function EmployeeCardDragged({
   const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
     const clickedElement = event.currentTarget;
     const clickedElementWidth = clickedElement.offsetWidth;
+    const windowWidth =
+      window.innerWidth || document.documentElement.clientWidth;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
     const detailViewHeight = 140;
+    const detailViewWidth = 315; // Assuming the detail view is also 140px wide
     // Get position relative to the document
     const rect = clickedElement.getBoundingClientRect();
     let top = rect.top + window.scrollY;
+    let left = rect.left + window.scrollX + clickedElementWidth;
+
     if (rect.bottom + detailViewHeight > windowHeight) {
       top = top - detailViewHeight;
     }
 
+    if (rect.right + detailViewWidth > windowWidth) {
+      left = rect.left + window.scrollX - detailViewWidth;
+    }
+
     const positionRelativeToDocument = {
       top: top,
-      left: rect.left + window.scrollX + clickedElementWidth,
+      left: left,
     };
-
     setChildLocation(positionRelativeToDocument);
 
     if (currentEmployeeDetailsId === draggableEmployee.dragId) {
@@ -202,10 +247,7 @@ export function EmployeeCardDragged({
     setCurrentEmployeeDetailsId(draggableEmployee.dragId as string);
   };
 
-  const handleProbabilityPicker = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    probability: number,
-  ) => {
+  const handleProbabilityPicker = (probability: number) => {
     if (!correctDealInfo || (isHeader && phase !== "Mogelijkheden")) return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
@@ -213,26 +255,39 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeft = () => {
-    if (!employee.fields.Contract_x0020_Status_x0020_Date)
+    if (employee.weeksLeft === -1)
       return {
         time: -1,
         color: "white",
       };
-    const date = new Date(employee.fields.Contract_x0020_Status_x0020_Date);
-    const now = new Date();
 
-    // Get the difference in milliseconds
-    const diff = date.getTime() - now.getTime();
+    return {
+      time: Math.abs(employee.weeksLeft),
+      color: employee.weeksLeft > 0 ? "green" : "red",
+    };
+  };
 
-    // Convert milliseconds to weeks
-    const weeks = Math.round(diff / (1000 * 60 * 60 * 24 * 7));
-
-    return { time: Math.abs(weeks), color: weeks > 0 ? "green" : "red" };
+  const employeeDate = () => {
+    const phase = (draggableEmployee.dragId as string).split("/")[1];
+    if (phase === "Mogelijkheden") return "No Date";
+    if (TLDatum) {
+      return TLDatum.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } else {
+      return "No Date";
+    }
   };
 
   const weeksLeftData = weeksLeft();
   const bgColorClass =
     weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
+
+  const handleDateChange = (date: Date) => {
+    setTLDatum(date);
+  };
 
   if (isHeader) {
     return (
@@ -252,6 +307,7 @@ export function EmployeeCardDragged({
               : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
+        title={employee.fields.Title}
       >
         <Button
           variant="ghost"
@@ -345,20 +401,8 @@ export function EmployeeCardDragged({
               </CircularProgressbarWithChildren>
             </div>
           </div>
-          <div className=" w-full rounded-b-14 truncate text-[11px] font-normal py-1">
-            {TLDatum
-              ? TLDatum.toLocaleDateString("fr-BE", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
-              : mongoDatum
-                ? mongoDatum.toLocaleDateString("fr-BE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
-                : "No Date"}
+          <div className=" w-full truncate text-[0.688rem] font-normal py-1">
+            {employeeDate()}
           </div>
         </Button>
         {showDetailView && (
@@ -368,10 +412,11 @@ export function EmployeeCardDragged({
               top: childLocation.top,
               left: childLocation.left + 8,
             }}
+            ref={detailViewRef}
           >
             <CardContent className="flex flex-col gap-2">
               <div className="flex justify-between gap-8 h-fit">
-                <h1>{firstNameOnly(employee.fields.Title)}</h1>
+                <h1>{employee.fields.Title}</h1>
                 <Button variant={"icon"} size={"clear"} onClick={handleOnClick}>
                   <X width={20} className="cursor-pointer" />
                 </Button>
@@ -387,66 +432,23 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
+              {/* datum picker */}
+              {correctDealInfo && TLDatum ? (
+                <DatePickerComponent
+                  deal={correctDealInfo}
+                  date={TLDatum}
+                  setTLDatum={handleDateChange}
+                />
+              ) : null}
               {phase !== "Mogelijkheden" && (
-                <>
-                  <div className="h-0.5 bg-primary rounded-full" />
-
-                  <div>
-                    <div className="mb-2">
-                      <p className="font-light">Probability</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff0000]"
-                        onClick={(e) => handleProbabilityPicker(e, 0)}
-                      >
-                        0
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff5000]"
-                        onClick={(e) => handleProbabilityPicker(e, 20)}
-                      >
-                        20
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fea600]"
-                        onClick={(e) => handleProbabilityPicker(e, 40)}
-                      >
-                        40
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 60)}
-                      >
-                        60
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 80)}
-                      >
-                        80
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 100)}
-                      >
-                        100
-                      </Button>
-                    </div>
-                  </div>
-                </>
+                <ProbabilityPicker
+                  handleProbabilityPicker={handleProbabilityPicker}
+                  currentEmployeeProbability={
+                    correctDealInfo?.estimated_probability
+                      ? correctDealInfo?.estimated_probability
+                      : 0
+                  }
+                />
               )}
             </CardContent>
           </Card>
