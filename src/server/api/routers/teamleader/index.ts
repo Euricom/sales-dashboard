@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createDeal, getDeals, updateDealPhase, updateDeal } from "./utils";
+import { createDeal, getDeals, updateDealPhase, updateDeal, updateDealPhaseDate } from "./utils";
 import type { SimplifiedDealArray } from "./types";
 import { z } from "zod";
 import {
@@ -153,4 +153,22 @@ export const teamleaderRouter = createTRPCRouter({
         console.error("Error in updateDealProbability:", error);
       }
     }),
+
+    updatePhaseDate: protectedProcedure.input(z.object({ id: z.string(), phaseId: z.string(), date: z.string() })).mutation(async (options) => {
+      const accessToken = options.ctx.session.token.accessToken;
+      const dealId = options.input.id;
+      const phaseId = options.input.phaseId;
+      const date = options.input.date;
+      try {
+        if (!accessToken) {
+          throw new Error("Access token not found");
+        }
+        const response = await updateDealPhaseDate(dealId, phaseId, date, accessToken);
+        if (!response) {
+          throw new Error("Failed to move deal in Teamleader");
+        }
+      } catch (error) {
+        console.error("Error in moveDeal:", error);
+      }
+    })
 });

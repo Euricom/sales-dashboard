@@ -78,6 +78,18 @@ export const simplifyDeals = async (
           id: phase?.id ?? null,
           name: phase?.name ?? null,
         },
+        // dit is voor de datums van phases aan te passen.
+        phase_history: dealInfo?.data.phase_history.map((history) => ({
+          phase: {
+            type: history.phase.type,
+            id: history.phase.id,
+          },
+          started_at: history.started_at,
+          started_by: {
+            type: history.started_by.type,
+            id: history.started_by.id,
+          },
+        })),
         company: {
           id: company?.id ?? null,
           name: company?.name ?? null,

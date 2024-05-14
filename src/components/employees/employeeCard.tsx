@@ -16,7 +16,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-
+import { DatePickerComponent } from "../ui/datePicker";
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -110,11 +110,15 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
-      setTLDatum(
-        correctDealInfo?.updated_at
-          ? new Date(correctDealInfo?.updated_at)
-          : null,
-      );
+      if (correctDealInfo && employee) {
+        const lastIndex = correctDealInfo.phase_history.length - 1;
+        if (correctDealInfo.phase_history[lastIndex]?.started_at) {
+          const datum = new Date(
+            correctDealInfo.phase_history[lastIndex].started_at,
+          );
+          setTLDatum(new Date(datum));
+        }
+      }
       setMongoDatum(empDeal?.datum ?? null);
     }
   }, [
@@ -123,7 +127,7 @@ export function EmployeeCardDragged({
     draggableEmployee.dragId,
     getCorrectDealId,
     isHeader,
-    correctDealInfo?.updated_at,
+    correctDealInfo,
   ]);
 
   // Close detail view when dragging or scrolling
@@ -133,6 +137,7 @@ export function EmployeeCardDragged({
 
   // Close detail view when clicking outside
   const detailViewRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
 
   // Add mousedown event listener to document
   useEffect(() => {
@@ -140,7 +145,8 @@ export function EmployeeCardDragged({
       // Check if the clicked element is outside of the detail view card
       if (
         detailViewRef.current &&
-        !detailViewRef.current.contains(event.target as Node)
+        !detailViewRef.current.contains(event.target as Node) &&
+        !dateRef.current?.contains(event.target as Node)
       ) {
         // Close the detail view
         setCurrentEmployeeDetailsId("");
@@ -262,6 +268,7 @@ export function EmployeeCardDragged({
     const phase = (draggableEmployee.dragId as string).split("/")[1];
     if (phase === "Mogelijkheden") return "No Date";
     if (TLDatum) {
+      // console.log(TLDatum);
       return TLDatum.toLocaleDateString("fr-BE", {
         day: "2-digit",
         month: "2-digit",
@@ -425,6 +432,10 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
+              {/* datum picker */}
+              {correctDealInfo && TLDatum ? (
+                <DatePickerComponent deal={correctDealInfo} date={TLDatum} />
+              ) : null}
               {phase !== "Mogelijkheden" && (
                 <>
                   <div className="h-0.5 bg-primary rounded-full" />

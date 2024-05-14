@@ -96,3 +96,13 @@ export type GroupedDeal = {
   deal: SimplifiedDeal;
   groupedDealId: string;
 };
+
+export type datePickerReturnProps= {
+  calendar: {
+    id: string;
+  }
+  day: number
+  era: string
+  month: number
+  year: number
+}

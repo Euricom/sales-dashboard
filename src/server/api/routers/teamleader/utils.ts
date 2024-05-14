@@ -174,7 +174,7 @@ export const createDeal = async (
         amount: 0,
         currency: deal.data.estimated_value.currency,
       },
-      estimated_probability: deal.data.estimated_probability,
+      estimated_probability: 0,
       estimated_closing_date: deal.data.estimated_closing_date ?? "1950-06-19",
       custom_fields: deal.data.custom_fields.map((field) => ({
         id: field.definition.id,
@@ -220,6 +220,34 @@ export const updateDealPhase = async (
       console.error("Failed to update deal phase in Teamleader");
     }
     const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in updateDealPhase:", error);
+  }
+};
+
+export const updateDealPhaseDate = async (id : string, phaseId: string, date: string, accessToken: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.move`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
+      phase_id: phaseId,
+      started_at: date,
+    }),
+  }
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to update deal phase in Teamleader");
+    }
+    const data = response;
+    console.log(data);
     return data;
   } catch (error) {
     console.error("Error in updateDealPhase:", error);
