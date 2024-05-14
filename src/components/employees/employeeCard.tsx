@@ -16,7 +16,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-
+import { DatePickerComponent } from "../ui/datePicker";
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -110,11 +110,18 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
-      setTLDatum(
-        correctDealInfo?.updated_at
-          ? new Date(correctDealInfo?.updated_at)
-          : null,
-      );
+      if (correctDealInfo && employee) {
+        const lastIndex = correctDealInfo.phase_history.length - 1;
+        if (correctDealInfo.phase_history[lastIndex]?.started_at) {
+          const datum = new Date(
+            correctDealInfo.phase_history[lastIndex].started_at,
+          );
+          if (!TLDatum) {
+            // only set TLDatum if it hasn't been set yet
+            setTLDatum(new Date(datum));
+          }
+        }
+      }
       setMongoDatum(empDeal?.datum ?? null);
     }
   }, [
@@ -123,7 +130,7 @@ export function EmployeeCardDragged({
     draggableEmployee.dragId,
     getCorrectDealId,
     isHeader,
-    correctDealInfo?.updated_at,
+    correctDealInfo,
   ]);
 
   // Close detail view when dragging or scrolling
@@ -133,6 +140,7 @@ export function EmployeeCardDragged({
 
   // Close detail view when clicking outside
   const detailViewRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
 
   // Add mousedown event listener to document
   useEffect(() => {
@@ -140,7 +148,8 @@ export function EmployeeCardDragged({
       // Check if the clicked element is outside of the detail view card
       if (
         detailViewRef.current &&
-        !detailViewRef.current.contains(event.target as Node)
+        !detailViewRef.current.contains(event.target as Node) &&
+        !dateRef.current?.contains(event.target as Node)
       ) {
         // Close the detail view
         setCurrentEmployeeDetailsId("");
@@ -267,12 +276,6 @@ export function EmployeeCardDragged({
         month: "2-digit",
         year: "numeric",
       });
-    } else if (mongoDatum) {
-      return mongoDatum.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
     } else {
       return "No Date";
     }
@@ -281,6 +284,10 @@ export function EmployeeCardDragged({
   const weeksLeftData = weeksLeft();
   const bgColorClass =
     weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
+
+  const handleDateChange = (date: Date) => {
+    setTLDatum(date);
+  };
 
   if (isHeader) {
     return (
@@ -425,6 +432,14 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
+              {/* datum picker */}
+              {correctDealInfo && TLDatum ? (
+                <DatePickerComponent
+                  deal={correctDealInfo}
+                  date={TLDatum}
+                  setTLDatum={handleDateChange}
+                />
+              ) : null}
               {phase !== "Mogelijkheden" && (
                 <>
                   <div className="h-0.5 bg-primary rounded-full" />
