@@ -226,7 +226,12 @@ export const updateDealPhase = async (
   }
 };
 
-export const updateDealPhaseDate = async (id : string, phaseId: string, date: string, accessToken: string) => {
+export const updateDealPhaseDate = async (
+  id: string,
+  phaseId: string,
+  date: string,
+  accessToken: string,
+) => {
   const url = `${env.TEAMLEADER_API_URL}/deals.move`;
   const options: RequestInit = {
     method: "POST",
@@ -239,7 +244,7 @@ export const updateDealPhaseDate = async (id : string, phaseId: string, date: st
       phase_id: phaseId,
       started_at: date,
     }),
-  }
+  };
 
   try {
     const response = await fetch(url, options);
@@ -247,7 +252,6 @@ export const updateDealPhaseDate = async (id : string, phaseId: string, date: st
       console.error("Failed to update deal phase in Teamleader");
     }
     const data = response;
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error in updateDealPhase:", error);
