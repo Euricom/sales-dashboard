@@ -89,8 +89,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       const groupedDealId = row.rowId.split("/")[0];
       if (groupedDealId) {
         if (groupedDealsToWrap.includes(groupedDealId))
-          console.log("groupedDealId", groupedDealId);
-        setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
+          setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
       }
     }
   }, [groupedDealsToWrap]);
