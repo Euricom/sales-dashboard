@@ -16,6 +16,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import { ProbabilityPicker } from "../ui/probabilityPicker";
 
 export function EmployeeCardDragged({
   draggableEmployee,
@@ -235,10 +236,7 @@ export function EmployeeCardDragged({
     setCurrentEmployeeDetailsId(draggableEmployee.dragId as string);
   };
 
-  const handleProbabilityPicker = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    probability: number,
-  ) => {
+  const handleProbabilityPicker = (probability: number) => {
     if (!correctDealInfo || (isHeader && phase !== "Mogelijkheden")) return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
@@ -426,65 +424,14 @@ export function EmployeeCardDragged({
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
               {phase !== "Mogelijkheden" && (
-                <>
-                  <div className="h-0.5 bg-primary rounded-full" />
-
-                  <div>
-                    <div className="mb-2">
-                      <p className="font-light">Slaagkans (%)</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff0000]"
-                        onClick={(e) => handleProbabilityPicker(e, 0)}
-                      >
-                        0
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff5000]"
-                        onClick={(e) => handleProbabilityPicker(e, 20)}
-                      >
-                        20
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fea600]"
-                        onClick={(e) => handleProbabilityPicker(e, 40)}
-                      >
-                        40
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 60)}
-                      >
-                        60
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 80)}
-                      >
-                        80
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 100)}
-                      >
-                        100
-                      </Button>
-                    </div>
-                  </div>
-                </>
+                <ProbabilityPicker
+                  handleProbabilityPicker={handleProbabilityPicker}
+                  currentEmployeeProbability={
+                    correctDealInfo?.estimated_probability
+                      ? correctDealInfo?.estimated_probability
+                      : 0
+                  }
+                />
               )}
             </CardContent>
           </Card>

@@ -80,7 +80,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       const pmName = getAllPMs?.find((pm) => pm.id === PMId)?.first_name;
 
       return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
+        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5">
           <div>{pmName}</div>
           <div className="rounded-full bg-white text-black">
             <X
@@ -99,7 +99,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   const handleRolePill = () => {
     if (filteringCurrentRole !== "" && filteringCurrentRole !== undefined) {
       return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
+        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5">
           <div>{filteringCurrentRole}</div>
           <div className="rounded-full bg-white text-black">
             <X
