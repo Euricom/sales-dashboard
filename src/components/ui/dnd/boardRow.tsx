@@ -103,7 +103,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       className={`${shouldWrap ? "min-h-32" : ""}`}
     >
       <CardContent
-        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : "flex-wrap"}`}
+        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : shouldWrap ? "flex-wrap min-h-32 overflow-hidden" : "flex-wrap"}`}
       >
         <SortableContext
           items={dragItemIds}
