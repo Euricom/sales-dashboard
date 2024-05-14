@@ -111,18 +111,20 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
+
       if (correctDealInfo && employee) {
         const lastIndex = correctDealInfo.phase_history.length - 1;
-        if (correctDealInfo.phase_history[lastIndex]?.started_at) {
-          const datum = new Date(
-            correctDealInfo.phase_history[lastIndex].started_at,
-          );
+        // needs better name but i don't know which date it is
+        const lastDate = correctDealInfo.phase_history[lastIndex];
+        if (lastDate) {
+          const datum = new Date(lastDate.started_at);
           if (!TLDatum) {
             // only set TLDatum if it hasn't been set yet
             setTLDatum(new Date(datum));
           }
         }
       }
+
       setMongoDatum(empDeal?.datum ?? null);
     }
   }, [
