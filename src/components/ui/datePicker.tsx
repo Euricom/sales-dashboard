@@ -20,28 +20,20 @@ import type {
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "~/utils/api";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import React from "react";
+import { useToast } from "~/components/ui/use-toast";
 
 export function DatePickerComponent({
   deal,
   date,
+  setTLDatum,
 }: {
   deal: SimplifiedDeal;
   date: Date;
+  setTLDatum: (date: Date) => void;
 }) {
   const dealDateUpdater = api.teamleader.updatePhaseDate.useMutation();
-  // const displayedDate: DateValue = convertDateToDateValue(date);
-
-  // function convertDateToDateValue(date: Date): DateValue {
-  //   return {
-  //     year: date.getFullYear(),
-  //     month: date.getMonth() + 1, // JavaScript months are 0-indexed
-  //     day: date.getDate(),
-  //     calendar: {
-  //       identifier: "gregorian",
-  //     },
-  //   };
-  // }
-
+  const { toast } = useToast();
   const handleOnclick = (date: DateValue) => {
     if (!deal) return;
 
@@ -60,7 +52,13 @@ export function DatePickerComponent({
       phaseId: deal.deal_phase.id,
       date: isoString,
     };
-    dealDateUpdater.mutate(input);
+    dealDateUpdater.mutate(input, {
+      onSuccess: () => {
+        setTLDatum(new Date(isoString));
+        toast({ title: "success", variant: "success" });
+      },
+      onError: () => toast({ title: "error", variant: "destructive" }),
+    });
   };
 
   return (

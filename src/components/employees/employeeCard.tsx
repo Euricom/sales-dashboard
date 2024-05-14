@@ -116,7 +116,10 @@ export function EmployeeCardDragged({
           const datum = new Date(
             correctDealInfo.phase_history[lastIndex].started_at,
           );
-          setTLDatum(new Date(datum));
+          if (!TLDatum) {
+            // only set TLDatum if it hasn't been set yet
+            setTLDatum(new Date(datum));
+          }
         }
       }
       setMongoDatum(empDeal?.datum ?? null);
@@ -268,14 +271,7 @@ export function EmployeeCardDragged({
     const phase = (draggableEmployee.dragId as string).split("/")[1];
     if (phase === "Mogelijkheden") return "No Date";
     if (TLDatum) {
-      // console.log(TLDatum);
       return TLDatum.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    } else if (mongoDatum) {
-      return mongoDatum.toLocaleDateString("fr-BE", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -288,6 +284,10 @@ export function EmployeeCardDragged({
   const weeksLeftData = weeksLeft();
   const bgColorClass =
     weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
+
+  const handleDateChange = (date: Date) => {
+    setTLDatum(date);
+  };
 
   if (isHeader) {
     return (
@@ -434,7 +434,11 @@ export function EmployeeCardDragged({
               </div>
               {/* datum picker */}
               {correctDealInfo && TLDatum ? (
-                <DatePickerComponent deal={correctDealInfo} date={TLDatum} />
+                <DatePickerComponent
+                  deal={correctDealInfo}
+                  date={TLDatum}
+                  setTLDatum={handleDateChange}
+                />
               ) : null}
               {phase !== "Mogelijkheden" && (
                 <>
