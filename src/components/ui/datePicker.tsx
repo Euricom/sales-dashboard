@@ -1,5 +1,5 @@
 import {
-  Button,
+  Button as AriaButton,
   Calendar,
   CalendarCell,
   CalendarGrid,
@@ -10,7 +10,6 @@ import {
   Dialog,
   Group,
   Heading,
-  Label,
   Popover,
 } from "react-aria-components";
 import type {
@@ -67,14 +66,14 @@ export function DatePickerComponent({
   return (
     <div className="relative inline-flex flex-col text-left">
       <DatePicker
-        className="group flex flex-col w-fit"
+        className="group flex flex-col w-full"
         onChange={(date) => handleOnclick(date)}
+        aria-label="Select a date"
       >
-        <Label className="cursor-default">Datum</Label>
         <Group className="flex bg-white/90 focus-within:bg-white group-open:bg-white transition focus-visible:ring-2">
-          <Button className="flex gap-1.5 outline-none">
+          <AriaButton className="flex gap-1.5 outline-none items-center w-full px-2 p-1 bg-primary rounded-14 text-white justify-between">
             <CalendarIcon width={20} />
-            <div className="font-light text-nowrap">
+            <div className="font-light flex h-5">
               {date
                 .toLocaleDateString("fr-BE", {
                   year: "2-digit",
@@ -83,7 +82,7 @@ export function DatePickerComponent({
                 })
                 .toString()}
             </div>
-          </Button>
+          </AriaButton>
         </Group>
         <MyPopover>
           <Dialog className="p-2 no-scrollbar">
@@ -124,9 +123,9 @@ export function DatePickerComponent({
 
 function RoundButton(props: ButtonProps) {
   return (
-    <Button
+    <AriaButton
       {...props}
-      className="w-9 h-9 outline-none cursor-default bg-transparent text-gray-600 border-0 rounded-full flex items-center justify-center hover:bg-gray-100 pressed:bg-gray-200 focus-visible:ring ring-violet-600/70 ring-offset-2"
+      className="w-9 h-9 outline-none bg-primary text-white border-0 rounded-14 flex items-center justify-center cursor-pointer"
     />
   );
 }
