@@ -73,9 +73,18 @@ export type LoginProps = {
   };
 };
 
+export enum DealName {
+  Opportunities = "Opportunities",
+  Proposed = "Proposed",
+  Interview = "Interview",
+  Retained = "Retained",
+  NonRetained = "Non-Retained"
+}
+
 export type DealPhase = {
   id: string | undefined;
-  name: string;
+  name: DealName;
+  label: string
 };
 
 export type PM = {

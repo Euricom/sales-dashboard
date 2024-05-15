@@ -23,14 +23,18 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
   const { isLoading } = useContext(EmployeeContext);
 
   if (isLoading) {
-    const amountOfSkeletons =
-      label === "Bench"
-        ? 6
-        : label === "Einde"
-          ? 2
-          : label === "Starter"
-            ? 1
-            : 2;
+    let amountOfSkeletons;
+
+    switch(label) {
+      case "Bench":
+        amountOfSkeletons = 6;
+        break;
+      case "Starter":
+        amountOfSkeletons = 1;
+        break;
+      default: 
+        amountOfSkeletons = 2;
+    }
 
     return (
       <Collapsible

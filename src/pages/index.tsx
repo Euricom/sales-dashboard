@@ -9,6 +9,8 @@ import { ActionMenu } from "~/components/ui/actionMenu";
 import { Toaster } from "~/components/ui/toaster";
 import Login from "./login";
 import { BugReport } from "~/components/ui/bugReport";
+import { dealPhases } from "~/lib/constants";
+import DealsColumn from "~/components/teamleader/dealsColumn";
 
 export default function Home() {
   const { status } = useSession();
@@ -32,12 +34,12 @@ export default function Home() {
                 <div className="flex flex-col w-full">
                   <CollapsibleCardGroups />
                   <div className="flex w-full  my-2 gap-4 h-[calc(100vh-6.375rem)]">
-                    <BoardColumn columnTitle="Deals" />
-                    <BoardColumn columnTitle="Mogelijkheden" />
-                    <BoardColumn columnTitle="Voorgesteld" />
-                    <BoardColumn columnTitle="Interview" />
-                    <BoardColumn columnTitle="Weerhouden" />
-                    <BoardColumn columnTitle="Niet-Weerhouden" />
+                    <>
+                    <DealsColumn/>
+                    {dealPhases.map(dealPhase => {
+                      return <BoardColumn dealPhase={dealPhase} />
+                    })}
+                    </>
                   </div>
                 </div>
                 <BugReport />

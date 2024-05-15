@@ -4,25 +4,18 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
-import DealsColumn from "~/components/teamleader/dealsColumn";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
-import { FilterMenu } from "../filterMenu";
 import { DealContext } from "~/contexts/dealsProvider";
-import { X } from "lucide-react";
+import { DealName, DealPhase } from "~/lib/types";
 
-export function BoardColumn({ columnTitle }: { columnTitle: string }) {
+export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
   const { rows, activeColumnId } = useContext(DropContext);
   const {
     isLoading,
-    PMId,
-    setPMId,
-    filteringCurrentRole,
-    setFilteringCurrentRole,
-    getAllPMs,
   } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
-    .filter((row) => row.rowId.split("/")[1] === columnTitle);
+    .filter((row) => row.rowId.split("/")[1] === dealPhase.name);
   const rowsIds = useMemo(
     () => filteredRows.map((row) => row.rowId),
     [filteredRows],
@@ -63,7 +56,7 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
   useSyncScroll(columns);
 
   const { setNodeRef, transform, transition } = useSortable({
-    id: columnTitle,
+    id: dealPhase.label,
     data: {
       type: "Column",
       filteredRows,
@@ -75,78 +68,23 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
     transform: CSS.Translate.toString(transform),
   };
 
-  const handlePMPill = () => {
-    if (PMId !== "" && PMId !== undefined) {
-      const pmName = getAllPMs?.find((pm) => pm.id === PMId)?.first_name;
-
-      return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
-          <div>{pmName}</div>
-          <div className="rounded-full bg-white text-black">
-            <X
-              size={16}
-              onClick={() => {
-                localStorage.setItem("PMId", "");
-                setPMId("");
-              }}
-            />
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const handleRolePill = () => {
-    if (filteringCurrentRole !== "" && filteringCurrentRole !== undefined) {
-      return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1 pr-0.5">
-          <div>{filteringCurrentRole}</div>
-          <div className="rounded-full bg-white text-black">
-            <X
-              size={16}
-              onClick={() => {
-                localStorage.setItem("filteringCurrentRole", "");
-                setFilteringCurrentRole("");
-              }}
-            />
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const isDeals = columnTitle === "Deals";
-  const isMogelijkheden = columnTitle === "Mogelijkheden";
-  const isVoorgesteld = columnTitle === "Voorgesteld";
-  const isNietWeerhouden = columnTitle === "Niet-Weerhouden";
+  const isOpportunity = dealPhase.name === DealName.Opportunities;
+  const isProposed = dealPhase.name === DealName.Proposed;
+  const isNonRetained = dealPhase.name === DealName.NonRetained;
 
   // Skeleton for loading state
   if (isLoading ?? !filteredRows ?? filteredRows.length === 0) {
-    if (isDeals) {
-      return (
-        <div className="basis-[24.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
-          <div className="pb-1.5 text-white">{columnTitle}</div>
-          <div className="flex flex-col gap-2">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-[3.75rem] bg-primary rounded-14 animate-pulse"
-              ></div>
-            ))}
-          </div>
-        </div>
-      );
-    } else if (isMogelijkheden) {
+    if (isOpportunity) {
       return (
         <div className="w-[23.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
-          <div className="pb-1.5 text-white">{columnTitle}</div>
+          <div className="pb-1.5 text-white">{dealPhase.label}</div>
         </div>
       );
     } else {
       return (
         <div className="flex-1 bg-secondary rounded-14 animate-pulse  px-4 py-2">
           <div className="pb-1.5 text-white">
-            {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
+            {dealPhase.label}
           </div>
         </div>
       );
@@ -158,36 +96,24 @@ export function BoardColumn({ columnTitle }: { columnTitle: string }) {
       ref={setNodeRef}
       style={style}
       variant={
-        activeColumnId === columnTitle &&
-        !isMogelijkheden &&
-        !isDeals &&
-        !isVoorgesteld
+        activeColumnId === dealPhase.name &&
+        !isOpportunity &&
+        !isProposed
           ? "columnHighlight"
           : "column"
       }
-      size={isMogelijkheden ? "columnMogelijkheden" : "column"}
+      size={isOpportunity ? "columnOpportunities" : "column"}
     >
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
-          {isNietWeerhouden ? "Niet Weerhouden" : columnTitle}
-          {isDeals ? (
-            <div className="flex flex-row gap-1">
-              {handlePMPill()}
-              {handleRolePill()}
-              <FilterMenu />
-            </div>
-          ) : null}
+         {dealPhase.label}
         </CardTitle>
       </CardHeader>
-      {isDeals ? (
-        <DealsColumn />
-      ) : (
         <CardContent className="flex flex-col p-1 gap-2 column no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] w-full">
           <SortableContext items={rowsIds}>
             {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
           </SortableContext>
         </CardContent>
-      )}
     </Card>
   );
 }
