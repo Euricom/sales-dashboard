@@ -35,10 +35,15 @@ export default function Home() {
                   <CollapsibleCardGroups />
                   <div className="flex w-full  my-2 gap-4 h-[calc(100vh-6.375rem)]">
                     <>
-                    <DealsColumn/>
-                    {dealPhases.map(dealPhase => {
-                      return <BoardColumn dealPhase={dealPhase} />
-                    })}
+                      <DealsColumn />
+                      {dealPhases.map((dealPhase) => {
+                        return (
+                          <BoardColumn
+                            key={dealPhase.id}
+                            dealPhase={dealPhase}
+                          />
+                        );
+                      })}
                     </>
                   </div>
                 </div>
