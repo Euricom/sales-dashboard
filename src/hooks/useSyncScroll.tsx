@@ -43,14 +43,12 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
     // Add scroll event listener to all columns once
     columns.forEach((ele: HTMLElement) => {
       ele.addEventListener("scroll", handleScroll);
-      ele.addEventListener("touchmove", handleTouchMove, { passive: true });
     });
 
     // Clean up event listeners when the component unmounts
     return () => {
       columns.forEach((ele: HTMLElement) => {
         ele.removeEventListener("scroll", handleScroll);
-        ele.removeEventListener("touchmove", handleTouchMove);
       });
     };
   }, [columns]);
