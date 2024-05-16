@@ -18,7 +18,11 @@ type DealContextType = {
   isLoading?: boolean;
   filteredDeals: GroupedDeal[] | null | undefined;
   setDealIds: React.Dispatch<React.SetStateAction<string[]>>;
-  getDealInfo: (id: string, phaseName: string, employee: Employee) => void;
+  updateOrCreateDeal: (
+    id: string,
+    phaseName: string,
+    employee: Employee,
+  ) => void;
   moveDeal: (id: string, phase_id: string, employee: Employee) => void;
   PMId: string | undefined;
   setPMId: React.Dispatch<React.SetStateAction<string>>;
@@ -113,7 +117,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     phaseName: string,
     employee: Employee,
   ) {
-    const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
+    const phase_id = dealPhases.find(
+      (phase) => phase.name.toString() === phaseName,
+    )?.id;
     if (!phase_id) throw new Error("Phase not found");
 
     const dealId = getCorrectDealId(groupedDealId, employee);
@@ -150,12 +156,14 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     });
   }
 
-  function getDealInfo(
+  function updateOrCreateDeal(
     groupedDealId: string,
     phaseName: string,
     employee: Employee,
   ) {
-    const phase_id = dealPhases.find((phase) => phase.name === phaseName)?.id;
+    const phase_id = dealPhases.find(
+      (phase) => phase.name.toString() === phaseName,
+    )?.id;
     if (!phase_id || !employee.fields.Euricom_x0020_email) {
       throw new Error("Phase not found");
     }
@@ -339,7 +347,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         isLoading,
         filteredDeals,
         setDealIds,
-        getDealInfo,
+        updateOrCreateDeal,
         moveDeal,
         PMId,
         setPMId,

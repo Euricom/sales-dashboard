@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
-import { type Row, type DraggableEmployee, type Employee, DealName } from "~/lib/types";
+import {
+  type Row,
+  type DraggableEmployee,
+  type Employee,
+  DealName,
+} from "~/lib/types";
 import {
   DndContext,
   type DragEndEvent,
@@ -60,7 +65,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     filteredDeals,
     dealPhases,
     isLoading,
-    getDealInfo,
+    updateOrCreateDeal,
     moveDeal,
     uniqueDeals,
   } = useContext(DealContext);
@@ -183,7 +188,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // Highlight the correct column and/or deal
     if (overData?.type === "Employee") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (DealName.Opportunities === columnName || DealName.Proposed ===columnName) {
+      if (
+        DealName.Opportunities.toString() === columnName ||
+        DealName.Proposed.toString() === columnName
+      ) {
         return;
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
@@ -192,7 +200,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
     if (overData?.type === "Row") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (DealName.Opportunities === columnName || DealName.Proposed ===columnName) {
+      if (
+        DealName.Opportunities.toString() === columnName ||
+        DealName.Proposed.toString() === columnName
+      ) {
         setActiveDealId(overId);
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
@@ -247,7 +258,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     // Dropping new Employee over the Board from Header
     if (
-      activeRowId === "0" && (DealName.Opportunities === activeColumnId || DealName.Proposed === activeColumnId)
+      activeRowId === "0" &&
+      (DealName.Opportunities === activeColumnId ||
+        DealName.Proposed === activeColumnId)
     ) {
       const employee = findEmployee(activeEmployee);
       if (!employee) return;
@@ -341,6 +354,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     // Find the employee to move
     const employee = findEmployee(draggableEmployee);
     if (!employee) return;
+
     // Check if move is allowed
     if (!isAllowedToDrop(draggableEmployee, targetId, employee)) {
       // Handle special cases
@@ -349,6 +363,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       targetId = newTargetId;
     }
     if (initialRowId === targetId) return;
+
     // Update the employees state
     setEmployees((employees) => {
       const updatedEmployees = employees.map((emp) => {
@@ -378,45 +393,53 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     });
   }
 
-  // Helper function to check if an employee is already in a row
+  // Helper function to check if the dragging action is allowed
   function isAllowedToDrop(
     draggableEmployee: DraggableEmployee,
     rowIdToCompare: string,
     employee: Employee,
   ) {
-    const [initialRowId, initialRowStatus] =
+    const [initialRowId, initialRowPhase] =
       (draggableEmployee.dragId as string).split("_")[1]?.split("/") ?? [];
-    const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
+    const [targetRowId, targetRowPhase] = rowIdToCompare.split("/");
 
-    // Inside the same row OR dragging between rows in Opportunities column
-
-    // In what situation does this need to be checked?
-    // this is what causes the bug btw
-    if (
-      initialRowId !== targetRowId &&
-      initialRowStatus === DealName.Opportunities &&
-      !employee?.rows.some(
-        (row) => (row as string).split("/")[0] === targetRowId,
+    // Dragging in the same deal: ALLOWED
+    if (initialRowId === targetRowId) {
+      // An employee can NOT be dragged to the opportunities column within the same deal: NOT ALLOWED
+      if (
+        targetRowPhase === DealName.Opportunities &&
+        initialRowPhase !== DealName.Opportunities
       )
+        return false;
+      return true;
+    }
+
+    // Check if the employee is already assigned to the deal (regardless of phase): NOT ALLOWED
+    const isTargetRowIdInEmployeeRows = employee?.rows.some(
+      (row) => (row as string).split("/")[0] === targetRowId,
+    );
+    if (isTargetRowIdInEmployeeRows) return false;
+
+    if (
+      initialRowPhase === DealName.Opportunities &&
+      targetRowPhase === DealName.Opportunities
+    )
+      // Dragging between rows in Opportunities column: ALLOWED
+      return true;
+
+    // Can you drag into the target row from the header?
+    // If you drag from the header to the opportunities column: ALLOWED
+    if (targetRowPhase === DealName.Opportunities && initialRowId === "0")
+      return true;
+    // If you drag from the header to the proposed column: ALLOWED
+    if (targetRowPhase === DealName.Proposed && initialRowId === "0")
+      return true;
+    // If you drag from opportunities to proposed column: ALLOWED
+    if (
+      targetRowPhase === DealName.Proposed &&
+      initialRowPhase === DealName.Opportunities
     )
       return true;
-    // Not in the same row and row does not exist in employee.rows
-
-    if (
-      initialRowId !== targetRowId &&
-      !employee?.rows.some(
-        (row) => (row as string).split("/")[0] === targetRowId,
-      )
-    ) {
-      // Can you drag into the target row from the header?
-      if (
-        (targetRowStatus === DealName.Opportunities && initialRowId === "0") ||
-        (targetRowStatus === DealName.Proposed &&
-          (initialRowStatus === DealName.Opportunities || initialRowId === "0"))
-      ) {
-        return true;
-      }
-    }
 
     return false;
   }
@@ -444,34 +467,36 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
   // Helper function to handle special cases
   function handleSpecialCases(initialRowId: string, targetId: string) {
-    // If the target row is not the correct row to drop the employee
-    // Check if the target is a column not equal to the initial column
+    // If the target is a column
+    if (targetId.split("/").length === 1) {
+      // If the target is the Opportunities column then return the initialRowId
+      if (DealName.Opportunities.toString() === targetId)
+        return (targetId = initialRowId);
 
-    // If the target is a column and not a row
-    //    AND the initial row is not the same as the target row
-    //    THEN return a new targetId with the same dealId but different status
-    if (
-      DealName.Opportunities != targetId &&
-      initialRowId.split("/")[1] !== targetId
-    ) {
-      return (targetId = initialRowId.split("/")[0] + "/" + targetId);
+      // If the initial row is not the same as the target row
+      // THEN return a new targetId with the same dealId but the new phase
+      if (initialRowId.split("/")[1] !== targetId)
+        return (targetId = initialRowId.split("/")[0] + "/" + targetId);
     }
+
     // If the target is a row
-    //   AND the initial row status is not the same as the target row status
-    //   AND the target is not Opportunities or Proposed
+    //   AND dragging to a different column and deal
+    //   AND the target column is not Opportunities or Proposed
     else if (
       (targetId.split("/")[1] ?? targetId) !== initialRowId.split("/")[1] &&
-      (targetId.split("/")[1] ?? targetId) !== DealName.Opportunities
+      (targetId.split("/")[1] ?? targetId) !== DealName.Opportunities.toString()
     ) {
       return (targetId =
         initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);
     }
     // If the target is a row in Opportunities
-    else if ((targetId.split("/")[1] ?? targetId) === DealName.Opportunities) {
+    else if (
+      (targetId.split("/")[1] ?? targetId) === DealName.Opportunities.toString()
+    ) {
       return (targetId = initialRowId);
-    } else {
-      return;
     }
+    // Unhandled edge cases
+    return (targetId = initialRowId);
   }
 
   function updateEmployeeInDB(
@@ -494,15 +519,22 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     employee: Employee,
     initialPhaseName: string | undefined,
   ) {
-    if (!groupedDealId || !phaseName || phaseName === DealName.Opportunities) {
+    if (
+      !groupedDealId ||
+      !phaseName ||
+      phaseName === DealName.Opportunities.toString()
+    ) {
       return;
     }
+
+    // Moving the deal to a different phase (not Opportunities)
     if (
-      initialPhaseName && DealName.Proposed != initialPhaseName
+      initialPhaseName &&
+      DealName.Opportunities.toString() !== initialPhaseName
     ) {
       moveDeal(groupedDealId, phaseName, employee);
     } else {
-      getDealInfo(groupedDealId, phaseName, employee);
+      updateOrCreateDeal(groupedDealId, phaseName, employee);
     }
   }
 };
