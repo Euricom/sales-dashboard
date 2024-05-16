@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { hasDraggableData } from "../components/ui/dnd/utils";
-import type { Row, DraggableEmployee, Employee } from "~/lib/types";
+import { type Row, type DraggableEmployee, type Employee, DealName } from "~/lib/types";
 import {
   DndContext,
   type DragEndEvent,
@@ -179,11 +179,11 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     );
 
     if (!overId) return;
-
+    const columnName = overId.split("/")[1]!;
     // Highlight the correct column and/or deal
     if (overData?.type === "Employee") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (["Mogelijkheden", "Voorgesteld"].includes(overId.split("/")[1]!)) {
+      if (DealName.Opportunities === columnName || DealName.Proposed ===columnName) {
         return;
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
@@ -192,7 +192,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     }
     if (overData?.type === "Row") {
       setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
-      if (["Mogelijkheden", "Voorgesteld"].includes(overId.split("/")[1]!)) {
+      if (DealName.Opportunities === columnName || DealName.Proposed ===columnName) {
         setActiveDealId(overId);
       } else {
         setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
@@ -215,11 +215,11 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       return;
     const isOverAnEmployee = overData?.type === "Employee";
 
-    // Dropping Employee over the header FROM Mogelijkheden (Delete Employee)
+    // Dropping Employee over the header FROM Opportunities (Delete Employee)
     if (
       activeRowId !== "0" &&
       overId.split("_")[1] === "0" &&
-      (event.active.id as string).split("/")[1] === "Mogelijkheden"
+      (event.active.id as string).split("/")[1] === DealName.Opportunities
     ) {
       removeEmployee(activeEmployee, activeRowId);
     }
@@ -247,8 +247,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
 
     // Dropping new Employee over the Board from Header
     if (
-      activeRowId === "0" &&
-      ["Mogelijkheden", "Voorgesteld"].includes(activeColumnId as string)
+      activeRowId === "0" && (DealName.Opportunities === activeColumnId || DealName.Proposed === activeColumnId)
     ) {
       const employee = findEmployee(activeEmployee);
       if (!employee) return;
@@ -389,17 +388,16 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       (draggableEmployee.dragId as string).split("_")[1]?.split("/") ?? [];
     const [targetRowId, targetRowStatus] = rowIdToCompare.split("/");
 
-    // Inside the same row OR dragging between rows in "Mogelijkheden" column
+    // Inside the same row OR dragging between rows in Opportunities column
 
     // In what situation does this need to be checked?
     // this is what causes the bug btw
     if (
       initialRowId !== targetRowId &&
-      initialRowStatus === "Mogelijkheden" &&
+      initialRowStatus === DealName.Opportunities &&
       !employee?.rows.some(
         (row) => (row as string).split("/")[0] === targetRowId,
       )
-      // || initialRowStatus === "Mogelijkheden"
     )
       return true;
     // Not in the same row and row does not exist in employee.rows
@@ -412,9 +410,9 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     ) {
       // Can you drag into the target row from the header?
       if (
-        (targetRowStatus === "Mogelijkheden" && initialRowId === "0") ||
-        (targetRowStatus === "Voorgesteld" &&
-          (initialRowStatus === "Mogelijkheden" || initialRowId === "0"))
+        (targetRowStatus === DealName.Opportunities && initialRowId === "0") ||
+        (targetRowStatus === DealName.Proposed &&
+          (initialRowStatus === DealName.Opportunities || initialRowId === "0"))
       ) {
         return true;
       }
@@ -453,25 +451,23 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     //    AND the initial row is not the same as the target row
     //    THEN return a new targetId with the same dealId but different status
     if (
-      ["Interview", "Weerhouden", "Niet-Weerhouden", "Voorgesteld"].includes(
-        targetId,
-      ) &&
+      DealName.Opportunities != targetId &&
       initialRowId.split("/")[1] !== targetId
     ) {
       return (targetId = initialRowId.split("/")[0] + "/" + targetId);
     }
     // If the target is a row
     //   AND the initial row status is not the same as the target row status
-    //   AND the target is not "Mogelijkheden" or "Voorgesteld"
+    //   AND the target is not Opportunities or Proposed
     else if (
       (targetId.split("/")[1] ?? targetId) !== initialRowId.split("/")[1] &&
-      (targetId.split("/")[1] ?? targetId) !== "Mogelijkheden"
+      (targetId.split("/")[1] ?? targetId) !== DealName.Opportunities
     ) {
       return (targetId =
         initialRowId.split("/")[0] + "/" + targetId.split("/")[1]);
     }
-    // If the target is a row in "Mogelijkheden"
-    else if ((targetId.split("/")[1] ?? targetId) === "Mogelijkheden") {
+    // If the target is a row in Opportunities
+    else if ((targetId.split("/")[1] ?? targetId) === DealName.Opportunities) {
       return (targetId = initialRowId);
     } else {
       return;
@@ -498,14 +494,11 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     employee: Employee,
     initialPhaseName: string | undefined,
   ) {
-    if (!groupedDealId || !phaseName || phaseName === "Mogelijkheden") {
+    if (!groupedDealId || !phaseName || phaseName === DealName.Opportunities) {
       return;
     }
     if (
-      initialPhaseName &&
-      ["Voorgesteld", "Interview", "Niet-Weerhouden", "Weerhouden"].includes(
-        initialPhaseName,
-      )
+      initialPhaseName && DealName.Proposed != initialPhaseName
     ) {
       moveDeal(groupedDealId, phaseName, employee);
     } else {

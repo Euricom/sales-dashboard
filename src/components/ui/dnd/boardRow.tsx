@@ -3,9 +3,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { EmployeeCardDragged } from "../../employees/employeeCard";
 import { Card, CardContent } from "../card";
-import type { BoardRowProps, DraggableEmployee } from "~/lib/types";
+import { DealName, type BoardRowProps, type DraggableEmployee } from "~/lib/types";
 import { DropContext } from "~/contexts/dndProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
+import { log } from "console";
 
 export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const {
@@ -36,13 +37,13 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
-  const isMogelijkheden = activeColumnId === "Mogelijkheden";
-  const isVoorgesteld = activeColumnId === "Voorgesteld";
+  const isOpportunities = activeColumnId === DealName.Opportunities;
+  const isProposed = activeColumnId === DealName.Proposed;
 
   const variant =
     row.rowId === activeDealId &&
     !isHeader &&
-    (isMogelijkheden || isVoorgesteld)
+    (isOpportunities || isProposed)
       ? "rowhighlight"
       : "row";
 

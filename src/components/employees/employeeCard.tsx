@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { EmployeeCardProps } from "~/lib/types";
+import { DealName, type EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
 import { determineColors } from "~/lib/utils";
@@ -248,7 +248,7 @@ export function EmployeeCardDragged({
   };
 
   const handleProbabilityPicker = (probability: number) => {
-    if (!correctDealInfo || (isHeader && phase !== "Mogelijkheden")) return;
+    if (!correctDealInfo || (isHeader && phase !== DealName.Opportunities)) return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
     correctDealInfo.estimated_probability = probability / 100;
@@ -269,7 +269,7 @@ export function EmployeeCardDragged({
 
   const employeeDate = () => {
     const phase = (draggableEmployee.dragId as string).split("/")[1];
-    if (phase === "Mogelijkheden") return "No Date";
+    if (phase === DealName.Opportunities) return "No Date";
     if (TLDatum) {
       return TLDatum.toLocaleDateString("fr-BE", {
         day: "2-digit",
@@ -336,6 +336,17 @@ export function EmployeeCardDragged({
     );
   }
 
+  const employeeEstProbability = correctDealInfo?.estimated_probability? Number(correctDealInfo?.estimated_probability * 100): 0;
+
+  const pathColor = () => {
+      if (employeeEstProbability < 20) return "#ff0000";
+      if (employeeEstProbability < 40) return "#ff5000";
+      if (employeeEstProbability < 60) return "#fea600";
+      if (employeeEstProbability < 80) return "#fdc800";
+      if (employeeEstProbability < 90) return "#b4fa00";
+      return "#00ff00";
+  }
+
   return (
     <>
       <Card
@@ -378,25 +389,17 @@ export function EmployeeCardDragged({
             </div>
             <div className="w-7 h-7">
               <CircularProgressbarWithChildren
-                value={
-                  correctDealInfo?.estimated_probability
-                    ? Number(correctDealInfo?.estimated_probability * 100)
-                    : 0
-                }
+                value={employeeEstProbability}
                 strokeWidth={8}
                 styles={buildStyles({
                   strokeLinecap: "butt",
-                  pathColor: "#00C800",
+                  pathColor: pathColor(),
                   trailColor: "#FFFFFF",
                 })}
                 className="shadow-[inset_0_3px_10px_rgba(0,0,0,.6)] rounded-full"
               >
                 <div className="mt-[1px] text-xs">
-                  {correctDealInfo?.estimated_probability ? (
-                    Number(correctDealInfo?.estimated_probability * 100)
-                  ) : (
-                    <div className="text-[9px]">N/A</div>
-                  )}
+                  {employeeEstProbability != 0 ? employeeEstProbability : ( <div className="text-[9px]">N/A</div>)}
                 </div>
               </CircularProgressbarWithChildren>
             </div>
@@ -440,7 +443,7 @@ export function EmployeeCardDragged({
                   setTLDatum={handleDateChange}
                 />
               ) : null}
-              {phase !== "Mogelijkheden" && (
+              {phase !== DealName.Opportunities && (
                 <ProbabilityPicker
                   handleProbabilityPicker={handleProbabilityPicker}
                   currentEmployeeProbability={
