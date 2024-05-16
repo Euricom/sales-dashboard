@@ -102,7 +102,11 @@ export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
           ? "columnHighlight"
           : "column"
       }
-      size={isOpportunity ? "columnOpportunities" : "column"}
+      size={
+        isOpportunity || isProposed
+          ? "columnOpportunitiesAndProposed"
+          : "column"
+      }
     >
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">

@@ -1,5 +1,6 @@
 import { useContext, useEffect } from "react";
 import { EmployeeContext } from "~/contexts/employeesProvider";
+
 export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
   const { currentEmployeeDetailsId, setCurrentEmployeeDetailsId } =
     useContext(EmployeeContext);
@@ -7,7 +8,7 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
   useEffect(() => {
     if (!columns) return;
 
-    const syncScroll = (scrolledEle: HTMLDivElement, ele: HTMLDivElement) => {
+    const syncScroll = (scrolledEle: HTMLElement, ele: HTMLElement) => {
       const top = scrolledEle.scrollTop;
       const left = scrolledEle.scrollLeft;
       ele.scrollTo({
@@ -18,24 +19,39 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
     };
 
     const handleScroll = (e: Event) => {
-      const scrolledEle = e.target as HTMLDivElement;
+      const scrolledEle = e.target as HTMLElement;
       const columnsArray = Array.from(columns);
 
       columnsArray
         .filter((item) => item !== scrolledEle)
         .forEach((ele) => {
-          ele.removeEventListener("scroll", handleScroll);
           syncScroll(scrolledEle, ele);
-          window.requestAnimationFrame(() => {
-            ele.addEventListener("scroll", handleScroll);
-          });
         });
     };
 
-    columns.forEach((ele: HTMLDivElement) => {
+    const handleTouchMove = (e: TouchEvent) => {
+      const touchedEle = e.target as HTMLElement;
+      const columnsArray = Array.from(columns);
+
+      columnsArray
+        .filter((item) => item !== touchedEle)
+        .forEach((ele) => {
+          syncScroll(touchedEle, ele);
+        });
+    };
+
+    // Add scroll event listener to all columns once
+    columns.forEach((ele: HTMLElement) => {
       ele.addEventListener("scroll", handleScroll);
+      ele.addEventListener("touchmove", handleTouchMove, { passive: true });
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Clean up event listeners when the component unmounts
+    return () => {
+      columns.forEach((ele: HTMLElement) => {
+        ele.removeEventListener("scroll", handleScroll);
+        ele.removeEventListener("touchmove", handleTouchMove);
+      });
+    };
   }, [columns]);
 }

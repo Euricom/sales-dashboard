@@ -60,6 +60,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     transform: CSS.Translate.toString(transform),
   };
 
+  // Check if the content is wrapping and if so, add the groupedDealId to list
   const [shouldWrap, setShouldWrap] = useState(false);
   useEffect(() => {
     const cardElement = node.current as unknown as HTMLElement;
@@ -83,11 +84,13 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     }
   }, [dragItemIds]);
 
+  // Check if the content should wrap based on groupedDealsToWrap
   useEffect(() => {
     if (!isHeader) {
       const groupedDealId = row.rowId.split("/")[0];
       if (groupedDealId) {
-        setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
+        if (groupedDealsToWrap.includes(groupedDealId))
+          setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
       }
     }
   }, [groupedDealsToWrap]);
@@ -98,10 +101,10 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       style={style}
       variant={variant}
       size={"row"}
-      className={`${shouldWrap ? "h-32" : ""}`}
+      className={`${shouldWrap ? "min-h-32" : ""}`}
     >
       <CardContent
-        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : "flex-wrap"}`}
+        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : shouldWrap ? "flex-wrap min-h-32 overflow-hidden" : "flex-wrap"}`}
       >
         <SortableContext
           items={dragItemIds}

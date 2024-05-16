@@ -265,6 +265,17 @@ export interface SimplifiedDeal {
     id: string;
     name: string;
   };
+  phase_history: {
+    phase: {
+      type: string;
+      id: string;
+    };
+    started_at: string;
+    started_by: {
+      type: string;
+      id: string;
+    };
+  }[];
   company: {
     id: string;
     name: string;

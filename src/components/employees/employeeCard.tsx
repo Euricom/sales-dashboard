@@ -16,7 +16,8 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
-
+import { DatePickerComponent } from "../ui/datePicker";
+import { ProbabilityPicker } from "../ui/probabilityPicker";
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -110,11 +111,20 @@ export function EmployeeCardDragged({
       const empDeal = employee.deals.find(
         (deal) => deal.dealId === correctDealId,
       );
-      setTLDatum(
-        correctDealInfo?.updated_at
-          ? new Date(correctDealInfo?.updated_at)
-          : null,
-      );
+
+      if (correctDealInfo && employee) {
+        const lastIndex = correctDealInfo.phase_history.length - 1;
+        // needs better name but i don't know which date it is
+        const lastDate = correctDealInfo.phase_history[lastIndex];
+        if (lastDate) {
+          const datum = new Date(lastDate.started_at);
+          if (!TLDatum) {
+            // only set TLDatum if it hasn't been set yet
+            setTLDatum(new Date(datum));
+          }
+        }
+      }
+
       setMongoDatum(empDeal?.datum ?? null);
     }
   }, [
@@ -123,7 +133,7 @@ export function EmployeeCardDragged({
     draggableEmployee.dragId,
     getCorrectDealId,
     isHeader,
-    correctDealInfo?.updated_at,
+    correctDealInfo,
   ]);
 
   // Close detail view when dragging or scrolling
@@ -133,6 +143,7 @@ export function EmployeeCardDragged({
 
   // Close detail view when clicking outside
   const detailViewRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
 
   // Add mousedown event listener to document
   useEffect(() => {
@@ -140,7 +151,8 @@ export function EmployeeCardDragged({
       // Check if the clicked element is outside of the detail view card
       if (
         detailViewRef.current &&
-        !detailViewRef.current.contains(event.target as Node)
+        !detailViewRef.current.contains(event.target as Node) &&
+        !dateRef.current?.contains(event.target as Node)
       ) {
         // Close the detail view
         setCurrentEmployeeDetailsId("");
@@ -235,10 +247,7 @@ export function EmployeeCardDragged({
     setCurrentEmployeeDetailsId(draggableEmployee.dragId as string);
   };
 
-  const handleProbabilityPicker = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    probability: number,
-  ) => {
+  const handleProbabilityPicker = (probability: number) => {
     if (!correctDealInfo || (isHeader && phase !== DealName.Opportunities)) return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
@@ -267,12 +276,6 @@ export function EmployeeCardDragged({
         month: "2-digit",
         year: "numeric",
       });
-    } else if (mongoDatum) {
-      return mongoDatum.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
     } else {
       return "No Date";
     }
@@ -281,6 +284,10 @@ export function EmployeeCardDragged({
   const weeksLeftData = weeksLeft();
   const bgColorClass =
     weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
+
+  const handleDateChange = (date: Date) => {
+    setTLDatum(date);
+  };
 
   if (isHeader) {
     return (
@@ -428,66 +435,23 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
+              {/* datum picker */}
+              {correctDealInfo && TLDatum ? (
+                <DatePickerComponent
+                  deal={correctDealInfo}
+                  date={TLDatum}
+                  setTLDatum={handleDateChange}
+                />
+              ) : null}
               {phase !== DealName.Opportunities && (
-                <>
-                  <div className="h-0.5 bg-primary rounded-full" />
-
-                  <div>
-                    <div className="mb-2">
-                      <p className="font-light">Slaagkans (%)</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff0000]"
-                        onClick={(e) => handleProbabilityPicker(e, 0)}
-                      >
-                        0
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#ff5000]"
-                        onClick={(e) => handleProbabilityPicker(e, 20)}
-                      >
-                        20
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fea600]"
-                        onClick={(e) => handleProbabilityPicker(e, 40)}
-                      >
-                        40
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#fdc800] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 60)}
-                      >
-                        60
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#b4fa00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 80)}
-                      >
-                        80
-                      </Button>
-                      <Button
-                        variant={"probabilityPicker"}
-                        size={"sm"}
-                        className="bg-[#00ff00] text-primary hover:text-white focus:text-white"
-                        onClick={(e) => handleProbabilityPicker(e, 100)}
-                      >
-                        100
-                      </Button>
-                    </div>
-                  </div>
-                </>
+                <ProbabilityPicker
+                  handleProbabilityPicker={handleProbabilityPicker}
+                  currentEmployeeProbability={
+                    correctDealInfo?.estimated_probability
+                      ? correctDealInfo?.estimated_probability
+                      : 0
+                  }
+                />
               )}
             </CardContent>
           </Card>
