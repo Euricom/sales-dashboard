@@ -25,6 +25,7 @@ import { EmployeeCardDragged } from "~/components/employees/employeeCard";
 import { DealContext } from "~/contexts/dealsProvider";
 import { EmployeeContext } from "./employeesProvider";
 import { api } from "~/utils/api";
+import { showToastForMoveNotAllowed } from "~/lib/utils";
 
 type DropContextType = {
   rows: Row[];
@@ -77,6 +78,8 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const [isDeletable, setDeletable] = useState<boolean>(false);
   const [groupedDealsToWrap, setGroupedDealsToWrap] = useState<string[]>([]);
+  const [isNotAllowedToMoveOrDrop, setIsNotAllowedToMoveOrDrop] =
+    useState<boolean>(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -107,6 +110,14 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       );
     }
   }, [isLoading, filteredDeals, dealPhases]);
+
+  // Display toast when user makes a wrong move
+  useEffect(() => {
+    if (isNotAllowedToMoveOrDrop) {
+      showToastForMoveNotAllowed();
+      setIsNotAllowedToMoveOrDrop(false);
+    }
+  }, [isNotAllowedToMoveOrDrop]);
 
   // Add & remove id to groupedDealsToWrap
   const appendGroupedDeal = (groupedDealId: string) => {
@@ -222,8 +233,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const { activeId, overId, overData, activeRowId, overRowId } =
       extractEventData(event.active, event.over);
 
-    if (activeId === overId || !activeEmployee || activeColumnId === "Deals")
+    if (activeId === overId || !activeEmployee || activeColumnId === "Deals") {
+      setIsNotAllowedToMoveOrDrop(true);
       return;
+    }
     const isOverAnEmployee = overData?.type === "Employee";
 
     // Dropping Employee over the header FROM Opportunities (Delete Employee)
@@ -233,6 +246,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       (event.active.id as string).split("/")[1] === DealName.Opportunities
     ) {
       removeEmployee(activeEmployee, activeRowId);
+      return;
     }
 
     // Dragging Employee between rows (Move employee)
@@ -248,11 +262,14 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
           activeRowId,
           overData.sortable.containerId,
         );
+        return;
       } else if (overId.split("_")[1] === "0") {
+        setIsNotAllowedToMoveOrDrop(true);
         return;
       } else {
         // Dropping Employee over a different row
         moveEmployee(activeEmployee, activeRowId, overId);
+        return;
       }
     }
 
@@ -280,11 +297,15 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       } else {
         // over a row
         if (!isAllowedToDrop(activeEmployee, overId, employee)) {
+          setIsNotAllowedToMoveOrDrop(true);
           return;
         }
         appendEmployee(employee, activeRowId, overId);
       }
     }
+
+    // Otherwise, move is not allowed
+    setIsNotAllowedToMoveOrDrop(true);
     setActiveEmployee(undefined);
   }
 
@@ -409,8 +430,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       if (
         targetRowPhase === DealName.Opportunities &&
         initialRowPhase !== DealName.Opportunities
-      )
+      ) {
+        setIsNotAllowedToMoveOrDrop(true);
         return false;
+      }
       return true;
     }
 
@@ -418,7 +441,10 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const isTargetRowIdInEmployeeRows = employee?.rows.some(
       (row) => (row as string).split("/")[0] === targetRowId,
     );
-    if (isTargetRowIdInEmployeeRows) return false;
+    if (isTargetRowIdInEmployeeRows) {
+      setIsNotAllowedToMoveOrDrop(true);
+      return false;
+    }
 
     if (
       initialRowPhase === DealName.Opportunities &&
@@ -441,6 +467,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     )
       return true;
 
+    setIsNotAllowedToMoveOrDrop(true);
     return false;
   }
 
