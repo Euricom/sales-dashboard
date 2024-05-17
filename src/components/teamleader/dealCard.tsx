@@ -74,7 +74,13 @@ export default function DealCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
-        <div className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit">
+        <div
+          className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit"
+          style={{
+            backgroundColor: colors?.backgroundColor,
+            color: colors?.color,
+          }}
+        >
           {trimRole(groupedDeal.deal.title)}
         </div>
         <div className="flex items-center gap-2 justify-end font-normal text-sm">
@@ -91,17 +97,6 @@ export default function DealCard({
           ) : (
             <div>no date</div>
           )}
-          <div
-            className="text-end text-xs px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit"
-            style={{
-              backgroundColor: colors?.backgroundColor,
-              color: colors?.color,
-            }}
-          >
-            {groupedDeal.deal.custom_fields[1]?.value
-              ? groupedDeal.deal.custom_fields[1]?.value
-              : "other"}
-          </div>
           <PmAvatar pm={groupedDeal.deal.PM} size={24} />
         </div>
       </CardContent>
