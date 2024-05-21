@@ -19,7 +19,8 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     appendGroupedDeal,
     removeGroupedDeal,
   } = useContext(DropContext);
-  const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
+  const { draggableEmployees, isFiltering, retainedEmployees } =
+    useContext(EmployeeContext);
 
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
@@ -40,6 +41,22 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
+
+  // Filter out the retained employees
+  const retainedDraggableEmployeesInThisRow =
+    draggableEmployeesInThisRow.filter((draggableEmployee) => {
+      return retainedEmployees?.some(
+        (retainedEmployee) =>
+          retainedEmployee.employeeId ===
+          (draggableEmployee.dragId as string).split("_")[0],
+      );
+    });
+
+  // Get the retained employee ids
+  const retainedEmployeeIds = retainedDraggableEmployeesInThisRow.map(
+    (e) => (e.dragId as string).split("_")[0],
+  );
+
   const isOpportunities = activeColumnId === DealName.Opportunities;
   const isProposed = activeColumnId === DealName.Proposed;
 
@@ -112,13 +129,31 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
           id={row.rowId}
           disabled={isFiltering && isHeader}
         >
-          {draggableEmployeesInThisRow?.map((e) => (
-            <EmployeeCardDragged
-              key={e.dragId}
-              draggableEmployee={e}
-              isHeader={isHeader}
-            />
-          ))}
+          {draggableEmployeesInThisRow?.map((e) =>
+            retainedEmployeeIds.includes(
+              (e.dragId as string).split("_")[0],
+            ) ? null : (
+              <EmployeeCardDragged
+                key={e.dragId}
+                draggableEmployee={e}
+                isHeader={isHeader}
+              />
+            ),
+          )}
+          {retainedDraggableEmployeesInThisRow.length > 0 ? (
+            <>
+              {isHeader ? (
+                <div className="bg-white/60 rounded-14 h-3/4 w-0.5 flex self-center" />
+              ) : null}
+              {retainedDraggableEmployeesInThisRow.map((e) => (
+                <EmployeeCardDragged
+                  key={e.dragId}
+                  draggableEmployee={e}
+                  isHeader={isHeader}
+                />
+              ))}
+            </>
+          ) : null}
         </SortableContext>
       </CardContent>
     </Card>

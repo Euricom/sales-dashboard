@@ -6,10 +6,11 @@ import React, {
   useState,
 } from "react";
 import { api } from "~/utils/api";
-import type {
-  DraggableEmployee,
-  Employee,
-  groupedDealFromDB,
+import {
+  type DraggableEmployee,
+  type Employee,
+  type groupedDealFromDB,
+  DealName,
 } from "~/lib/types";
 import { DealContext } from "./dealsProvider";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
@@ -31,6 +32,7 @@ type EmployeeContextType = {
   isLoading?: boolean;
   currentEmployeeDetailsId: string;
   setCurrentEmployeeDetailsId: React.Dispatch<React.SetStateAction<string>>;
+  retainedEmployees?: Employee[];
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -101,6 +103,24 @@ export const EmployeeContextProvider: React.FC<
     starter: DraggableEmployee[];
     openForNewOpportunities: DraggableEmployee[];
   }>(sortEmployeesData(draggableEmployees));
+
+  // Separate the retained employees from the rest
+  const retainedEmployees: Employee[] = useMemo(() => {
+    const dealsWithRetainedEmployees = deals?.filter((deal) => {
+      const isRetained =
+        deal.deal_phase.id ===
+        dealPhases.find((phase) => phase.name === DealName.Retained)?.id;
+      if (!isRetained) return false;
+      return true;
+    });
+    return dealsWithRetainedEmployees?.map((deal) => {
+      return employees.find((employee) => {
+        return employee.deals?.some(
+          (employeeDeal) => employeeDeal.dealId === deal.id,
+        );
+      });
+    }) as Employee[];
+  }, [deals, dealPhases, employees]);
 
   // Other states
   // For filtering
@@ -218,6 +238,7 @@ export const EmployeeContextProvider: React.FC<
         isLoading,
         currentEmployeeDetailsId,
         setCurrentEmployeeDetailsId,
+        retainedEmployees,
       }}
     >
       {children}
