@@ -248,7 +248,8 @@ export function EmployeeCardDragged({
   };
 
   const handleProbabilityPicker = (probability: number) => {
-    if (!correctDealInfo || (isHeader && phase !== DealName.Opportunities)) return;
+    if (!correctDealInfo || (isHeader && phase !== DealName.Opportunities))
+      return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
     correctDealInfo.estimated_probability = probability / 100;
@@ -336,16 +337,18 @@ export function EmployeeCardDragged({
     );
   }
 
-  const employeeEstProbability = correctDealInfo?.estimated_probability? Number(correctDealInfo?.estimated_probability * 100): 0;
+  const employeeEstProbability = correctDealInfo?.estimated_probability
+    ? Number(correctDealInfo?.estimated_probability * 100)
+    : 0;
 
   const pathColor = () => {
-      if (employeeEstProbability < 20) return "#ff0000";
-      if (employeeEstProbability < 40) return "#ff5000";
-      if (employeeEstProbability < 60) return "#fea600";
-      if (employeeEstProbability < 80) return "#fdc800";
-      if (employeeEstProbability < 90) return "#b4fa00";
-      return "#00ff00";
-  }
+    if (employeeEstProbability < 20) return "#ff0000";
+    if (employeeEstProbability < 40) return "#ff5000";
+    if (employeeEstProbability < 60) return "#fea600";
+    if (employeeEstProbability < 80) return "#fdc800";
+    if (employeeEstProbability < 90) return "#b4fa00";
+    return "#00ff00";
+  };
 
   return (
     <>
@@ -399,7 +402,11 @@ export function EmployeeCardDragged({
                 className="shadow-[inset_0_3px_10px_rgba(0,0,0,.6)] rounded-full"
               >
                 <div className="mt-[1px] text-xs">
-                  {employeeEstProbability != 0 ? employeeEstProbability : ( <div className="text-[9px]">N/A</div>)}
+                  {employeeEstProbability != 0 ? (
+                    employeeEstProbability
+                  ) : (
+                    <div className="text-[9px]">N/A</div>
+                  )}
                 </div>
               </CircularProgressbarWithChildren>
             </div>

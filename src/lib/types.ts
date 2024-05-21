@@ -35,6 +35,7 @@ export type Employee = {
     avatar: string | null;
     Euricom_x0020_email: string | null;
   };
+  shouldCreate?: boolean;
 };
 
 export type EmployeeFromDB = {

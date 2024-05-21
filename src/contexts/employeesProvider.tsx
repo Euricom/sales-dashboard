@@ -14,6 +14,7 @@ import {
 } from "~/lib/types";
 import { DealContext } from "./dealsProvider";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import { type SharePointEmployeeWithAvatar } from "~/server/api/routers/sharepoint/types";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -54,16 +55,25 @@ export const EmployeeContextProvider: React.FC<
   } = api.mongodb.getEmployees.useQuery();
   const mongoEmployeeUpdater = api.mongodb.updateEmployee.useMutation();
   const { deals, dealPhases, uniqueDeals } = useContext(DealContext);
+  const sharePointEmployeeFetcher =
+    api.sharepoint.getMissingEmployeeData.useMutation();
 
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
+  const [extraEmployees, setExtraEmployees] = useState<Employee[]>([]);
 
   useMemo(() => {
     if (employeesData) {
       // GET employees from MongoDB
-      setEmployees(employeesData);
+      if (extraEmployees.length > 0) {
+        console.log("extraEmployees", extraEmployees);
+        setEmployees([...employeesData, ...extraEmployees]);
+      } else {
+        setEmployees(employeesData);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employeesData]);
 
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
@@ -139,7 +149,24 @@ export const EmployeeContextProvider: React.FC<
 
   useEffect(() => {
     if (employees && deals && uniqueDeals) {
-      updateEmployeeData(employees, uniqueDeals, deals);
+      const emailValues = checkWhichEmployeesNeedToBeAdded();
+      if (emailValues) {
+        sharePointEmployeeFetcher.mutate(emailValues, {
+          onSuccess: (data) => {
+            if (data) {
+              const formattedData = data.map((employee) =>
+                formatMissingEmployeeData(employee),
+              );
+              if (formattedData.length > 0) {
+                setExtraEmployees(formattedData);
+              }
+              const parsedEmployees = [...employees, ...formattedData];
+
+              updateEmployeeData(parsedEmployees, uniqueDeals, deals);
+            }
+          },
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals, uniqueDeals]);
@@ -149,6 +176,7 @@ export const EmployeeContextProvider: React.FC<
     groupedDeals: groupedDealFromDB[],
     deals: SimplifiedDeal[],
   ) {
+    setEmployees(employees);
     let shouldRefetch = false;
 
     deals.forEach((deal) => {
@@ -220,8 +248,79 @@ export const EmployeeContextProvider: React.FC<
         employeeId: employee.employeeId,
         rows: employee.rows as string[],
         deals: employee.deals,
+        shouldCreate: employee.shouldCreate,
       },
     });
+  };
+
+  const checkWhichEmployeesNeedToBeAdded = () => {
+    if (!employees || !deals) return;
+    const emailValues: string[] = [];
+    deals.forEach((deal) => {
+      // Skip deals without email value
+      const emailValue = deal.custom_fields[0]?.value;
+      if (!emailValue || emailValue === "") {
+        return;
+      }
+
+      // Find employee by email
+      const employee = employees.find(
+        (emp) => emp.fields.Euricom_x0020_email === emailValue,
+      );
+      if (!employee) {
+        // Add the employee to the database
+        emailValues.push(emailValue);
+      }
+    });
+    return emailValues;
+  };
+
+  const formatMissingEmployeeData = (
+    data: SharePointEmployeeWithAvatar,
+  ): Employee => {
+    if (!data) return {} as Employee;
+    // find the correct deal
+    const deal = deals?.find(
+      (deal) =>
+        deal.custom_fields[0]?.value === data.fields.Euricom_x0020_email,
+    );
+    if (!deal) return {} as Employee;
+    // find the correct groupedDeal
+    const groupedDeal = uniqueDeals?.find((groupedDeal) =>
+      groupedDeal.value.includes(deal.id),
+    );
+    if (!groupedDeal) return {} as Employee;
+    // Calculate row identifier
+    const phaseName = dealPhases.find(
+      (phase) => phase.id === deal.deal_phase.id,
+    )?.name;
+
+    const rowId = `${groupedDeal.id}/${phaseName}`;
+
+    const dealInfo = {
+      dealId: deal.id,
+      datum: new Date(),
+    };
+
+    return {
+      employeeId: data.id,
+      rows: [rowId], // You need to provide the correct data for this field
+      deals: [dealInfo], // You need to provide the correct data for this field
+      weeksLeft: 0, // You need to provide the correct data for this field
+      fields: {
+        Title: data.fields.Title,
+        City: data.fields.City,
+        Job_x0020_title: data.fields.Job_x0020_title,
+        Level: data.fields.Level || "",
+        Status: data.fields.Status || "",
+        Contract_x0020_Substatus: data.fields.Contract_x0020_Substatus || "",
+        Contract_x0020_Status_x0020_Date:
+          data.fields.Contract_x0020_Status_x0020_Date,
+        avatar: data.fields.avatar,
+        Euricom_x0020_email: data.fields.Euricom_x0020_email,
+      },
+      shouldCreate: true,
+    };
   };
 
   return (
