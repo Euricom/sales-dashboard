@@ -69,7 +69,7 @@ export function DatePickerComponent({
         aria-label="Select a date"
       >
         <Group className="flex bg-white/90 focus-within:bg-white group-open:bg-white transition focus-visible:ring-2">
-          <AriaButton className="flex gap-1.5 outline-none items-center w-full px-2 p-1 bg-primary rounded-14 text-white justify-between">
+          <AriaButton className="flex gap-1.5 outline-none items-center w-full px-2 p-1 bg-primary rounded-sm text-white justify-between">
             <CalendarIcon width={20} />
             <div className="font-light flex h-5">
               {date

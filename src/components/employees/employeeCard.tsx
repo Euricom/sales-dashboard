@@ -127,6 +127,7 @@ export function EmployeeCardDragged({
 
       setMongoDatum(empDeal?.datum ?? null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     employee,
     deals,
@@ -432,13 +433,13 @@ export function EmployeeCardDragged({
                 </Button>
               </div>
               <div className="h-0.5 bg-primary rounded-full" />
-              <div className="flex gap-2">
+              <div className="px-2 flex gap-2">
                 <Briefcase width={20} />
                 <p className="font-light text-nowrap">
                   {employee.fields.Job_x0020_title}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="px-2 flex gap-2">
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
