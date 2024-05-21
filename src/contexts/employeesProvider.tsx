@@ -67,7 +67,6 @@ export const EmployeeContextProvider: React.FC<
     if (employeesData) {
       // GET employees from MongoDB
       if (extraEmployees.length > 0) {
-        console.log("extraEmployees", extraEmployees);
         setEmployees([...employeesData, ...extraEmployees]);
       } else {
         setEmployees(employeesData);
