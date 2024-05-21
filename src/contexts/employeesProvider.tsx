@@ -68,6 +68,25 @@ export const EmployeeContextProvider: React.FC<
     }
   }, [employeesData]);
 
+  useEffect(() => {
+    if (employeesData) {
+      const emailValues = checkWhichEmployeesNeedToBeAdded();
+      if (emailValues) {
+        sharePointEmployeeFetcher.mutate(emailValues, {
+          onSuccess: (data) => {
+            if (data) {
+              const formattedData = data.map((employee) =>
+                formatMissingEmployeeData(employee),
+              );
+              setEmployees([...employeesData, ...formattedData]);
+            }
+          },
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeesData]);
+
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];
     return employees.flatMap((employee) =>
@@ -268,10 +287,15 @@ export const EmployeeContextProvider: React.FC<
 
     const rowId = `${groupedDeal.id}/${phaseName}`;
 
+    const dealInfo = {
+      dealId: deal.id,
+      datum: new Date(),
+    };
+
     return {
       employeeId: data.id,
       rows: [rowId], // You need to provide the correct data for this field
-      deals: [], // You need to provide the correct data for this field
+      deals: [dealInfo], // You need to provide the correct data for this field
       weeksLeft: 0, // You need to provide the correct data for this field
       fields: {
         Title: data.fields.Title,

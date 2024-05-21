@@ -18,9 +18,6 @@ export const getMissingEmployeeData= async (accessToken: string, employeeEmails:
             return employeeEmails.includes(employee.fields.Euricom_x0020_email);
         }).map((employee) => employee.id);
 
-
-
-        console.log("missingEmployees", missingEmployees);
         
         try {
             const missingEmployeeData =  await Promise.all((missingEmployees).map(async (missingEmployee) => {
