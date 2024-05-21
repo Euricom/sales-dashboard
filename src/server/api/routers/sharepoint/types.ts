@@ -62,3 +62,38 @@ export interface batchResponse {
 export interface batchRequestResponse {
   responses: batchResponse[];
 }
+
+export interface employeeWithIdsAndEmails {
+  "@odata.context": string;
+  "@odata.nextLink": string;
+  value: {
+    "@odata.etag": string;
+    id: string;
+    "fields@odata.context": string;
+    fields: {
+      "@odata.etag": string;
+      id: string;
+      Euricom_x0020_email?: string;
+    }
+  }[];
+};
+
+export interface missingEmployeeData {
+  "@odata.context": string;
+  "@odata.etag": string;
+  id: string;
+  "fields@odata.context": string;
+  fields: {
+    "@odata.etag": string;
+    id: string;
+    Title: string;
+    City: string;
+    Euricom_x0020_email: string;
+    Job_x0020_title: string;
+    Contract_x0020_Status_x0020_Date: string | null;
+    Level?: string;
+    Status?: string;
+    Contract_x0020_Substatus?: string;
+    avatar?: string | null;
+  }
+}

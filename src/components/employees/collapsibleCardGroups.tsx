@@ -23,14 +23,18 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
   const { isLoading } = useContext(EmployeeContext);
 
   if (isLoading) {
-    const amountOfSkeletons =
-      label === "Bench"
-        ? 6
-        : label === "Einde"
-          ? 2
-          : label === "Starter"
-            ? 1
-            : 2;
+    let amountOfSkeletons;
+
+    switch(label) {
+      case "Bench":
+        amountOfSkeletons = 6;
+        break;
+      case "Starter":
+        amountOfSkeletons = 1;
+        break;
+      default: 
+        amountOfSkeletons = 2;
+    }
 
     return (
       <Collapsible
@@ -72,25 +76,25 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
       </div>
     );
 
-  return (
-    <>
+    return (
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
         className="flex bg-white pt-1.5 border-x-4 border-b-4 tv:border-x-8 tv:border-b-[6px] border-white h-fit w-fit rounded-b-2xl top-0 items-center justify-between"
       >
         <CollapsibleTrigger
-          className={`h-[4.75rem] p-0 text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"}`}
+          className={`h-[4.75rem] text-primary hover:bg-primary/10 hover:text-accent-foreground rounded-xl ${isOpen ? "mr-1" : "mr-0"} relative`}
         >
           <h4 className="text-sm font-semibold -rotate-90">{label}</h4>
+          {!isOpen && <div className="absolute text-gray-600 top-[0px] right-[1px] text-[10px]">{data.length}</div>}
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="flex h-[4.75rem] justify-center gap-4 bg-primary px-3.5 py-2 rounded-2xl">
+          <div className="flex h-[4.75rem] justify-center bg-primary pl-3.5 pr-8 py-2 rounded-2xl relative">
             <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
+            <div className="absolute text-white top-[5px] right-[8px] text-[10px]">{data.length}</div>
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </>
   );
 };
 
@@ -98,7 +102,8 @@ export const CollapsibleCardGroups = () => {
   const { sortedData } = useContext(EmployeeContext);
 
   return (
-    <div className="gap-2 flex">
+    <div className="w-full overflow-hidden">
+      <div className="flex gap-2 px-4 no-scrollbar overflow-x-auto ">
       <CollapsibleCardGroup
         label="Bench"
         data={sortedData.bench}
@@ -119,6 +124,7 @@ export const CollapsibleCardGroups = () => {
         data={sortedData.openForNewOpportunities}
         status="openForNewOpportunities"
       />
+      </div>
     </div>
   );
 };

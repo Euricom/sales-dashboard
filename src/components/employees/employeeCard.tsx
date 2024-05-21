@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { EmployeeCardProps } from "~/lib/types";
+import { DealName, type EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
 import { determineColors } from "~/lib/utils";
@@ -127,6 +127,7 @@ export function EmployeeCardDragged({
 
       setMongoDatum(empDeal?.datum ?? null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     employee,
     deals,
@@ -218,8 +219,8 @@ export function EmployeeCardDragged({
       window.innerWidth || document.documentElement.clientWidth;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const detailViewHeight = 140;
-    const detailViewWidth = 315; // Assuming the detail view is also 140px wide
+    const detailViewHeight = 180;
+    const detailViewWidth = 315;
     // Get position relative to the document
     const rect = clickedElement.getBoundingClientRect();
     let top = rect.top + window.scrollY;
@@ -248,7 +249,8 @@ export function EmployeeCardDragged({
   };
 
   const handleProbabilityPicker = (probability: number) => {
-    if (!correctDealInfo || (isHeader && phase !== "Mogelijkheden")) return;
+    if (!correctDealInfo || (isHeader && phase !== DealName.Opportunities))
+      return;
     updateDealProbability(correctDealInfo?.id, probability);
     // instead of refetch
     correctDealInfo.estimated_probability = probability / 100;
@@ -269,13 +271,31 @@ export function EmployeeCardDragged({
 
   const employeeDate = () => {
     const phase = (draggableEmployee.dragId as string).split("/")[1];
-    if (phase === "Mogelijkheden") return "No Date";
+    if (phase === DealName.Opportunities) return "No Date";
     if (TLDatum) {
-      return TLDatum.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // remove time part
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const TLDatumDate = new Date(TLDatum);
+      TLDatumDate.setHours(0, 0, 0, 0); // remove time part
+
+      if (TLDatumDate.getTime() === today.getTime()) {
+        return "Vandaag";
+      } else if (TLDatumDate.getTime() === tomorrow.getTime()) {
+        return "Morgen";
+      } else if (TLDatumDate.getTime() === yesterday.getTime()) {
+        return "Gisteren";
+      } else {
+        return TLDatum.toLocaleDateString("fr-BE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
     } else {
       return "No Date";
     }
@@ -336,6 +356,19 @@ export function EmployeeCardDragged({
     );
   }
 
+  const employeeEstProbability = correctDealInfo?.estimated_probability
+    ? Number(correctDealInfo?.estimated_probability * 100)
+    : 0;
+
+  const pathColor = () => {
+    if (employeeEstProbability < 20) return "#ff0000";
+    if (employeeEstProbability < 40) return "#ff5000";
+    if (employeeEstProbability < 60) return "#fea600";
+    if (employeeEstProbability < 80) return "#fdc800";
+    if (employeeEstProbability < 90) return "#b4fa00";
+    return "#00ff00";
+  };
+
   return (
     <>
       <Card
@@ -378,22 +411,18 @@ export function EmployeeCardDragged({
             </div>
             <div className="w-7 h-7">
               <CircularProgressbarWithChildren
-                value={
-                  correctDealInfo?.estimated_probability
-                    ? Number(correctDealInfo?.estimated_probability * 100)
-                    : 0
-                }
+                value={employeeEstProbability}
                 strokeWidth={8}
                 styles={buildStyles({
                   strokeLinecap: "butt",
-                  pathColor: "#00C800",
+                  pathColor: pathColor(),
                   trailColor: "#FFFFFF",
                 })}
                 className="shadow-[inset_0_3px_10px_rgba(0,0,0,.6)] rounded-full"
               >
                 <div className="mt-[1px] text-xs">
-                  {correctDealInfo?.estimated_probability ? (
-                    Number(correctDealInfo?.estimated_probability * 100)
+                  {employeeEstProbability != 0 ? (
+                    employeeEstProbability
                   ) : (
                     <div className="text-[9px]">N/A</div>
                   )}
@@ -422,13 +451,13 @@ export function EmployeeCardDragged({
                 </Button>
               </div>
               <div className="h-0.5 bg-primary rounded-full" />
-              <div className="flex gap-2">
+              <div className="px-2 flex gap-2">
                 <Briefcase width={20} />
                 <p className="font-light text-nowrap">
                   {employee.fields.Job_x0020_title}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="px-2 flex gap-2">
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
@@ -440,7 +469,7 @@ export function EmployeeCardDragged({
                   setTLDatum={handleDateChange}
                 />
               ) : null}
-              {phase !== "Mogelijkheden" && (
+              {phase !== DealName.Opportunities && (
                 <ProbabilityPicker
                   handleProbabilityPicker={handleProbabilityPicker}
                   currentEmployeeProbability={

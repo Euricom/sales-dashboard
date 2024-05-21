@@ -1,11 +1,13 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { env } from "~/env";
 import {
+  type employeeWithIdsAndEmails,
   type batchRequestResponse,
   type batchResponse,
   type SharePointContact,
   type SharePointEmployee,
   type SharePointEmployeeWithAvatar,
+  type missingEmployeeData,
 } from "./types";
 
 export const azureClient = new ConfidentialClientApplication({
@@ -196,3 +198,60 @@ const generateQueryBody = async (
     console.error(error);
   }
 };
+
+export const getEmployeeIdsAndEmails= async (accessToken: string) => {
+  const url = `${env.AZURE_AD_GRAPH_API_BASE_URL_SUBSITE_LIST}items?$select=id&$expand=fields($select=Id,Euricom_x0020_email)`;
+
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly", // Bypass the warning
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from SharePoint");
+    }
+
+    const data = (await response.json()) as employeeWithIdsAndEmails;
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getEmployeeById= async (accessToken: string, id: string) => {
+  const url = `${env.AZURE_AD_GRAPH_API_BASE_URL_SUBSITE_LIST}items/${id}?$select=id&$expand=fields($select=Id,Title,City,Euricom_x0020_email,Job_x0020_title,Level,Status,Contract_x0020_Substatus,Contract_x0020_Status_x0020_Date)`;
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly", // Bypass the warning
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to fetch data from SharePoint");
+    }
+
+    const data = (await response.json()) as missingEmployeeData;
+    const avatarString =(await getEmployeeAvatar(accessToken,data.fields.Euricom_x0020_email)) ?? null;
+    return {
+      ...data,
+      fields: {
+        ...data.fields,
+        avatar: avatarString,
+      },
+    
+    } as SharePointEmployeeWithAvatar; 
+  } catch (error) {
+    console.error(error);
+  }
+
+};
+

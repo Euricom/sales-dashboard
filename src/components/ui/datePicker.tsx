@@ -61,6 +61,32 @@ export function DatePickerComponent({
     });
   };
 
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // remove time part
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0); // remove time part
+
+    if (targetDate.getTime() === today.getTime()) {
+      return "Vandaag";
+    } else if (targetDate.getTime() === tomorrow.getTime()) {
+      return "Morgen";
+    } else if (targetDate.getTime() === yesterday.getTime()) {
+      return "Gisteren";
+    } else {
+      return targetDate.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
+    }
+  };
+
   return (
     <div className="relative inline-flex flex-col text-left">
       <DatePicker
@@ -69,17 +95,9 @@ export function DatePickerComponent({
         aria-label="Select a date"
       >
         <Group className="flex bg-white/90 focus-within:bg-white group-open:bg-white transition focus-visible:ring-2">
-          <AriaButton className="flex gap-1.5 outline-none items-center w-full px-2 p-1 bg-primary rounded-14 text-white justify-between">
+          <AriaButton className="flex gap-1.5 outline-none items-center w-full px-2 p-1 bg-primary rounded-sm text-white justify-between">
             <CalendarIcon width={20} />
-            <div className="font-light flex h-5">
-              {date
-                .toLocaleDateString("fr-BE", {
-                  year: "2-digit",
-                  month: "2-digit",
-                  day: "2-digit",
-                })
-                .toString()}
-            </div>
+            <div className="font-light flex h-5">{formatDate(date)}</div>
           </AriaButton>
         </Group>
         <MyPopover>
@@ -106,7 +124,11 @@ export function DatePickerComponent({
                   {(date) => (
                     <CalendarCell
                       date={date}
-                      className=" w-8 h-8 outline-none cursor-default rounded-full flex items-center justify-center outside-month:text-gray-300 hover:bg-gray-100 pressed:bg-gray-200 selected:bg-violet-700 selected:text-white focus-visible:ring ring-violet-600/70 ring-offset-2"
+                      className={({ isOutsideMonth }) =>
+                        isOutsideMonth
+                          ? "text-gray-300 w-8 h-8 outline-none cursor-default rounded-full flex items-center justify-center hover:bg-gray-100 pressed:bg-gray-200 selected:bg-violet-700 selected:text-white focus-visible:ring ring-violet-600/70 ring-offset-2"
+                          : "w-8 h-8 outline-none cursor-default rounded-full flex items-center justify-center hover:bg-gray-100 pressed:bg-gray-200 selected:bg-violet-700 selected:text-white focus-visible:ring ring-violet-600/70 ring-offset-2"
+                      }
                     />
                   )}
                 </CalendarGridBody>

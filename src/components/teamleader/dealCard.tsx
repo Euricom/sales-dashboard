@@ -34,6 +34,32 @@ export default function DealCard({
     }
   }, [groupedDealsToWrap]);
 
+  const formatDate = (date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // remove time part
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0); // remove time part
+
+    if (targetDate.getTime() === today.getTime()) {
+      return "Vandaag";
+    } else if (targetDate.getTime() === tomorrow.getTime()) {
+      return "Morgen";
+    } else if (targetDate.getTime() === yesterday.getTime()) {
+      return "Gisteren";
+    } else {
+      return targetDate.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
+    }
+  };
+
   return (
     <Card
       variant={variant}
@@ -74,34 +100,21 @@ export default function DealCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
-        <div className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit">
+        <div
+          className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit"
+          style={{
+            backgroundColor: colors?.backgroundColor,
+            color: colors?.color,
+          }}
+        >
           {trimRole(groupedDeal.deal.title)}
         </div>
         <div className="flex items-center gap-2 justify-end font-normal text-sm">
           {groupedDeal.deal.estimated_closing_date ? (
-            <div>
-              {new Date(
-                groupedDeal.deal.estimated_closing_date,
-              ).toLocaleDateString("fr-BE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "2-digit",
-              })}
-            </div>
+            <div>{formatDate(groupedDeal.deal.estimated_closing_date)}</div>
           ) : (
             <div>no date</div>
           )}
-          <div
-            className="text-end text-xs px-2 py-0.5 rounded-[14px] tv:rounded-[28px] w-fit"
-            style={{
-              backgroundColor: colors?.backgroundColor,
-              color: colors?.color,
-            }}
-          >
-            {groupedDeal.deal.custom_fields[1]?.value
-              ? groupedDeal.deal.custom_fields[1]?.value
-              : "other"}
-          </div>
           <PmAvatar pm={groupedDeal.deal.PM} size={24} />
         </div>
       </CardContent>

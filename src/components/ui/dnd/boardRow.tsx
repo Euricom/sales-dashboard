@@ -3,7 +3,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { EmployeeCardDragged } from "../../employees/employeeCard";
 import { Card, CardContent } from "../card";
-import type { BoardRowProps, DraggableEmployee } from "~/lib/types";
+import {
+  DealName,
+  type BoardRowProps,
+  type DraggableEmployee,
+} from "~/lib/types";
 import { DropContext } from "~/contexts/dndProvider";
 import { EmployeeContext } from "~/contexts/employeesProvider";
 
@@ -15,7 +19,8 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     appendGroupedDeal,
     removeGroupedDeal,
   } = useContext(DropContext);
-  const { draggableEmployees, isFiltering } = useContext(EmployeeContext);
+  const { draggableEmployees, isFiltering, retainedEmployees } =
+    useContext(EmployeeContext);
 
   const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
@@ -36,13 +41,27 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const dragItemIds = draggableEmployeesInThisRow.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
-  const isMogelijkheden = activeColumnId === "Mogelijkheden";
-  const isVoorgesteld = activeColumnId === "Voorgesteld";
+
+  // Filter out the retained employees
+  const retainedDraggableEmployeesInThisRow =
+    draggableEmployeesInThisRow.filter((draggableEmployee) => {
+      return retainedEmployees?.some(
+        (retainedEmployee) =>
+          retainedEmployee.employeeId ===
+          (draggableEmployee.dragId as string).split("_")[0],
+      );
+    });
+
+  // Get the retained employee ids
+  const retainedEmployeeIds = retainedDraggableEmployeesInThisRow.map(
+    (e) => (e.dragId as string).split("_")[0],
+  );
+
+  const isOpportunities = activeColumnId === DealName.Opportunities;
+  const isProposed = activeColumnId === DealName.Proposed;
 
   const variant =
-    row.rowId === activeDealId &&
-    !isHeader &&
-    (isMogelijkheden || isVoorgesteld)
+    row.rowId === activeDealId && !isHeader && (isOpportunities || isProposed)
       ? "rowhighlight"
       : "row";
 
@@ -103,20 +122,38 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       className={`${shouldWrap ? "min-h-32" : ""}`}
     >
       <CardContent
-        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : "flex-wrap"}`}
+        className={`flex gap-2 h-15 ${isHeader ? "gap-4" : shouldWrap ? "flex-wrap min-h-32 overflow-hidden" : "flex-wrap"}`}
       >
         <SortableContext
           items={dragItemIds}
           id={row.rowId}
           disabled={isFiltering && isHeader}
         >
-          {draggableEmployeesInThisRow?.map((e) => (
-            <EmployeeCardDragged
-              key={e.dragId}
-              draggableEmployee={e}
-              isHeader={isHeader}
-            />
-          ))}
+          {draggableEmployeesInThisRow?.map((e) =>
+            retainedEmployeeIds.includes(
+              (e.dragId as string).split("_")[0],
+            ) ? null : (
+              <EmployeeCardDragged
+                key={e.dragId}
+                draggableEmployee={e}
+                isHeader={isHeader}
+              />
+            ),
+          )}
+          {retainedDraggableEmployeesInThisRow.length > 0 ? (
+            <>
+              {isHeader ? (
+                <div className="bg-white/60 rounded-14 h-3/4 w-0.5 flex self-center" />
+              ) : null}
+              {retainedDraggableEmployeesInThisRow.map((e) => (
+                <EmployeeCardDragged
+                  key={e.dragId}
+                  draggableEmployee={e}
+                  isHeader={isHeader}
+                />
+              ))}
+            </>
+          ) : null}
         </SortableContext>
       </CardContent>
     </Card>

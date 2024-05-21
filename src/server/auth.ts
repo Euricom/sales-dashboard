@@ -8,7 +8,6 @@ import {
 import type { JWT } from "next-auth/jwt";
 import { env } from "~/env";
 import TeamleaderProvider from "./teamleaderProvider";
-import { optional } from "zod";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
