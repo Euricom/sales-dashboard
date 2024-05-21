@@ -219,8 +219,8 @@ export function EmployeeCardDragged({
       window.innerWidth || document.documentElement.clientWidth;
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const detailViewHeight = 140;
-    const detailViewWidth = 315; // Assuming the detail view is also 140px wide
+    const detailViewHeight = 180;
+    const detailViewWidth = 315;
     // Get position relative to the document
     const rect = clickedElement.getBoundingClientRect();
     let top = rect.top + window.scrollY;
@@ -273,11 +273,29 @@ export function EmployeeCardDragged({
     const phase = (draggableEmployee.dragId as string).split("/")[1];
     if (phase === DealName.Opportunities) return "No Date";
     if (TLDatum) {
-      return TLDatum.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // remove time part
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const TLDatumDate = new Date(TLDatum);
+      TLDatumDate.setHours(0, 0, 0, 0); // remove time part
+
+      if (TLDatumDate.getTime() === today.getTime()) {
+        return "Vandaag";
+      } else if (TLDatumDate.getTime() === tomorrow.getTime()) {
+        return "Morgen";
+      } else if (TLDatumDate.getTime() === yesterday.getTime()) {
+        return "Gisteren";
+      } else {
+        return TLDatum.toLocaleDateString("fr-BE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
     } else {
       return "No Date";
     }

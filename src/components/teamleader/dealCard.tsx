@@ -34,6 +34,32 @@ export default function DealCard({
     }
   }, [groupedDealsToWrap]);
 
+  const formatDate = (date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // remove time part
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0); // remove time part
+
+    if (targetDate.getTime() === today.getTime()) {
+      return "Vandaag";
+    } else if (targetDate.getTime() === tomorrow.getTime()) {
+      return "Morgen";
+    } else if (targetDate.getTime() === yesterday.getTime()) {
+      return "Gisteren";
+    } else {
+      return targetDate.toLocaleDateString("fr-BE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
+    }
+  };
+
   return (
     <Card
       variant={variant}
@@ -85,15 +111,7 @@ export default function DealCard({
         </div>
         <div className="flex items-center gap-2 justify-end font-normal text-sm">
           {groupedDeal.deal.estimated_closing_date ? (
-            <div>
-              {new Date(
-                groupedDeal.deal.estimated_closing_date,
-              ).toLocaleDateString("fr-BE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "2-digit",
-              })}
-            </div>
+            <div>{formatDate(groupedDeal.deal.estimated_closing_date)}</div>
           ) : (
             <div>no date</div>
           )}
