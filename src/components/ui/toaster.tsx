@@ -8,6 +8,16 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
+        if (description) {
+          return (
+            <Toast key={id} {...props}>
+              <div className="gap-2 flex">
+                {title === "success" ? <Check /> : <Ban />}
+                {description}
+              </div>
+            </Toast>
+          );
+        }
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">

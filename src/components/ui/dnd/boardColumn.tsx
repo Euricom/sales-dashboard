@@ -6,13 +6,11 @@ import { DropContext } from "~/contexts/dndProvider";
 import { CSS } from "@dnd-kit/utilities";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
 import { DealContext } from "~/contexts/dealsProvider";
-import { DealName, DealPhase } from "~/lib/types";
+import { DealName, type DealPhase } from "~/lib/types";
 
-export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
+export function BoardColumn({ dealPhase }: { dealPhase: DealPhase }) {
   const { rows, activeColumnId } = useContext(DropContext);
-  const {
-    isLoading,
-  } = useContext(DealContext);
+  const { isLoading } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
     .filter((row) => row.rowId.split("/")[1] === dealPhase.name);
@@ -83,9 +81,7 @@ export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
     } else {
       return (
         <div className="flex-1 bg-secondary rounded-14 animate-pulse  px-4 py-2">
-          <div className="pb-1.5 text-white">
-            {dealPhase.label}
-          </div>
+          <div className="pb-1.5 text-white">{dealPhase.label}</div>
         </div>
       );
     }
@@ -96,9 +92,7 @@ export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
       ref={setNodeRef}
       style={style}
       variant={
-        activeColumnId === dealPhase.name &&
-        !isOpportunity &&
-        !isProposed
+        activeColumnId === dealPhase.name && !isOpportunity && !isProposed
           ? "columnHighlight"
           : "column"
       }
@@ -110,14 +104,14 @@ export function BoardColumn({ dealPhase }: {dealPhase: DealPhase}) {
     >
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
-         {dealPhase.label}
+          {dealPhase.label}
         </CardTitle>
       </CardHeader>
-        <CardContent className="flex flex-col p-1 gap-2 column no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] w-full">
-          <SortableContext items={rowsIds}>
-            {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
-          </SortableContext>
-        </CardContent>
+      <CardContent className="flex flex-col p-1 gap-2 column no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] w-full">
+        <SortableContext items={rowsIds}>
+          {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
+        </SortableContext>
+      </CardContent>
     </Card>
   );
 }
