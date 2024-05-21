@@ -131,7 +131,6 @@ export const updateEmployee = async (
 ) => {
   const client = new MongoClient(env.DATABASE_URL);
   const db = client.db();
-  console.log("employee", employee);
   // Create a map to store rows based on their unique identifiers
   const rowMap = new Map<string, string[]>();
 
