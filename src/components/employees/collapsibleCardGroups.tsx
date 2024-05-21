@@ -76,7 +76,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
       </div>
     );
 
-  return (
+    return (
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
@@ -91,7 +91,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
         <CollapsibleContent>
           <div className="flex h-[4.75rem] justify-center bg-primary pl-3.5 pr-8 py-2 rounded-2xl relative">
             <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
-            {isOpen && <div className="absolute text-white top-[5px] right-[8px] text-[10px]">{data.length}</div>}
+            <div className="absolute text-white top-[5px] right-[8px] text-[10px]">{data.length}</div>
           </div>
         </CollapsibleContent>
       </Collapsible>
