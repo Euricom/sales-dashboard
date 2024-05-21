@@ -14,7 +14,6 @@ import type {
 import { DealContext } from "./dealsProvider";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { type SharePointEmployeeWithAvatar } from "~/server/api/routers/sharepoint/types";
-import { on } from "events";
 
 type EmployeeContextType = {
   employees: Employee[];
@@ -60,28 +59,16 @@ export const EmployeeContextProvider: React.FC<
   // Instantiate initial employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFiltering, setFiltering] = useState(false);
+  const [extraEmployees, setExtraEmployees] = useState<Employee[]>([]);
 
   useMemo(() => {
     if (employeesData) {
       // GET employees from MongoDB
-      setEmployees(employeesData);
-    }
-  }, [employeesData]);
-
-  useEffect(() => {
-    if (employeesData) {
-      const emailValues = checkWhichEmployeesNeedToBeAdded();
-      if (emailValues) {
-        sharePointEmployeeFetcher.mutate(emailValues, {
-          onSuccess: (data) => {
-            if (data) {
-              const formattedData = data.map((employee) =>
-                formatMissingEmployeeData(employee),
-              );
-              setEmployees([...employeesData, ...formattedData]);
-            }
-          },
-        });
+      if (extraEmployees.length > 0) {
+        console.log("extraEmployees", extraEmployees);
+        setEmployees([...employeesData, ...extraEmployees]);
+      } else {
+        setEmployees(employeesData);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,6 +137,9 @@ export const EmployeeContextProvider: React.FC<
               const formattedData = data.map((employee) =>
                 formatMissingEmployeeData(employee),
               );
+              if (formattedData.length > 0) {
+                setExtraEmployees(formattedData);
+              }
               const parsedEmployees = [...employees, ...formattedData];
 
               updateEmployeeData(parsedEmployees, uniqueDeals, deals);
