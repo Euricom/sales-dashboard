@@ -102,7 +102,8 @@ export const CollapsibleCardGroups = () => {
   const { sortedData } = useContext(EmployeeContext);
 
   return (
-    <div className="gap-2 flex">
+    <div className="w-full overflow-hidden">
+      <div className="flex gap-2 px-4 no-scrollbar overflow-x-auto ">
       <CollapsibleCardGroup
         label="Bench"
         data={sortedData.bench}
@@ -123,6 +124,7 @@ export const CollapsibleCardGroups = () => {
         data={sortedData.openForNewOpportunities}
         status="openForNewOpportunities"
       />
+      </div>
     </div>
   );
 };
