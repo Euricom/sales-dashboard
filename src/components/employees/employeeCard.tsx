@@ -343,13 +343,13 @@ export function EmployeeCardDragged({
             {weeksLeftData?.time}
           </div>
           <div
-            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1.5 font-normal"
+            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1.5 font-normal text-[12px] truncate"
             style={{
               backgroundColor: colors?.backgroundColor,
               color: colors?.color,
             }}
           >
-            {truncateName(firstNameOnly(employee.fields.Title)!)}
+            {firstNameOnly(employee.fields.Title)!}
           </div>
         </Button>
       </Card>
@@ -489,13 +489,4 @@ export function EmployeeCardDragged({
 
 const firstNameOnly = (name: string) => {
   return name.split(" ")[0];
-};
-
-const truncateName = (name: string) => {
-  const MAX_NAME_LENGTH = 4;
-  if (name.length > MAX_NAME_LENGTH) {
-    return name.slice(0, MAX_NAME_LENGTH) + ".";
-  } else {
-    return name;
-  }
 };
