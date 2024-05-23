@@ -33,16 +33,13 @@ export default function Home() {
               <main className="flex justify-between no-scrollbar overflow-hidden">
                 <div className="flex flex-col w-full">
                   <CollapsibleCardGroups />
-                  <div className="flex w-full px-4 my-2 gap-4 h-[calc(100vh-6.375rem)]">
-                      <DealsColumn />
-                      {dealPhases.map((dealPhase) => {
-                        return (
-                          <BoardColumn
-                            key={dealPhase.id}
-                            dealPhase={dealPhase}
-                          />
-                        );
-                      })}
+                  <div className="flex w-full px-4 my-2 gap-3 h-[calc(100vh-6.375rem)]">
+                    <DealsColumn />
+                    {dealPhases.map((dealPhase) => {
+                      return (
+                        <BoardColumn key={dealPhase.id} dealPhase={dealPhase} />
+                      );
+                    })}
                   </div>
                 </div>
                 <BugReport />

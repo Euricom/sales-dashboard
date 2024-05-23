@@ -7,22 +7,30 @@ import { X } from "lucide-react";
 import { FilterMenu } from "../ui/filterMenu";
 
 export default function DealsColumn() {
-  const { filteringCurrentRole, setFilteringCurrentRole, filteredDeals, isLoading, PMId, setPMId, getAllPMs } = useContext(DealContext);
+  const {
+    filteringCurrentRole,
+    setFilteringCurrentRole,
+    filteredDeals,
+    isLoading,
+    PMId,
+    setPMId,
+    getAllPMs,
+  } = useContext(DealContext);
 
   if (isLoading) {
-      return (
-        <div className="basis-[24.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
-          <div className="pb-1.5 text-white">Deals</div>
-          <div className="flex flex-col gap-2">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-[3.75rem] bg-primary rounded-14 animate-pulse"
-              ></div>
-            ))}
-          </div>
+    return (
+      <div className="basis-[24.5rem] bg-secondary rounded-14 animate-pulse px-4 py-2">
+        <div className="pb-1.5 text-white">Deals</div>
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-[3.75rem] bg-primary rounded-14 animate-pulse"
+            ></div>
+          ))}
         </div>
-      );
+      </div>
+    );
   }
 
   const handlePMPill = () => {
@@ -66,21 +74,18 @@ export default function DealsColumn() {
   };
 
   return (
-    <Card
-    variant="columnDeals"
-    size="columnDeals"
-  >
+    <Card variant="columnDeals" size="columnDeals">
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
           Deals
-            <div className="flex flex-row gap-1">
-              {handlePMPill()}
-              {handleRolePill()}
-              <FilterMenu />
-            </div>
+          <div className="flex flex-row gap-1">
+            {handlePMPill()}
+            {handleRolePill()}
+            <FilterMenu />
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)] min-w-[24rem]">
+      <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
         {filteredDeals?.map((dealObject: GroupedDeal, index) => (
           <DealCard groupedDeal={dealObject} key={index} />
         ))}

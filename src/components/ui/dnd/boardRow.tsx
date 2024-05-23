@@ -82,22 +82,22 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const [shouldWrap, setShouldWrap] = useState(false);
   useEffect(() => {
     const cardElement = node.current as unknown as HTMLElement;
-    if (cardElement) {
-      const isWrapping = cardElement.scrollHeight > cardElement.clientHeight;
-      const groupedDealId = row.rowId.split("/")[0];
-      if (groupedDealId && !isHeader) {
-        if (isWrapping && !groupedDealsToWrap.includes(groupedDealId)) {
-          // Content is wrapping AKA too many employees in this row
-          appendGroupedDeal(groupedDealId);
-        } else if (!isWrapping && groupedDealsToWrap.includes(groupedDealId)) {
-          const isNotWrappingAnymore =
-            cardElement.scrollHeight < cardElement.clientHeight;
-          if (isNotWrappingAnymore) {
-            // Content is not wrapping anymore and should be unwrapped
-            removeGroupedDeal(groupedDealId);
-          }
-          // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
+    if (!cardElement) return;
+
+    const isWrapping = cardElement.scrollHeight > cardElement.clientHeight;
+    const groupedDealId = row.rowId.split("/")[0];
+    if (groupedDealId && !isHeader) {
+      if (isWrapping && !groupedDealsToWrap.includes(groupedDealId)) {
+        // Content is wrapping AKA too many employees in this row
+        appendGroupedDeal(groupedDealId);
+      } else if (!isWrapping && groupedDealsToWrap.includes(groupedDealId)) {
+        const isNotWrappingAnymore =
+          cardElement.scrollHeight < cardElement.clientHeight;
+        if (isNotWrappingAnymore) {
+          // Content is not wrapping anymore and should be unwrapped
+          removeGroupedDeal(groupedDealId);
         }
+        // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
       }
     }
   }, [dragItemIds]);
