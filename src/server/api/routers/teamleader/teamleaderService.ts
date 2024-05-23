@@ -119,8 +119,8 @@ export const simplifyDeals = async (
       if (!a.estimated_closing_date) return 1; // a is put last
       if (!b.estimated_closing_date) return -1; // b is put last
       return (
-        new Date(a.estimated_closing_date).getTime() -
-        new Date(b.estimated_closing_date).getTime()
+        new Date(b.estimated_closing_date).getTime() -
+        new Date(a.estimated_closing_date).getTime()
       );
     }) as SimplifiedDealArray;
 
