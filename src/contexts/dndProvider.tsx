@@ -198,26 +198,29 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     const columnName = overId.split("/")[1]!;
     // Highlight the correct column and/or deal
     if (overData?.type === "Employee") {
-      setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
+      setActiveColumnId(columnName);
+
+      const overDealId = overId.split("_")[1];
       if (
-        DealName.Opportunities.toString() === columnName ||
-        DealName.Proposed.toString() === columnName
+        columnName === DealName.Opportunities.toString() ||
+        columnName === DealName.Proposed.toString()
       ) {
+        setActiveDealId(overDealId);
         return;
       } else {
-        setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
+        setActiveDealId(activeDealId);
       }
       return;
     }
     if (overData?.type === "Row") {
-      setActiveColumnId(overId.split("/")[1] as UniqueIdentifier);
+      setActiveColumnId(columnName);
       if (
-        DealName.Opportunities.toString() === columnName ||
-        DealName.Proposed.toString() === columnName
+        columnName === DealName.Opportunities.toString() ||
+        columnName === DealName.Proposed.toString()
       ) {
         setActiveDealId(overId);
       } else {
-        setActiveDealId(activeId.split("_")[1] as UniqueIdentifier);
+        setActiveDealId(activeId.split("_")[1]);
       }
       return;
     }
@@ -234,7 +237,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       extractEventData(event.active, event.over);
 
     if (activeId === overId || !activeEmployee || activeColumnId === "Deals") {
-      setIsNotAllowedToMoveOrDrop(true);
       return;
     }
     const isOverAnEmployee = overData?.type === "Employee";
@@ -302,10 +304,17 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         }
         appendEmployee(employee, activeRowId, overId);
       }
+    } else if (
+      activeRowId === "0" &&
+      activeColumnId &&
+      [DealName.Interview, DealName.Retained, DealName.NonRetained].includes(
+        activeColumnId.toString() as DealName,
+      )
+    ) {
+      // Indicate that dragging from header to other columns is not allowed
+      setIsNotAllowedToMoveOrDrop(true);
     }
 
-    // Otherwise, move is not allowed
-    setIsNotAllowedToMoveOrDrop(true);
     setActiveEmployee(undefined);
   }
 
@@ -467,7 +476,6 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
     )
       return true;
 
-    setIsNotAllowedToMoveOrDrop(true);
     return false;
   }
 
