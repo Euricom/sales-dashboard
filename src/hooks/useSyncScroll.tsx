@@ -19,6 +19,11 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
     };
 
     const handleScroll = (e: Event) => {
+      // this dissables the detailview when scrolling. This causes a bit of lag (because of rerendering), for maybe 0.5 seconds
+      if (currentEmployeeDetailsId !== "") {
+        setCurrentEmployeeDetailsId("");
+      }
+
       const scrolledEle = e.target as HTMLElement;
       const columnsArray = Array.from(columns);
 
@@ -26,17 +31,6 @@ export function useSyncScroll(columns: NodeListOf<HTMLDivElement> | null) {
         .filter((item) => item !== scrolledEle)
         .forEach((ele) => {
           syncScroll(scrolledEle, ele);
-        });
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const touchedEle = e.target as HTMLElement;
-      const columnsArray = Array.from(columns);
-
-      columnsArray
-        .filter((item) => item !== touchedEle)
-        .forEach((ele) => {
-          syncScroll(touchedEle, ele);
         });
     };
 
