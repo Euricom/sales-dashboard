@@ -77,13 +77,16 @@ export default function DealsColumn() {
     <Card variant="columnDeals" size="columnDeals">
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
-          Deals
-            <div className="flex flex-row gap-1">
-              {handlePMPill()}
-              {handleRolePill()}
-              {filteredDeals?.length}
-              <FilterMenu />
-            </div>
+          <div className="flex gap-1.5">
+            <div>Deals</div>
+            <div className="bg-white/30 rounded-14 h-1/2 w-0.5 flex self-center" />
+            {filteredDeals?.length}
+          </div>
+          <div className="flex flex-row gap-1">
+            {handlePMPill()}
+            {handleRolePill()}
+            <FilterMenu />
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="column p-1 flex flex-col gap-2 no-scrollbar overflow-auto h-[calc(100vh-9.625rem)]">
