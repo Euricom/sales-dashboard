@@ -8,9 +8,13 @@ import type {
   GroupedDeal,
   MongoEmployeeDeal,
 } from "~/lib/types";
-import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
+import type {
+  SimplifiedDeal,
+  SimplifiedDealArray,
+} from "~/server/api/routers/teamleader/types";
 import { api } from "~/utils/api";
 import { dealPhases } from "~/lib/constants";
+import type { QueryObserverResult } from "@tanstack/react-query";
 
 type DealContextType = {
   deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state
@@ -35,6 +39,12 @@ type DealContextType = {
     employee: Employee,
   ) => string | undefined;
   updateDealProbability: (dealId: string, probability: number) => void;
+  refetch: () => Promise<
+    QueryObserverResult<
+      | { deals: SimplifiedDealArray; uniqueDeals: groupedDealFromDB[] }
+      | undefined
+    >
+  >;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -357,6 +367,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         setFilteringCurrentRole,
         getCorrectDealId,
         updateDealProbability,
+        refetch,
       }}
     >
       {children}
