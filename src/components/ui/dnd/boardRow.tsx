@@ -17,7 +17,6 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     activeColumnId,
     groupedDealsToWrap,
     appendGroupedDeal,
-    removeGroupedDeal,
   } = useContext(DropContext);
   const { draggableEmployees, isFiltering, retainedEmployees } =
     useContext(EmployeeContext);
@@ -90,15 +89,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       if (isWrapping && !groupedDealsToWrap.includes(groupedDealId)) {
         // Content is wrapping AKA too many employees in this row
         appendGroupedDeal(groupedDealId);
-      } else if (!isWrapping && groupedDealsToWrap.includes(groupedDealId)) {
-        const isNotWrappingAnymore =
-          cardElement.scrollHeight < cardElement.clientHeight;
-        if (isNotWrappingAnymore) {
-          // Content is not wrapping anymore and should be unwrapped
-          removeGroupedDeal(groupedDealId);
-        }
-        // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
-      }
+      } 
     }
   }, [dragItemIds]);
 
