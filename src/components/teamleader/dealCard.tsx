@@ -6,6 +6,7 @@ import afkortingen from "~/lib/Afkortingen.json";
 import { PmAvatar } from "./pmAvatar";
 import { determineColors } from "~/lib/utils";
 import { type GroupedDeal } from "~/lib/types";
+import { DealContext } from "~/contexts/dealsProvider";
 
 export default function DealCard({
   groupedDeal,
@@ -25,14 +26,13 @@ export default function DealCard({
       : "deal";
 
   const [shouldWrap, setShouldWrap] = useState(false);
-
   useEffect(() => {
     if (groupedDealsToWrap.includes(groupedDeal.groupedDealId)) {
       setShouldWrap(true);
     } else {
       setShouldWrap(false);
     }
-  }, [groupedDealsToWrap]);
+  }, [groupedDealsToWrap, groupedDeal.groupedDealId]);
 
   const formatDate = (date: string) => {
     const today = new Date();
