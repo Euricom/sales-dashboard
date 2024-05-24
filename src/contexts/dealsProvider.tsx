@@ -226,7 +226,26 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             id: groupedDealId,
             value: groupedDeal.value,
           });
+        } else {
+          // update the deals in the app, so that they can be moved immediately
+          // find the correct deal and update the emailfield
+          const updatedDeals = deals?.map((deal) => {
+            if (deal.id === dealId) {
+              if (deal.custom_fields[0])
+                deal.custom_fields[0].value =
+                  employee.fields.Euricom_x0020_email;
+            }
+            const groupedDealId = uniqueDeals?.find((entry) =>
+              entry.value.includes(deal.id),
+            )?.id;
+            return {
+              deal: deal,
+              groupedDealId: groupedDealId ?? "",
+            };
+          });
+          setInitialDeals(updatedDeals);
         }
+        //refetch().catch((error) => console.error(error));
       },
     });
   }
