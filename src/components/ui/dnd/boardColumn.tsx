@@ -68,7 +68,6 @@ export function BoardColumn({ dealPhase }: { dealPhase: DealPhase }) {
 
   const isOpportunity = dealPhase.name === DealName.Opportunities;
   const isProposed = dealPhase.name === DealName.Proposed;
-  const isNonRetained = dealPhase.name === DealName.NonRetained;
 
   // Skeleton for loading state
   if (isLoading ?? !filteredRows ?? filteredRows.length === 0) {
