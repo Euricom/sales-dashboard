@@ -227,6 +227,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             value: groupedDeal.value,
           });
         }
+        refetch().catch((error) => console.error(error));
       },
     });
   }
