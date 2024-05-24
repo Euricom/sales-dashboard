@@ -20,6 +20,7 @@ export function ActionMenu() {
     setPMId,
     filteringCurrentRole,
     setFilteringCurrentRole,
+    refetch,
   } = useContext(DealContext);
   const [displayFilter, setDisplayFilter] = useState(false);
 
@@ -29,8 +30,8 @@ export function ActionMenu() {
     }
   }, [PMId, filteringCurrentRole, isFiltering]);
 
-  const handleRefresh = () => {
-    window.location.replace(window.location.href);
+  const handleRefresh = async () => {
+    await refetch();
   };
 
   const handleFullscreen = () => {

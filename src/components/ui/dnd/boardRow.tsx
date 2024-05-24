@@ -46,7 +46,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     draggableEmployeesInThisRow.filter((draggableEmployee) => {
       return retainedEmployees?.some(
         (retainedEmployee) =>
-          retainedEmployee.employeeId ===
+          retainedEmployee?.employeeId ===
           (draggableEmployee.dragId as string).split("_")[0],
       );
     });

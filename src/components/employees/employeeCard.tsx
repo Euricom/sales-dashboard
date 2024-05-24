@@ -37,8 +37,8 @@ export function EmployeeCardDragged({
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
-  const [TLDatum, setTLDatum] = useState<Date | null>(null);
-  const [mongoDatum, setMongoDatum] = useState<Date | null>(null);
+  const [TLDate, setTLDate] = useState<Date | null>(null);
+  const [mongoDate, setMongoDate] = useState<Date | null>(null);
 
   const phase = (draggableEmployee.dragId as string).split("/")[1];
 
@@ -118,14 +118,14 @@ export function EmployeeCardDragged({
         const lastDate = correctDealInfo.phase_history[lastIndex];
         if (lastDate) {
           const datum = new Date(lastDate.started_at);
-          if (!TLDatum) {
+          if (!TLDate) {
             // only set TLDatum if it hasn't been set yet
-            setTLDatum(new Date(datum));
+            setTLDate(new Date(datum));
           }
         }
       }
 
-      setMongoDatum(empDeal?.datum ?? null);
+      setMongoDate(empDeal?.datum ?? null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -272,7 +272,7 @@ export function EmployeeCardDragged({
   const employeeDate = () => {
     const phase = (draggableEmployee.dragId as string).split("/")[1];
     if (phase === DealName.Opportunities) return "No Date";
-    if (TLDatum) {
+    if (TLDate) {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // remove time part
       const tomorrow = new Date(today);
@@ -280,7 +280,7 @@ export function EmployeeCardDragged({
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
-      const TLDatumDate = new Date(TLDatum);
+      const TLDatumDate = new Date(TLDate);
       TLDatumDate.setHours(0, 0, 0, 0); // remove time part
 
       if (TLDatumDate.getTime() === today.getTime()) {
@@ -290,7 +290,7 @@ export function EmployeeCardDragged({
       } else if (TLDatumDate.getTime() === yesterday.getTime()) {
         return "Gisteren";
       } else {
-        return TLDatum.toLocaleDateString("fr-BE", {
+        return TLDate.toLocaleDateString("fr-BE", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
@@ -306,7 +306,7 @@ export function EmployeeCardDragged({
     weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
 
   const handleDateChange = (date: Date) => {
-    setTLDatum(date);
+    setTLDate(date);
   };
 
   if (isHeader) {
@@ -343,13 +343,13 @@ export function EmployeeCardDragged({
             {weeksLeftData?.time}
           </div>
           <div
-            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1.5 font-normal"
+            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1 font-normal text-[12px] truncate"
             style={{
               backgroundColor: colors?.backgroundColor,
               color: colors?.color,
             }}
           >
-            {truncateName(firstNameOnly(employee.fields.Title)!)}
+            {firstNameOnly(employee.fields.Title)!}
           </div>
         </Button>
       </Card>
@@ -462,10 +462,10 @@ export function EmployeeCardDragged({
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
               {/* datum picker */}
-              {correctDealInfo && TLDatum ? (
+              {correctDealInfo && TLDate ? (
                 <DatePickerComponent
                   deal={correctDealInfo}
-                  date={TLDatum}
+                  date={TLDate}
                   setTLDatum={handleDateChange}
                 />
               ) : null}
@@ -489,13 +489,4 @@ export function EmployeeCardDragged({
 
 const firstNameOnly = (name: string) => {
   return name.split(" ")[0];
-};
-
-const truncateName = (name: string) => {
-  const MAX_NAME_LENGTH = 4;
-  if (name.length > MAX_NAME_LENGTH) {
-    return name.slice(0, MAX_NAME_LENGTH) + ".";
-  } else {
-    return name;
-  }
 };
