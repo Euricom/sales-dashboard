@@ -9,7 +9,7 @@ import { FilterMenu } from "../ui/filterMenu";
 export default function DealsColumn() {
   const {
     filteringCurrentRole,
-    setFilteringCurrentRole,
+    removeRoleFilter,
     filteredDeals,
     isLoading,
     PMId,
@@ -55,29 +55,29 @@ export default function DealsColumn() {
   };
 
   const handleRolePill = () => {
-    if (filteringCurrentRole !== "" && filteringCurrentRole !== undefined) {
-      return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5">
-          <div>{filteringCurrentRole}</div>
+    if (!filteringCurrentRole.length) return null;
+
+    return filteringCurrentRole.map(role => {
+      return (<div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5" key={role}>
+          <div>{role}</div>
           <div className="rounded-full bg-white text-black">
             <X
               size={16}
               onClick={() => {
-                localStorage.setItem("filteringCurrentRole", "");
-                setFilteringCurrentRole("");
+                removeRoleFilter(role);
               }}
             />
           </div>
         </div>
       );
-    }
+    })
   };
 
   return (
     <Card variant="columnDeals" size="columnDeals">
       <CardHeader>
         <CardTitle className="pb-1.5 truncate flex justify-between w-full">
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 mr-2">
             <div>Deals</div>
             <div className="bg-white/30 rounded-14 h-1/2 w-0.5 flex self-center" />
             {filteredDeals?.length}

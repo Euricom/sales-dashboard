@@ -18,7 +18,9 @@ export function FilterMenu() {
     setPMId,
     getAllPMs,
     filteringCurrentRole,
-    setFilteringCurrentRole,
+    addRoleFilter,
+    removeRoleFilter,
+    clearRoleFilter,
   } = useContext(DealContext);
   const [isOpenPMs, setIsOpenPMs] = useState(true);
   const [isOpenRoles, setIsOpenRoles] = useState(true);
@@ -26,10 +28,7 @@ export function FilterMenu() {
   const [clearFilterDisplay, setClearFilterDisplay] = useState(isFiltering);
 
   useEffect(() => {
-    setIsFiltering(
-      (PMId !== "" && PMId !== undefined) ||
-        (filteringCurrentRole !== "" && filteringCurrentRole !== undefined),
-    );
+    setIsFiltering((PMId !== "" && PMId !== undefined) || !!filteringCurrentRole.length);
   }, [PMId, filteringCurrentRole]);
 
   // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
@@ -103,19 +102,14 @@ export function FilterMenu() {
                 <DropdownMenuItem
                   key={role}
                   onClick={() => {
-                    if (role === filteringCurrentRole) {
-                      localStorage.setItem("filteringCurrentRole", "");
-                      setFilteringCurrentRole("");
+                    if (filteringCurrentRole.includes(role!)) {
+                      removeRoleFilter(role!)
                     } else {
-                      localStorage.setItem(
-                        "filteringCurrentRole",
-                        role ? role : "",
-                      );
-                      setFilteringCurrentRole(role ? role : "");
+                      addRoleFilter(role!)
                     }
                   }}
                   className={
-                    role === filteringCurrentRole
+                    filteringCurrentRole.includes(role!)
                       ? "outline outline-white-400 outline-offset-1 justify-center w-full"
                       : "justify-center w-full"
                   }
@@ -134,9 +128,8 @@ export function FilterMenu() {
             <DropdownMenuLabel
               onClick={() => {
                 localStorage.setItem("PMId", "");
-                localStorage.setItem("filteringCurrentRole", "");
                 setPMId("");
-                setFilteringCurrentRole("");
+                clearRoleFilter();
                 handleFilter(false);
               }}
               className="flex items-center justify-center w-full bg-primary rounded-14 py-2 px-3 my-2 text-white border-2"
