@@ -19,7 +19,7 @@ export function FilterMenu() {
     removePmFilter,
     clearPmFilter,
     getAllPMs,
-    filterRole: filteringCurrentRole,
+    filterRole,
     addRoleFilter,
     removeRoleFilter,
     clearRoleFilter,
@@ -30,8 +30,8 @@ export function FilterMenu() {
   const [clearFilterDisplay, setClearFilterDisplay] = useState(isFiltering);
 
   useEffect(() => {
-    setIsFiltering(!!filterPm.length || !!filteringCurrentRole.length);
-  }, [filterPm, filteringCurrentRole]);
+    setIsFiltering(!!filterPm.length || !!filterRole.length);
+  }, [filterPm, filterRole]);
 
   // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
   const handleFilter = (isOpen: boolean) => {
@@ -92,9 +92,9 @@ export function FilterMenu() {
                 <DropdownMenuItem
                   key={role}
                   onClick={() => {
-                    filteringCurrentRole.includes(role!)? removeRoleFilter(role!) : addRoleFilter(role!)}}
+                    filterRole.includes(role!)? removeRoleFilter(role!) : addRoleFilter(role!)}}
                   className={
-                    filteringCurrentRole.includes(role!)
+                    filterRole.includes(role!)
                       ? "outline outline-white-400 outline-offset-1 justify-center w-full"
                       : "justify-center w-full"
                   }
