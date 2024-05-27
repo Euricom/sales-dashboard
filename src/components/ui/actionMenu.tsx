@@ -16,19 +16,19 @@ export function ActionMenu() {
     useContext(EmployeeContext);
   const {
     setDealIds,
-    PMId,
-    setPMId,
-    filteringCurrentRole,
-    setFilteringCurrentRole,
+    filterPm,
+    clearPmFilter,
+    filterRole,
+    clearRoleFilter,
     refetch,
   } = useContext(DealContext);
   const [displayFilter, setDisplayFilter] = useState(false);
 
   useEffect(() => {
-    if (PMId !== "" || filteringCurrentRole !== "" || isFiltering) {
+    if (filterPm.length || filterRole.length || isFiltering) {
       setDisplayFilter(true);
     }
-  }, [PMId, filteringCurrentRole, isFiltering]);
+  }, [filterPm, filterRole, isFiltering]);
 
   const handleRefresh = async () => {
     await refetch();
@@ -47,12 +47,10 @@ export function ActionMenu() {
   const handleRemoveFiltering = () => {
     localStorage.setItem("dealIds", JSON.stringify([]));
     localStorage.setItem("employeeId", "");
-    localStorage.setItem("PMId", "");
-    localStorage.setItem("filteringCurrentRole", "");
     setDealIds([]);
     setEmployeeId("");
-    setPMId("");
-    setFilteringCurrentRole("");
+    clearPmFilter();
+    clearRoleFilter();
     setFiltering(false);
   };
 

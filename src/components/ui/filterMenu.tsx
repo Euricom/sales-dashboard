@@ -14,10 +14,12 @@ import { determineColors } from "~/lib/utils";
 
 export function FilterMenu() {
   const {
-    PMId,
-    setPMId,
+    filterPm,
+    addPmFilter,
+    removePmFilter,
+    clearPmFilter,
     getAllPMs,
-    filteringCurrentRole,
+    filterRole: filteringCurrentRole,
     addRoleFilter,
     removeRoleFilter,
     clearRoleFilter,
@@ -28,8 +30,8 @@ export function FilterMenu() {
   const [clearFilterDisplay, setClearFilterDisplay] = useState(isFiltering);
 
   useEffect(() => {
-    setIsFiltering((PMId !== "" && PMId !== undefined) || !!filteringCurrentRole.length);
-  }, [PMId, filteringCurrentRole]);
+    setIsFiltering(!!filterPm.length || !!filteringCurrentRole.length);
+  }, [filterPm, filteringCurrentRole]);
 
   // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
   const handleFilter = (isOpen: boolean) => {
@@ -43,7 +45,6 @@ export function FilterMenu() {
   };
 
   return (
-    <>
       <DropdownMenu onOpenChange={handleFilter}>
         <DropdownMenuTrigger>
           <Filter size={24} />
@@ -53,7 +54,6 @@ export function FilterMenu() {
           side="right"
           align="start"
         >
-          {/** PM FILTER */}
           <DropdownMenuLabel
             onClick={() => setIsOpenPMs(!isOpenPMs)}
             className="flex justify-between bg-white rounded-14 py-2 px-3 mb-2 text-primary items-center"
@@ -62,25 +62,16 @@ export function FilterMenu() {
             {isOpenPMs ? <ChevronDown /> : <ChevronUp />}
           </DropdownMenuLabel>
           {isOpenPMs && (
-            <div className="mb-2">
+            <div className="flex flex-col gap-1 mb-2">
               {getAllPMs?.map((pm) => (
                 <DropdownMenuItem
                   key={pm.id}
-                  onClick={() => {
-                    if (pm.id === PMId) {
-                      localStorage.setItem("PMId", "");
-                      setPMId("");
-                    } else {
-                      localStorage.setItem("PMId", pm.id);
-                      setPMId(pm.id);
-                    }
-                  }}
+                  onClick={() => {filterPm.includes(pm.id) ? removePmFilter(pm.id): addPmFilter(pm.id);}}
                   className={
-                    pm.id === PMId
-                      ? "outline outline-white-400 outline-offset-1 flex justify-between"
+                    filterPm.includes(pm.id)
+                      ? "outline outline-white-400 outline-offset-[-2px] flex justify-between"
                       : "flex justify-between"
                   }
-                  // className="flex justify-between"
                 >
                   <span>{pm.first_name + " " + pm.last_name}</span>
                   <PmAvatar pm={pm} />
@@ -88,7 +79,6 @@ export function FilterMenu() {
               ))}
             </div>
           )}
-          {/** TODO: ROLE FILTER */}
           <DropdownMenuLabel
             onClick={() => setIsOpenRoles(!isOpenRoles)}
             className="flex justify-between bg-white rounded-14 py-2 px-3 text-primary items-center"
@@ -102,12 +92,7 @@ export function FilterMenu() {
                 <DropdownMenuItem
                   key={role}
                   onClick={() => {
-                    if (filteringCurrentRole.includes(role!)) {
-                      removeRoleFilter(role!)
-                    } else {
-                      addRoleFilter(role!)
-                    }
-                  }}
+                    filteringCurrentRole.includes(role!)? removeRoleFilter(role!) : addRoleFilter(role!)}}
                   className={
                     filteringCurrentRole.includes(role!)
                       ? "outline outline-white-400 outline-offset-1 justify-center w-full"
@@ -127,8 +112,7 @@ export function FilterMenu() {
           {clearFilterDisplay && (
             <DropdownMenuLabel
               onClick={() => {
-                localStorage.setItem("PMId", "");
-                setPMId("");
+                clearPmFilter();
                 clearRoleFilter();
                 handleFilter(false);
               }}
@@ -139,6 +123,5 @@ export function FilterMenu() {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-    </>
   );
 }

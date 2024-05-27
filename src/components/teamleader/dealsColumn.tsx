@@ -8,12 +8,12 @@ import { FilterMenu } from "../ui/filterMenu";
 
 export default function DealsColumn() {
   const {
-    filteringCurrentRole,
+    filterRole,
     removeRoleFilter,
     filteredDeals,
     isLoading,
-    PMId,
-    setPMId,
+    filterPm,
+    removePmFilter,
     getAllPMs,
   } = useContext(DealContext);
 
@@ -34,31 +34,30 @@ export default function DealsColumn() {
   }
 
   const handlePMPill = () => {
-    if (PMId) {
-      const pmName = getAllPMs?.find((pm) => pm.id === PMId)?.first_name;
+    if (!filterPm.length) return null;
 
+    return filterPm.map(pmId => {
+      const pmName = getAllPMs?.find((pm) => pm.id === pmId)?.first_name;
       return (
-        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-1">
-          <div>{pmName}</div>
-          <div className="rounded-full bg-white text-black">
-            <X
-              size={16}
-              onClick={() => {
-                localStorage.setItem("PMId", "");
-                setPMId("");
-              }}
-            />
+      <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-1" key={pmId}>
+            <div>{pmName}</div>
+            <div className="rounded-full bg-white text-black">
+              <X
+                size={16}
+                onClick={() => {removePmFilter(pmId)}}
+              />
+            </div>
           </div>
-        </div>
       );
-    }
+    });
   };
 
   const handleRolePill = () => {
-    if (!filteringCurrentRole.length) return null;
+    if (!filterRole.length) return null;
 
-    return filteringCurrentRole.map(role => {
-      return (<div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5" key={role}>
+    return filterRole.map(role => {
+      return (
+        <div className="text-sm flex flex-row gap-1 items-center bg-primary text-white rounded-14 pl-1.5 pr-0.5" key={role}>
           <div>{role}</div>
           <div className="rounded-full bg-white text-black">
             <X
@@ -82,9 +81,13 @@ export default function DealsColumn() {
             <div className="bg-white/30 rounded-14 h-1/2 w-0.5 flex self-center" />
             {filteredDeals?.length}
           </div>
-          <div className="flex flex-row gap-1">
-            {handlePMPill()}
-            {handleRolePill()}
+          <div className="flex gap-1">
+            <div className="flex flex-row max-w-72 overflow-hidden justify-end">
+              <div className="flex gap-1 no-scrollbar overflow-x-auto">
+                {handlePMPill()}
+                {handleRolePill()}
+              </div>
+            </div>
             <FilterMenu />
           </div>
         </CardTitle>
