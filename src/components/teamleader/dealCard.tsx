@@ -101,7 +101,7 @@ export default function DealCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
         <div
-          className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit"
+          className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit truncate"
           style={{
             backgroundColor: colors?.backgroundColor,
             color: colors?.color,
