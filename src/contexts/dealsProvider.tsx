@@ -286,10 +286,10 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     const dealIdsInStorage = localStorage.getItem("dealIds");
     const dealids = dealIdsInStorage ? (JSON.parse(dealIdsInStorage) as string[]): [];
 
-    const pmIdsInStorage = localStorage.getItem("PMId");
+    const pmIdsInStorage = localStorage.getItem("filterPm");
     const pmIds = pmIdsInStorage ? JSON.parse(pmIdsInStorage) as string[] : [];
 
-    const rolesInStorage = localStorage.getItem("filteringCurrentRole");
+    const rolesInStorage = localStorage.getItem("filterRoles");
     const roleIds =  rolesInStorage ? JSON.parse(rolesInStorage) as string[] : [] ;
 
     setDealIds(dealids);
@@ -357,32 +357,32 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
   };
 
   const addRoleFilter = (role: string) => {
-    localStorage.setItem("filteringCurrentRole", JSON.stringify([...filterRole, role]));
+    localStorage.setItem("filterRoles", JSON.stringify([...filterRole, role]));
     setFilterRole(a => [...a, role]);
   }
 
   const removeRoleFilter = (role: string) => {
-    localStorage.setItem("filteringCurrentRole", JSON.stringify(filterRole.filter(r => r !== role)));
+    localStorage.setItem("filterRoles", JSON.stringify(filterRole.filter(r => r !== role)));
     setFilterRole(filterRole.filter(a => a !== role));
   }
 
   const clearRoleFilter = () => {
-    localStorage.setItem("filteringCurrentRole", JSON.stringify([]));
+    localStorage.setItem("filterRoles", JSON.stringify([]));
     setFilterRole([]);
   }
 
   const addPmFilter = (pm: string) => {
-    localStorage.setItem("PMId", JSON.stringify([...filterPm, pm]));
+    localStorage.setItem("filterPm", JSON.stringify([...filterPm, pm]));
     setFilterPm(a => [...a, pm]);
   }
 
   const removePmFilter = (pm: string) => {
-    localStorage.setItem("PMId", JSON.stringify(filterPm.filter(a => a !== pm)));
+    localStorage.setItem("filterPm", JSON.stringify(filterPm.filter(a => a !== pm)));
     setFilterPm(filterPm.filter(a => a !== pm));
   }
 
   const clearPmFilter = () => {
-    localStorage.setItem("PMId", JSON.stringify([]));
+    localStorage.setItem("filterPm", JSON.stringify([]));
     setFilterPm([]);
   }
 
