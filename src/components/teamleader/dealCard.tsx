@@ -123,12 +123,16 @@ export default function DealCard({
 }
 
 const trimDealTitle = (title: string) => {
+  if (!title) return null;
+
   let trimmedTitle = title.split("[")[0]?.split("(")[0];
   trimmedTitle = replaceWords(trimmedTitle);
   return trimmedTitle;
 };
 
 const trimRole = (role: string) => {
+  if (!role) return null;
+  
   let newRole = role.split("[")[0]?.split("(")[0];
   newRole = newRole?.replace(/\b[A-Z]*[0-9]+[A-Z]+|[A-Z]+[0-9]+[A-Z]*\b/g, "");
   //newRole = replaceWords(newRole);
