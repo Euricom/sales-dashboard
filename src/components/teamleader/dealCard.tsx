@@ -2,11 +2,9 @@ import { Card, CardHeader, CardContent, CardTitle } from "../ui/card";
 import { DropContext } from "~/contexts/dndProvider";
 import { useContext, useEffect, useState } from "react";
 import CompanyLogo from "./companyLogo";
-import afkortingen from "~/lib/Afkortingen.json";
 import { PmAvatar } from "./pmAvatar";
 import { determineColors } from "~/lib/utils";
 import { type GroupedDeal } from "~/lib/types";
-import { DealContext } from "~/contexts/dealsProvider";
 
 export default function DealCard({
   groupedDeal,
@@ -20,8 +18,10 @@ export default function DealCard({
       : null,
   );
 
+  console.log(activeDealId);
+  console.log(groupedDeal);
   const variant =
-    groupedDeal.deal.id === (activeDealId as string)?.split("/")[0]
+    groupedDeal.groupedDealId === (activeDealId as string)?.split("/")[0]
       ? "dealhighlight"
       : "deal";
 
@@ -96,7 +96,7 @@ export default function DealCard({
               }
             />
           )}
-          {trimDealTitle(groupedDeal.deal.company.name)}
+          {groupedDeal.deal.company.name}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
@@ -122,42 +122,11 @@ export default function DealCard({
   );
 }
 
-const trimDealTitle = (title: string) => {
-  if (!title) return null;
-
-  let trimmedTitle = title.split("[")[0]?.split("(")[0];
-  trimmedTitle = replaceWords(trimmedTitle);
-  return trimmedTitle;
-};
-
 const trimRole = (role: string) => {
   if (!role) return null;
-  
+
   let newRole = role.split("[")[0]?.split("(")[0];
   newRole = newRole?.replace(/\b[A-Z]*[0-9]+[A-Z]+|[A-Z]+[0-9]+[A-Z]*\b/g, "");
-  //newRole = replaceWords(newRole);
+
   return newRole;
-};
-
-const replaceWords = (str: string | undefined): string => {
-  if (!str) return "";
-  const words: Record<string, string> = afkortingen.reduce(
-    (acc: Record<string, string>, { woord, afkorting }) => {
-      acc[woord] = afkorting;
-      return acc;
-    },
-    {},
-  );
-
-  const replacedStr: string = str
-    .split(/[\s/]+/)
-    .map((word: string) => {
-      if (words[word]) {
-        return words[word];
-      }
-      return word;
-    })
-    .join(" ");
-
-  return replacedStr;
 };
