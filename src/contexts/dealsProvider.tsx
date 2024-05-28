@@ -28,12 +28,16 @@ type DealContextType = {
     employee: Employee,
   ) => void;
   moveDeal: (id: string, phase_id: string, employee: Employee) => void;
-  PMId: string | undefined;
-  setPMId: React.Dispatch<React.SetStateAction<string>>;
+  filterPm: string[];
+  addPmFilter: (pm: string) => void,
+  removePmFilter: (pm: string) => void,
+  clearPmFilter: () => void,
   getAllPMs: PM[] | undefined | null;
   uniqueDeals: groupedDealFromDB[] | null | undefined;
-  filteringCurrentRole: string;
-  setFilteringCurrentRole: React.Dispatch<React.SetStateAction<string>>;
+  filterRole: string[];
+  addRoleFilter: (role: string) => void,
+  removeRoleFilter: (role: string) => void,
+  clearRoleFilter: () => void,
   getCorrectDealId: (
     groupedDealid: string,
     employee: Employee,
@@ -237,8 +241,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     GroupedDeal[] | undefined | null
   >(null);
   const [dealIds, setDealIds] = useState<string[]>([]);
-  const [PMId, setPMId] = useState<string>("");
-  const [filteringCurrentRole, setFilteringCurrentRole] = useState<string>("");
+  const [filterPm, setFilterPm] = useState<string[]>([]);
+  const [filterRole, setFilterRole] = useState<string[]>([]);
   const [filteredDeals, setFilteredDeals] = useState<
     GroupedDeal[] | undefined | null
   >(null);
@@ -278,22 +282,25 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           };
         }),
     );
+
     const dealIdsInStorage = localStorage.getItem("dealIds");
-    const dealids = dealIdsInStorage
-      ? (JSON.parse(dealIdsInStorage) as string[])
-      : ([] as string[]);
-    const PMID = localStorage.getItem("PMId");
-    const ROLe = localStorage.getItem("filteringCurrentRole");
+    const dealids = dealIdsInStorage ? (JSON.parse(dealIdsInStorage) as string[]): [];
+
+    const pmIdsInStorage = localStorage.getItem("filterPm");
+    const pmIds = pmIdsInStorage ? JSON.parse(pmIdsInStorage) as string[] : [];
+
+    const rolesInStorage = localStorage.getItem("filterRoles");
+    const roleIds =  rolesInStorage ? JSON.parse(rolesInStorage) as string[] : [] ;
 
     setDealIds(dealids);
-    setPMId(PMID ?? "");
-    setFilteringCurrentRole(ROLe ?? "");
+    setFilterPm(pmIds);
+    setFilterRole(roleIds);
   }, [deals, uniqueDeals]);
 
   useEffect(() => {
     if (!initialDeals) return;
 
-    if (dealIds.length === 0 && PMId === "" && filteringCurrentRole === "") {
+    if (dealIds.length === 0 && !filterPm.length && !filterRole.length) {
       setFilteredDeals(initialDeals); // No need to filter if no criteria are set
       return;
     }
@@ -301,16 +308,15 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     const filtered = initialDeals.filter((groupedDeal) => {
       const matchesDealIds =
         dealIds.length === 0 || dealIds.includes(groupedDeal.groupedDealId);
-      const matchesPMId = PMId === "" || groupedDeal.deal.PM.id === PMId;
+      const matchesPMId = !filterPm.length || filterPm.includes(groupedDeal.deal.PM.id);
       const matchesCurrentRole =
-        filteringCurrentRole === "" ||
-        groupedDeal.deal.custom_fields[1]?.value === filteringCurrentRole;
-
+        !filterRole.length ||
+        filterRole.includes(groupedDeal.deal.custom_fields[1]?.value);
       return matchesDealIds && matchesPMId && matchesCurrentRole;
     });
 
     setFilteredDeals(filtered);
-  }, [dealIds, PMId, filteringCurrentRole, initialDeals]);
+  }, [dealIds, filterPm, filterRole, initialDeals]);
 
   const getAllPMs = useMemo(() => {
     if (deals)
@@ -350,6 +356,36 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     dealProbabilityMutator.mutate({ id: dealId, probability: probability });
   };
 
+  const addRoleFilter = (role: string) => {
+    localStorage.setItem("filterRoles", JSON.stringify([...filterRole, role]));
+    setFilterRole(a => [...a, role]);
+  }
+
+  const removeRoleFilter = (role: string) => {
+    localStorage.setItem("filterRoles", JSON.stringify(filterRole.filter(r => r !== role)));
+    setFilterRole(filterRole.filter(a => a !== role));
+  }
+
+  const clearRoleFilter = () => {
+    localStorage.setItem("filterRoles", JSON.stringify([]));
+    setFilterRole([]);
+  }
+
+  const addPmFilter = (pm: string) => {
+    localStorage.setItem("filterPm", JSON.stringify([...filterPm, pm]));
+    setFilterPm(a => [...a, pm]);
+  }
+
+  const removePmFilter = (pm: string) => {
+    localStorage.setItem("filterPm", JSON.stringify(filterPm.filter(a => a !== pm)));
+    setFilterPm(filterPm.filter(a => a !== pm));
+  }
+
+  const clearPmFilter = () => {
+    localStorage.setItem("filterPm", JSON.stringify([]));
+    setFilterPm([]);
+  }
+
   return (
     <DealContext.Provider
       value={{
@@ -360,12 +396,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         setDealIds,
         updateOrCreateDeal,
         moveDeal,
-        PMId,
-        setPMId,
+        filterPm,
+        addPmFilter,
+        removePmFilter,
+        clearPmFilter,
         getAllPMs,
         uniqueDeals,
-        filteringCurrentRole,
-        setFilteringCurrentRole,
+        filterRole,
+        addRoleFilter,
+        removeRoleFilter,
+        clearRoleFilter,
         getCorrectDealId,
         updateDealProbability,
         refetch,
