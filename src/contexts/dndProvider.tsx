@@ -35,6 +35,7 @@ type DropContextType = {
   groupedDealsToWrap: string[];
   appendGroupedDeal: (groupedDealId: string) => void;
   removeGroupedDeal: (groupedDealId: string) => void;
+  confetti: boolean;
 };
 
 type Sortable = {
@@ -77,6 +78,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
   const [activeDealId, setActiveDealId] = useState<UniqueIdentifier>();
   const [activeColumnId, setActiveColumnId] = useState<UniqueIdentifier>();
   const [isDeletable, setDeletable] = useState<boolean>(false);
+  const [confetti, setConfetti] = useState<boolean>(false);
   const [groupedDealsToWrap, setGroupedDealsToWrap] = useState<string[]>([]);
   const [isNotAllowedToMoveOrDrop, setIsNotAllowedToMoveOrDrop] =
     useState<boolean>(false);
@@ -139,6 +141,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
         groupedDealsToWrap,
         appendGroupedDeal,
         removeGroupedDeal,
+        confetti,
       }}
     >
       <DndContext
@@ -271,6 +274,13 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
       } else {
         // Dropping Employee over a different row
         moveEmployee(activeEmployee, activeRowId, overId);
+        if (overId.split("/")[1] === DealName.Retained) {
+          setConfetti(true);
+
+          setTimeout(() => {
+            setConfetti(false);
+          }, 3000);
+        }
         return;
       }
     }

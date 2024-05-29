@@ -417,7 +417,7 @@ export function EmployeeCardDragged({
                 })}
                 className="shadow-[inset_0_3px_10px_rgba(0,0,0,.6)] rounded-full"
               >
-                <div className="mt-[1px] text-xs">
+                <div className="mt-[1px] text-white text-xs">
                   {employeeEstProbability != 0 ? (
                     employeeEstProbability
                   ) : (

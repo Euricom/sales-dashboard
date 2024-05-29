@@ -110,6 +110,9 @@ dependencies:
   react-aria-components:
     specifier: ^1.2.0
     version: 1.2.0(react-dom@18.2.0)(react@18.2.0)
+  react-canvas-confetti:
+    specifier: ^2.0.7
+    version: 2.0.7(react@18.2.0)
   react-circular-progressbar:
     specifier: ^2.1.0
     version: 2.1.0(react@18.2.0)
@@ -5704,6 +5707,10 @@ packages:
       '@babel/types': 7.24.0
     dev: true
 
+  /@types/canvas-confetti@1.6.4:
+    resolution: {integrity: sha512-fNyZ/Fdw/Y92X0vv7B+BD6ysHL4xVU5dJcgzgxLdGbn8O3PezZNIJpml44lKM0nsGur+o/6+NZbZeNTt00U1uA==}
+    dev: false
+
   /@types/cookie@0.6.0:
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
     dev: false
@@ -6569,6 +6576,10 @@ packages:
 
   /caniuse-lite@1.0.30001610:
     resolution: {integrity: sha512-QFutAY4NgaelojVMjY63o6XlZyORPaLfyMnsl3HgnWdJUcX6K0oaJymHjH8PT5Gk7sTm8rvC/c5COUQKXqmOMA==}
+
+  /canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
+    dev: false
 
   /chalk@2.4.1:
     resolution: {integrity: sha512-ObN6h1v2fTJSmUXoS3nMQ92LbDK9be4TV+6G+omQlGJFdcUX5heKi1LZ1YnRMIgwTLEj3E24bT6tYni50rlCfQ==}
@@ -10315,6 +10326,16 @@ packages:
       '@react-types/shared': 3.23.0(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-canvas-confetti@2.0.7(react@18.2.0):
+    resolution: {integrity: sha512-DIj44O35TPAwJkUSIZqWdVsgAMHtVf8h7YNmnr3jF3bn5mG+d7Rh9gEcRmdJfYgRzh6K+MAGujwUoIqQyLnMJw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      '@types/canvas-confetti': 1.6.4
+      canvas-confetti: 1.9.3
+      react: 18.2.0
     dev: false
 
   /react-circular-progressbar@2.1.0(react@18.2.0):
