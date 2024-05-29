@@ -8,7 +8,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { DealName, type EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
-import { determineColors } from "~/lib/utils";
 import { Briefcase, Home, X } from "lucide-react";
 import {
   CircularProgressbarWithChildren,
@@ -18,6 +17,7 @@ import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { DatePickerComponent } from "../ui/datePicker";
 import { ProbabilityPicker } from "../ui/probabilityPicker";
+import { employeeRoles } from "~/lib/constants";
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -54,7 +54,6 @@ export function EmployeeCardDragged({
     attributes,
     listeners,
     transform,
-    // transition,
     isDragging,
   } = useSortable({
     id: draggableEmployee.dragId,
@@ -114,7 +113,6 @@ export function EmployeeCardDragged({
 
       if (correctDealInfo && employee) {
         const lastIndex = correctDealInfo.phase_history.length - 1;
-        // needs better name but i don't know which date it is
         const lastDate = correctDealInfo.phase_history[lastIndex];
         if (lastDate) {
           const datum = new Date(lastDate.started_at);
@@ -170,7 +168,7 @@ export function EmployeeCardDragged({
   }, [setCurrentEmployeeDetailsId]);
 
   if (!employee) return null;
-  const colors = determineColors(employee.fields.Job_x0020_title);
+  const employeeRole = employeeRoles.filter(e => e.name === employee.fields.Job_x0020_title)[0];
 
   const handleOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isHeader) {
@@ -317,7 +315,7 @@ export function EmployeeCardDragged({
           ...style,
           backgroundImage: `url(data:image/jpeg;base64,${employee.fields.avatar})`,
           backgroundSize: "cover",
-          backgroundColor: colors?.backgroundColor,
+          backgroundColor: employeeRole?.color,
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
@@ -343,10 +341,9 @@ export function EmployeeCardDragged({
             {weeksLeftData?.time}
           </div>
           <div
-            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1 font-normal text-[12px] truncate"
+            className="absolute z-10 bottom-0 w-full rounded-b-14 px-1 font-normal text-white text-[12px] truncate"
             style={{
-              backgroundColor: colors?.backgroundColor,
-              color: colors?.color,
+              backgroundColor: employeeRole?.color,
             }}
           >
             {firstNameOnly(employee.fields.Title)!}
@@ -385,7 +382,7 @@ export function EmployeeCardDragged({
           size="dragged"
           {...attributes}
           {...listeners}
-          className="w-full h-full hover:text-white flex flex-col justify-between p-0"
+          className="w-full h-full flex flex-col justify-between p-0"
           onClick={handleOnClick}
         >
           <div className="w-full flex flex-row justify-between mt-1 px-2">
@@ -404,8 +401,8 @@ export function EmployeeCardDragged({
                   objectFit: "contain",
                   width: "100%",
                   height: "100%",
-                  borderColor: colors?.backgroundColor,
-                  backgroundColor: colors?.backgroundColor,
+                  borderColor: employeeRole?.color,
+                  backgroundColor: employeeRole?.color,
                 }}
               />
             </div>
@@ -424,13 +421,13 @@ export function EmployeeCardDragged({
                   {employeeEstProbability != 0 ? (
                     employeeEstProbability
                   ) : (
-                    <div className="text-[9px]">N/A</div>
+                    <div className="text-white text-[9px]">N/A</div>
                   )}
                 </div>
               </CircularProgressbarWithChildren>
             </div>
           </div>
-          <div className=" w-full truncate text-[0.688rem] font-normal py-1">
+          <div className=" w-full truncate text-white text-[0.688rem] font-normal py-1">
             {employeeDate()}
           </div>
         </Button>
@@ -461,7 +458,7 @@ export function EmployeeCardDragged({
                 <Home width={20} />
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
-              {/* datum picker */}
+
               {correctDealInfo && TLDate ? (
                 <DatePickerComponent
                   deal={correctDealInfo}
@@ -469,6 +466,7 @@ export function EmployeeCardDragged({
                   setTLDatum={handleDateChange}
                 />
               ) : null}
+
               {phase !== DealName.Opportunities && (
                 <ProbabilityPicker
                   handleProbabilityPicker={handleProbabilityPicker}

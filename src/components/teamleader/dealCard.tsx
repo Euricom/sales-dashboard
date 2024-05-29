@@ -3,8 +3,8 @@ import { DropContext } from "~/contexts/dndProvider";
 import { useContext, useEffect, useState } from "react";
 import CompanyLogo from "./companyLogo";
 import { PmAvatar } from "./pmAvatar";
-import { determineColors } from "~/lib/utils";
 import { type GroupedDeal } from "~/lib/types";
+import { employeeRoles } from "~/lib/constants";
 
 export default function DealCard({
   groupedDeal,
@@ -12,26 +12,15 @@ export default function DealCard({
   groupedDeal: GroupedDeal;
 }) {
   const { activeDealId, groupedDealsToWrap } = useContext(DropContext);
-  const colors = determineColors(
-    groupedDeal.deal.custom_fields[1]?.value
-      ? groupedDeal.deal.custom_fields[1]?.value
-      : null,
-  );
-
-  console.log(activeDealId);
-  console.log(groupedDeal);
   const variant =
     groupedDeal.groupedDealId === (activeDealId as string)?.split("/")[0]
       ? "dealhighlight"
       : "deal";
 
   const [shouldWrap, setShouldWrap] = useState(false);
+
   useEffect(() => {
-    if (groupedDealsToWrap.includes(groupedDeal.groupedDealId)) {
-      setShouldWrap(true);
-    } else {
-      setShouldWrap(false);
-    }
+    setShouldWrap(groupedDealsToWrap.includes(groupedDeal.groupedDealId));
   }, [groupedDealsToWrap, groupedDeal.groupedDealId]);
 
   const formatDate = (date: string) => {
@@ -59,6 +48,9 @@ export default function DealCard({
       });
     }
   };
+
+  if (!groupedDeal.deal.custom_fields[1]) return null;
+  const employeeRole = employeeRoles.filter(e => e.name.includes(groupedDeal.deal.custom_fields[1].value))[0];
 
   return (
     <Card
@@ -101,10 +93,9 @@ export default function DealCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-1 items-end h-[3rem]">
         <div
-          className="bg-white text-primary text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit truncate"
+          className="bg-white text-white text-end text-[13px] px-2 rounded-[14px] tv:rounded-[28px] w-fit truncate"
           style={{
-            backgroundColor: colors?.backgroundColor,
-            color: colors?.color,
+            backgroundColor: employeeRole?.color ?? 'black',
           }}
         >
           {trimRole(groupedDeal.deal.title)}

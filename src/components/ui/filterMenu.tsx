@@ -9,8 +9,7 @@ import {
   DropdownMenuLabel,
 } from "./dropdown-menu";
 import { PmAvatar } from "../teamleader/pmAvatar";
-import roles from "~/lib/roles.json";
-import { determineColors } from "~/lib/utils";
+import { employeeRoles } from "~/lib/constants";
 
 export function FilterMenu() {
   const {
@@ -36,12 +35,6 @@ export function FilterMenu() {
   // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
   const handleFilter = (isOpen: boolean) => {
     setClearFilterDisplay(isOpen && isFiltering);
-  };
-
-  const getRoleTitles = () => {
-    return roles.employeeRoles.map((role) =>
-      role.split("_")[0]?.replace(/\[(.*?)\]/, "$1"),
-    );
   };
 
   return (
@@ -88,23 +81,21 @@ export function FilterMenu() {
           </DropdownMenuLabel>
           {isOpenRoles && (
             <div className="flex flex-col gap-2 mt-2">
-              {getRoleTitles().map((role) => (
+              {employeeRoles.map((role) => (
                 <DropdownMenuItem
-                  key={role}
+                  key={role.name}
                   onClick={() => {
-                    filterRole.includes(role!)? removeRoleFilter(role!) : addRoleFilter(role!)}}
+                    filterRole.includes(role.name) ? removeRoleFilter(role.name) : addRoleFilter(role.name)}}
                   className={
-                    filterRole.includes(role!)
+                    filterRole.includes(role.name)
                       ? "outline outline-white-400 outline-offset-1 justify-center w-full"
                       : "justify-center w-full"
                   }
                   style={{
-                    backgroundColor: determineColors(role ? role : "")
-                      ?.backgroundColor,
-                    color: determineColors(role ? role : "")?.color,
+                    backgroundColor: role.color,
                   }}
                 >
-                  <span>{role}</span>
+                  <span>{role.name}</span>
                 </DropdownMenuItem>
               ))}
             </div>
