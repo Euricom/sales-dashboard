@@ -114,21 +114,24 @@ export const EmployeeContextProvider: React.FC<
   }>(sortEmployeesData(draggableEmployees));
 
   // Separate the retained employees from the rest
-  const retainedEmployees: Employee[] = useMemo(() => {
+  const retainedEmployees = useMemo(() => {
     const dealsWithRetainedEmployees = deals?.filter((deal) => {
       const isRetained =
         deal.deal_phase.id ===
         dealPhases.find((phase) => phase.name === DealName.Retained)?.id;
-      if (!isRetained) return false;
-      return true;
+
+      return isRetained;
     });
-    return dealsWithRetainedEmployees?.map((deal) => {
+
+    if (!dealsWithRetainedEmployees) return [];
+
+    return dealsWithRetainedEmployees.map((retainedDeal) => {
       return employees.find((employee) => {
-        return employee.deals?.some(
-          (employeeDeal) => employeeDeal.dealId === deal.id,
+        return employee.deals.some(
+          (employeeDeal) => employeeDeal.dealId === retainedDeal.id,
         );
       });
-    }) as Employee[];
+    });
   }, [deals, dealPhases, employees]);
 
   // Other states
