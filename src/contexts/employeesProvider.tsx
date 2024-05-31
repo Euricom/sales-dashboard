@@ -28,12 +28,14 @@ type EmployeeContextType = {
   };
   employeeId: string;
   setEmployeeId: React.Dispatch<React.SetStateAction<string>>;
+  addEmployeeFilter: (employeeId: string) => void;
+  clearEmployeeFilter: () => void;
   isFiltering: boolean;
   setFiltering: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading?: boolean;
   currentEmployeeDetailsId: string;
   setCurrentEmployeeDetailsId: React.Dispatch<React.SetStateAction<string>>;
-  retainedEmployees?: Employee[];
+  retainedEmployees?: Employee[] | [];
 };
 
 export const EmployeeContext = createContext<EmployeeContextType>(
@@ -125,7 +127,7 @@ export const EmployeeContextProvider: React.FC<
 
     if (!dealsWithRetainedEmployees) return [];
 
-    return dealsWithRetainedEmployees.map((retainedDeal) => {
+    return dealsWithRetainedEmployees!.map((retainedDeal) => {
       return employees.find((employee) => {
         return employee.deals.some(
           (employeeDeal) => employeeDeal.dealId === retainedDeal.id,
@@ -139,11 +141,11 @@ export const EmployeeContextProvider: React.FC<
   const [employeeId, setEmployeeId] = useState<string>("");
   useEffect(() => {
     const employeeIdFromStorage = localStorage.getItem("employeeId");
-    setEmployeeId(employeeIdFromStorage ? employeeIdFromStorage : "");
+    setEmployeeId(employeeIdFromStorage ? JSON.parse(employeeIdFromStorage) as string : "");
   }, [deals]);
+
   // For the employee details
-  const [currentEmployeeDetailsId, setCurrentEmployeeDetailsId] =
-    useState<string>("");
+  const [currentEmployeeDetailsId, setCurrentEmployeeDetailsId] = useState<string>("");
 
   useEffect(() => {
     setSortedData(sortEmployeesData(draggableEmployees));
@@ -325,6 +327,17 @@ export const EmployeeContextProvider: React.FC<
     };
   };
 
+  const addEmployeeFilter = (employeeId: string) => {
+    localStorage.setItem("employeeId", JSON.stringify(employeeId));
+    setEmployeeId(employeeId);
+  }
+
+  const clearEmployeeFilter = () => {
+    localStorage.setItem("employeeId", "");
+    setEmployeeId("");
+  }
+  
+
   return (
     <EmployeeContext.Provider
       value={{
@@ -334,6 +347,8 @@ export const EmployeeContextProvider: React.FC<
         sortedData,
         employeeId,
         setEmployeeId,
+        addEmployeeFilter,
+        clearEmployeeFilter,
         isFiltering,
         setFiltering,
         isLoading,
@@ -374,3 +389,4 @@ const sortEmployeesData = (draggableEmployees: DraggableEmployee[]) => {
 
   return { bench, endOfContract, starter, openForNewOpportunities };
 };
+

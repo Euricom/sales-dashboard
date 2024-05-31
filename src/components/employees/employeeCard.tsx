@@ -26,12 +26,13 @@ export function EmployeeCardDragged({
   const {
     employees,
     employeeId,
-    setEmployeeId,
+    addEmployeeFilter,
+    clearEmployeeFilter,
     setFiltering,
     currentEmployeeDetailsId,
     setCurrentEmployeeDetailsId,
   } = useContext(EmployeeContext);
-  const { setDealIds, getCorrectDealId, deals, updateDealProbability } =
+  const { getCorrectDealId, deals, updateDealProbability, addDealFilter, clearDealFilter } =
     useContext(DealContext);
   const [filteringVariant, setFilteringVariant] = useState("");
   const [showDetailView, setShowDetailView] = useState(false);
@@ -90,11 +91,7 @@ export function EmployeeCardDragged({
 
   // Show detail view when clicked
   useEffect(() => {
-    if (currentEmployeeDetailsId === draggableEmployee.dragId) {
-      setShowDetailView(true);
-    } else {
-      setShowDetailView(false);
-    }
+      setShowDetailView(currentEmployeeDetailsId === draggableEmployee.dragId);
   }, [currentEmployeeDetailsId, draggableEmployee.dragId]);
 
   // Get correct deal info for employee
@@ -184,30 +181,21 @@ export function EmployeeCardDragged({
         const dealId = String(row);
         return dealId.split("/")[0];
       });
-      localStorage.setItem("dealIds", JSON.stringify(dealIdsWithoutSuffix));
-      localStorage.setItem("employeeId", employee.employeeId);
-
-      setDealIds(
-        dealIdsWithoutSuffix.filter((id) => id !== undefined) as string[],
-      );
-      setEmployeeId(employee.employeeId);
+      addDealFilter(dealIdsWithoutSuffix);
+      addEmployeeFilter(employee.employeeId);
       setFiltering(true);
+      setFilteringVariant("filter");
       return;
-    } else if (!isFilterPossible) {
-      handleFilterNotPossible();
     }
-    localStorage.setItem("dealIds", JSON.stringify([]));
-    localStorage.setItem("employeeId", "");
-    setDealIds([]);
-    setEmployeeId("");
+    if (!isFilterPossible) {
+      setFilteringVariant("noFilterPossible");
+      setTimeout(() => {
+        setFilteringVariant("");
+      }, 800);
+    }
+    clearDealFilter();
     setFiltering(false);
-  };
-
-  const handleFilterNotPossible = () => {
-    setFilteringVariant("noFilterPossible");
-    setTimeout(() => {
-      setFilteringVariant("");
-    }, 750);
+    clearEmployeeFilter();
   };
 
   const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -255,15 +243,9 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeft = () => {
-    if (employee.weeksLeft === -1)
-      return {
-        time: -1,
-        color: "white",
-      };
-
     return {
       time: Math.abs(employee.weeksLeft),
-      color: employee.weeksLeft > 0 ? "green" : "red",
+      color: employee.weeksLeft > 0 ? "bg-green-500" : "bg-red-500",
     };
   };
 
@@ -300,8 +282,6 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeftData = weeksLeft();
-  const bgColorClass =
-    weeksLeftData?.color === "green" ? "bg-green-500" : "bg-red-500";
 
   const handleDateChange = (date: Date) => {
     setTLDate(date);
@@ -319,10 +299,7 @@ export function EmployeeCardDragged({
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
-          filtering:
-            employee.employeeId === employeeId
-              ? "filtering"
-              : (filteringVariant as "noFilterPossible" | null),
+          filtering: employee.employeeId === employeeId ? "filtering" : filteringVariant
         })}
         size={"employee"}
         title={employee.fields.Title}
@@ -336,7 +313,7 @@ export function EmployeeCardDragged({
           onClick={handleOnClick}
         >
           <div
-            className={`${bgColorClass} absolute top-0 -right-[0.375rem] flex justify-center items-center min-w-[1.25rem] h-[1.25rem] rounded-bl-[0.3rem] px-0.5 rounded-r-[0.3rem] font-normal text-white`}
+            className={`${weeksLeftData.color} absolute top-0 -right-[0.375rem] flex justify-center items-center min-w-[1.25rem] h-[1.25rem] rounded-bl-[0.3rem] px-0.5 rounded-r-[0.3rem] font-normal text-white`}
           >
             {weeksLeftData?.time}
           </div>

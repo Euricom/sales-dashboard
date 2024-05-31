@@ -29,7 +29,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
         const status = (draggableEmployee.dragId as string).split("_")[2];
 
         if (!isHeader && !status) {
-          return rowId === row.rowId.split("_")[0];
+          return rowId === row.rowId;
         }
         return rowId === "0" && status === rowStatus;
       })
@@ -43,14 +43,14 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   );
 
   // Filter out the retained employees
-  const retainedDraggableEmployeesInThisRowColumn =
+  const retainedDraggableEmployeesInThisRowColumn = useMemo(() =>
     draggableEmployeesInThisRowColumn.filter((draggableEmployee) => {
       return retainedEmployees?.some(
         (retainedEmployee) =>
           retainedEmployee?.employeeId ===
           (draggableEmployee.dragId as string).split("_")[0],
       );
-    });
+    }), [draggableEmployeesInThisRowColumn, retainedEmployees]);
 
   // Get the retained employee ids
   const retainedEmployeeIds = retainedDraggableEmployeesInThisRowColumn.map(
@@ -100,7 +100,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
         // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
       }
     }
-  }, [dragItemIds]);
+  }, [appendGroupedDeal, dragItemIds, groupedDealsToWrap, isHeader, node, removeGroupedDeal, row.rowId]);
 
   // Check if the content should wrap based on groupedDealsToWrap
   useEffect(() => {
@@ -111,7 +111,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
           setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
       }
     }
-  }, [groupedDealsToWrap]);
+  }, [groupedDealsToWrap, isHeader, row.rowId]);
 
   return (
     <Card

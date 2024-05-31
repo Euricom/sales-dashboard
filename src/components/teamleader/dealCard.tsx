@@ -56,7 +56,7 @@ export default function DealCard({
     <Card
       variant={variant}
       size={"deal"}
-      className={`${shouldWrap ? "mb-[4.25rem]" : ""}`}
+      className={`${shouldWrap && "mb-[4.25rem]"}`}
     >
       <CardHeader>
         <CardTitle className="text-sm font-medium flex max-w-40 items-center">
@@ -72,6 +72,7 @@ export default function DealCard({
                 <div
                   style={{ width: "1.5rem", height: "1.5rem", display: "flex" }}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={groupedDeal.deal.company.logo_url}
                     alt="example.com icon"
@@ -115,9 +116,6 @@ export default function DealCard({
 
 const trimRole = (role: string) => {
   if (!role) return null;
-
-  let newRole = role.split("[")[0]?.split("(")[0];
-  newRole = newRole?.replace(/\b[A-Z]*[0-9]+[A-Z]+|[A-Z]+[0-9]+[A-Z]*\b/g, "");
-
-  return newRole;
+  
+  return role.split("[")[0]?.split("(")[0];
 };

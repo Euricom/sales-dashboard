@@ -29,6 +29,8 @@ type DealContextType = {
   ) => void;
   moveDeal: (id: string, phase_id: string, employee: Employee) => void;
   filterPm: string[];
+  addDealFilter: (dealId: string[]) => void,
+  clearDealFilter: () => void,
   addPmFilter: (pm: string) => void,
   removePmFilter: (pm: string) => void,
   clearPmFilter: () => void,
@@ -357,6 +359,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     dealProbabilityMutator.mutate({ id: dealId, probability: probability });
   };
 
+  const addDealFilter = (dealIds: string[]) => {
+    localStorage.setItem("dealIds", JSON.stringify(dealIds));
+    setDealIds(dealIds);
+  }
+
+  const clearDealFilter = () => {
+    localStorage.setItem("dealIds", JSON.stringify([]));
+    setDealIds([]);
+  }
+
   const addRoleFilter = (role: string) => {
     localStorage.setItem("filterRoles", JSON.stringify([...filterRole, role]));
     setFilterRole(a => [...a, role]);
@@ -398,6 +410,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         updateOrCreateDeal,
         moveDeal,
         filterPm,
+        addDealFilter,
+        clearDealFilter,
         addPmFilter,
         removePmFilter,
         clearPmFilter,
