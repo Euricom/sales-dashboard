@@ -8,7 +8,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { DealName, type EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
-import { Briefcase, Home, X } from "lucide-react";
+import { Briefcase, Home, X, Trash2 } from "lucide-react";
 import {
   CircularProgressbarWithChildren,
   buildStyles,
@@ -32,15 +32,18 @@ export function EmployeeCardDragged({
     currentEmployeeDetailsId,
     setCurrentEmployeeDetailsId,
   } = useContext(EmployeeContext);
-  const { getCorrectDealId, deals, updateDealProbability, addDealFilter, clearDealFilter } =
+  const { getCorrectDealId, deals, updateDealProbability, deleteDeal, addDealFilter, clearDealFilter } =
     useContext(DealContext);
-  const [filteringVariant, setFilteringVariant] = useState("");
+  const [filteringVariant, setFilteringVariant] = useState();
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
   const [TLDate, setTLDate] = useState<Date | null>(null);
   const [mongoDate, setMongoDate] = useState<Date | null>(null);
 
+  const groupedDealId= (draggableEmployee.dragId as string)
+  .split("_")[1]
+  ?.split("/")?.[0];;
   const phase = (draggableEmployee.dragId as string).split("/")[1];
 
   const employee = employees.find(
@@ -97,9 +100,6 @@ export function EmployeeCardDragged({
   // Get correct deal info for employee
   useEffect(() => {
     if (!isHeader) {
-      const groupedDealId = (draggableEmployee.dragId as string)
-        .split("_")[1]
-        ?.split("/")?.[0];
       if (!groupedDealId || !employee) return;
       const correctDealId = getCorrectDealId(groupedDealId, employee);
       setCorrectDealInfo(deals?.find((deal) => deal.id === correctDealId));
@@ -190,7 +190,7 @@ export function EmployeeCardDragged({
     if (!isFilterPossible) {
       setFilteringVariant("noFilterPossible");
       setTimeout(() => {
-        setFilteringVariant("");
+        setFilteringVariant(null);
       }, 800);
     }
     clearDealFilter();
@@ -436,13 +436,20 @@ export function EmployeeCardDragged({
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
 
-              {correctDealInfo && TLDate ? (
-                <DatePickerComponent
-                  deal={correctDealInfo}
-                  date={TLDate}
-                  setTLDatum={handleDateChange}
-                />
-              ) : null}
+              {correctDealInfo && (
+                <div className="flex gap-1">
+                  {TLDate ? (
+                    <DatePickerComponent
+                      deal={correctDealInfo}
+                      date={TLDate}
+                      setTLDatum={handleDateChange}
+                    />
+                  ) : null}
+                  <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
+                    <Trash2 width={20}/>
+                  </Button>
+                </div>
+              )}
 
               {phase !== DealName.Opportunities && (
                 <ProbabilityPicker

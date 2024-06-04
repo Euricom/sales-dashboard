@@ -28,6 +28,7 @@ type DealContextType = {
     employee: Employee,
   ) => void;
   moveDeal: (id: string, phase_id: string, employee: Employee) => void;
+  deleteDeal: (id: string, employee: Employee) => void;
   filterPm: string[];
   addDealFilter: (dealId: string[]) => void,
   clearDealFilter: () => void,
@@ -102,7 +103,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     [dealsData, isLoading],
   );
 
+  const dealDeleter = api.teamleader.deleteDeal.useMutation({
+    onSuccess: async () => {
+      toast({ title: "success", variant: "success" });
+    },
+    onError: () => toast({ title: "error", variant: "destructive" }),
+  });
+
   const mongoDealUpdator = api.mongodb.updateDeal.useMutation();
+
+  const mongoDealDeletor = api.mongodb.deleteDeal.useMutation();
 
   type MutateDealResponse = {
     data: {
@@ -207,11 +217,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             datum: new Date(),
           };
 
-          const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter(
-            (deal) => {
-              return deal.dealId !== dealId;
-            },
-          );
+          const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) =>  deal.dealId !== dealId);
 
           filteredDeals.push(newDeal);
 
@@ -235,6 +241,38 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         }
         refetch().catch((error) => console.error(error));
       },
+    });
+  }
+
+  function deleteDeal(groupedDealId: string, employee: Employee) {
+    if (!groupedDealId) return;
+    const dealId = uniqueDeals?.find(
+      (groupedDeal) => groupedDeal.id === groupedDealId,
+    )?.value[0];
+    if (!dealId) return;
+    dealDeleter.mutate({id: dealId}, {
+      onSuccess: (data) => {
+        if(!data) return;
+        const updatedDealIds = [...employee.deals];
+        const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) => deal.dealId !== dealId);
+
+        employeeUpdator.mutate({
+          employee: {
+            employeeId: employee.employeeId,
+            rows: employee.rows as string[],
+            deals: filteredDeals,
+          },
+        });
+
+        const groupedDeal = uniqueDeals.find((deal) => deal.id === groupedDealId)!;
+        const filteredGroupedDeal = groupedDeal.value.filter(dealId => dealId !== dealId);
+
+        mongoDealUpdator.mutate({
+          id: groupedDealId,
+          value: filteredGroupedDeal,
+        });
+        refetch().catch((error) => console.error(error));
+    }
     });
   }
 
@@ -409,6 +447,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         setDealIds,
         updateOrCreateDeal,
         moveDeal,
+        deleteDeal,
         filterPm,
         addDealFilter,
         clearDealFilter,

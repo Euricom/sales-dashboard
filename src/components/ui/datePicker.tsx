@@ -88,7 +88,6 @@ export function DatePickerComponent({
   };
 
   return (
-    <div className="relative inline-flex flex-col text-left">
       <DatePicker
         className="group flex flex-col w-full"
         onChange={(date) => handleOnclick(date)}
@@ -137,7 +136,6 @@ export function DatePickerComponent({
           </Dialog>
         </MyPopover>
       </DatePicker>
-    </div>
   );
 }
 
