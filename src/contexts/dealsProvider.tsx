@@ -259,8 +259,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         const updatedDealIds = [...employee.deals];
         const filteredRows = employee.rows.filter(row => row.toString().split("/")[0] !== groupedDealId);
         const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) => deal.dealId !== dealId);
-        console.log(employee.rows);
-        console.log(filteredRows);
+
         employeeUpdator.mutate({
           employee: {
             employeeId: employee.employeeId,
