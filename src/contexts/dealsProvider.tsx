@@ -70,6 +70,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     isLoading,
     refetch,
   } = api.teamleader.getDealsData.useQuery();
+  const {
+    refetch: employeeRefetch,
+  } = api.mongodb.getEmployees.useQuery();
   const { toast } = useToast();
 
   const dealMutator = api.teamleader.updateDeal.useMutation({
@@ -254,15 +257,19 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       onSuccess: (data) => {
         if(!data) return;
         const updatedDealIds = [...employee.deals];
+        const filteredRows = employee.rows.filter(row => row.toString().split("/")[0] !== groupedDealId);
         const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) => deal.dealId !== dealId);
-
+        console.log(employee.rows);
+        console.log(filteredRows);
         employeeUpdator.mutate({
           employee: {
             employeeId: employee.employeeId,
-            rows: employee.rows as string[],
+            rows: filteredRows as string[],
             deals: filteredDeals,
           },
         });
+
+        employeeRefetch().catch((error) => console.error(error));
 
         const groupedDeal = uniqueDeals.find((deal) => deal.id === groupedDealId)!;
         const filteredGroupedDeal = groupedDeal.value.filter(dealId => dealId !== dealId);
@@ -271,8 +278,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           id: groupedDealId,
           value: filteredGroupedDeal,
         });
+
         refetch().catch((error) => console.error(error));
-    }
+      }
     });
   }
 
