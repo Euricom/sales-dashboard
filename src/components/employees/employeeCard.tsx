@@ -34,7 +34,7 @@ export function EmployeeCardDragged({
   } = useContext(EmployeeContext);
   const { getCorrectDealId, deals, updateDealProbability, deleteDeal, addDealFilter, clearDealFilter } =
     useContext(DealContext);
-  const [filteringVariant, setFilteringVariant] = useState();
+  const [filteringVariant, setFilteringVariant] = useState<"filtering" | "noFilterPossible" | null>(null);
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
@@ -179,12 +179,12 @@ export function EmployeeCardDragged({
     if (isFilterPossible && employeeId !== employee.employeeId) {
       const dealIdsWithoutSuffix = employee.rows.slice(1).map((row) => {
         const dealId = String(row);
-        return dealId.split("/")[0];
+        return dealId.split("/")[0]!;
       });
       addDealFilter(dealIdsWithoutSuffix);
       addEmployeeFilter(employee.employeeId);
       setFiltering(true);
-      setFilteringVariant("filter");
+      setFilteringVariant("filtering");
       return;
     }
     if (!isFilterPossible) {
