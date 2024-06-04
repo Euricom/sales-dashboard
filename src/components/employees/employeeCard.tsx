@@ -43,7 +43,7 @@ export function EmployeeCardDragged({
 
   const groupedDealId= (draggableEmployee.dragId as string)
   .split("_")[1]
-  ?.split("/")?.[0];;
+  ?.split("/")?.[0];
   const phase = (draggableEmployee.dragId as string).split("/")[1];
 
   const employee = employees.find(
@@ -436,7 +436,7 @@ export function EmployeeCardDragged({
                 <p className="font-light text-nowrap">{employee.fields.City}</p>
               </div>
 
-              {correctDealInfo && (
+              {correctDealInfo && groupedDealId && (
                 <div className="flex gap-1">
                   {TLDate ? (
                     <DatePickerComponent
