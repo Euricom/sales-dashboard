@@ -358,7 +358,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       const matchesPMId = !filterPm.length || filterPm.includes(groupedDeal.deal.PM.id);
       const matchesCurrentRole =
         !filterRole.length ||
-        filterRole.some(s => s.includes(groupedDeal.deal.custom_fields[1]?.value));
+        filterRole.some(s => s.includes(groupedDeal.deal.custom_fields[1]!.value!));
 
       return matchesDealIds && matchesPMId && matchesCurrentRole;
     });

@@ -49,8 +49,8 @@ export default function DealCard({
     }
   };
 
-  if (!groupedDeal.deal.custom_fields[1]) return null;
-  const employeeRole = employeeRoles.filter(e => e.name.includes(groupedDeal.deal.custom_fields[1].value))[0];
+  if (!groupedDeal.deal.custom_fields[1]?.value === undefined) return null;
+  const employeeRole = employeeRoles.filter(e => e.name.includes(groupedDeal.deal.custom_fields[1]!.value!))[0];
 
   return (
     <Card
@@ -116,6 +116,6 @@ export default function DealCard({
 
 const trimRole = (role: string) => {
   if (!role) return null;
-  
+
   return role.split("[")[0]?.split("(")[0];
 };

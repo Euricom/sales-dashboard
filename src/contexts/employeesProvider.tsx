@@ -127,7 +127,7 @@ export const EmployeeContextProvider: React.FC<
 
     if (!dealsWithRetainedEmployees) return [];
 
-    return dealsWithRetainedEmployees!.map((retainedDeal) => {
+    return dealsWithRetainedEmployees.map((retainedDeal) => {
       return employees.find((employee) => {
         return employee.deals.some(
           (employeeDeal) => employeeDeal.dealId === retainedDeal.id,
