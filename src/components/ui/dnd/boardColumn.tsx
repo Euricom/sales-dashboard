@@ -7,7 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
 import { DealContext } from "~/contexts/dealsProvider";
 import { DealName, type DealPhase } from "~/lib/types";
-import Crossfire from "react-canvas-confetti/dist/presets/Crossfire";
+import Crossfire from "react-canvas-confetti/dist/presets/crossfire";
 
 export function BoardColumn({ dealPhase }: { dealPhase: DealPhase }) {
   const { rows, activeColumnId, confetti } = useContext(DropContext);

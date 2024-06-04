@@ -133,7 +133,7 @@ export const EmployeeContextProvider: React.FC<
           (employeeDeal) => employeeDeal.dealId === retainedDeal.id,
         );
       });
-    });
+    }) as Employee[];
   }, [deals, dealPhases, employees]);
 
   // Other states
