@@ -22,14 +22,14 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const { draggableEmployees, isFiltering, retainedEmployees } =
     useContext(EmployeeContext);
 
-  const draggableEmployeesInThisRow: DraggableEmployee[] = useMemo(() => {
+  const draggableEmployeesInThisRowColumn: DraggableEmployee[] = useMemo(() => {
     return draggableEmployees
       .filter((draggableEmployee) => {
         const rowId = (draggableEmployee.dragId as string).split("_")[1];
         const status = (draggableEmployee.dragId as string).split("_")[2];
 
         if (!isHeader && !status) {
-          return rowId === row.rowId.split("_")[0];
+          return rowId === row.rowId;
         }
         return rowId === "0" && status === rowStatus;
       })
@@ -38,22 +38,22 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
       });
   }, [draggableEmployees, row.rowId, isHeader, rowStatus]);
 
-  const dragItemIds = draggableEmployeesInThisRow.map(
+  const dragItemIds = draggableEmployeesInThisRowColumn.map(
     (draggableEmployee) => draggableEmployee.dragId,
   );
 
   // Filter out the retained employees
-  const retainedDraggableEmployeesInThisRow =
-    draggableEmployeesInThisRow.filter((draggableEmployee) => {
+  const retainedDraggableEmployeesInThisRowColumn = useMemo(() =>
+    draggableEmployeesInThisRowColumn.filter((draggableEmployee) => {
       return retainedEmployees?.some(
         (retainedEmployee) =>
           retainedEmployee?.employeeId ===
           (draggableEmployee.dragId as string).split("_")[0],
       );
-    });
+    }), [draggableEmployeesInThisRowColumn, retainedEmployees]);
 
   // Get the retained employee ids
-  const retainedEmployeeIds = retainedDraggableEmployeesInThisRow.map(
+  const retainedEmployeeIds = retainedDraggableEmployeesInThisRowColumn.map(
     (e) => (e.dragId as string).split("_")[0],
   );
 
@@ -100,7 +100,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
         // cardElement.scrollHeight = cardElement.clientHeight --> size should stay the same
       }
     }
-  }, [dragItemIds]);
+  }, [appendGroupedDeal, dragItemIds, groupedDealsToWrap, isHeader, node, removeGroupedDeal, row.rowId]);
 
   // Check if the content should wrap based on groupedDealsToWrap
   useEffect(() => {
@@ -111,7 +111,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
           setShouldWrap(groupedDealsToWrap.includes(groupedDealId));
       }
     }
-  }, [groupedDealsToWrap]);
+  }, [groupedDealsToWrap, isHeader, row.rowId]);
 
   return (
     <Card
@@ -129,10 +129,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
           id={row.rowId}
           disabled={isFiltering && isHeader}
         >
-          {draggableEmployeesInThisRow?.map((e) =>
-            retainedEmployeeIds.includes(
-              (e.dragId as string).split("_")[0],
-            ) ? null : (
+          {draggableEmployeesInThisRowColumn?.map(e =>!retainedEmployeeIds.includes((e.dragId as string).split("_")[0]) && (
               <EmployeeCardDragged
                 key={e.dragId}
                 draggableEmployee={e}
@@ -140,12 +137,10 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
               />
             ),
           )}
-          {retainedDraggableEmployeesInThisRow.length > 0 ? (
+          {retainedDraggableEmployeesInThisRowColumn.length > 0 ? (
             <>
-              {isHeader ? (
-                <div className="bg-white/60 rounded-14 h-3/4 w-0.5 flex self-center" />
-              ) : null}
-              {retainedDraggableEmployeesInThisRow.map((e) => (
+              {isHeader && <div className="bg-white/60 rounded-14 h-3/4 w-0.5 flex self-center" />}
+              {retainedDraggableEmployeesInThisRowColumn.map(e => (
                 <EmployeeCardDragged
                   key={e.dragId}
                   draggableEmployee={e}

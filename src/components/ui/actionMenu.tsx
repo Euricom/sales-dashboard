@@ -12,10 +12,10 @@ import { EmployeeContext } from "~/contexts/employeesProvider";
 
 export function ActionMenu() {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { isFiltering, setFiltering, setEmployeeId } =
+  const { isFiltering, setFiltering, clearEmployeeFilter } =
     useContext(EmployeeContext);
   const {
-    setDealIds,
+    clearDealFilter,
     filterPm,
     clearPmFilter,
     filterRole,
@@ -45,10 +45,8 @@ export function ActionMenu() {
   };
 
   const handleRemoveFiltering = () => {
-    localStorage.setItem("dealIds", JSON.stringify([]));
-    localStorage.setItem("employeeId", "");
-    setDealIds([]);
-    setEmployeeId("");
+    clearDealFilter();
+    clearEmployeeFilter()
     clearPmFilter();
     clearRoleFilter();
     setFiltering(false);

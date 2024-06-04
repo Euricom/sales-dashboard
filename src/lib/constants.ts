@@ -27,3 +27,26 @@ export const dealPhases = [
     label: "Niet-Weerhouden",
   },
 ];
+
+export const employeeRoles = [
+  {
+    name: "JS Fullstack",
+    color: "#4A6AF2"
+  },
+  {
+    name: "JS Frontend",
+    color: "#8F379E"
+  },
+  {
+    name: "Analist",
+    color: "#E76F51"
+  },
+  {
+    name: ".NET Fullstack",
+    color: "#fe9f4b"
+  },
+  {
+    name: ".NET Backend",
+    color: "#2A9D8F"
+  },
+]

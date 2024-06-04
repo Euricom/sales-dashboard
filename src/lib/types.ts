@@ -105,7 +105,7 @@ export type GroupedDeal = {
   groupedDealId: string;
 };
 
-export type datePickerReturnProps= {
+export type datePickerReturnProps = {
   calendar: {
     id: string;
   }

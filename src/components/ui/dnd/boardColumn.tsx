@@ -7,9 +7,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { useSyncScroll } from "~/hooks/useSyncScroll";
 import { DealContext } from "~/contexts/dealsProvider";
 import { DealName, type DealPhase } from "~/lib/types";
+import Crossfire from "react-canvas-confetti/dist/presets/crossfire";
 
 export function BoardColumn({ dealPhase }: { dealPhase: DealPhase }) {
-  const { rows, activeColumnId } = useContext(DropContext);
+  const { rows, activeColumnId, confetti } = useContext(DropContext);
   const { isLoading } = useContext(DealContext);
   const filteredRows = rows
     .filter((row) => row.rowId !== "0")
@@ -111,6 +112,7 @@ export function BoardColumn({ dealPhase }: { dealPhase: DealPhase }) {
           {filteredRows?.map((row) => <BoardRow key={row.rowId} row={row} />)}
         </SortableContext>
       </CardContent>
+      {confetti && <Crossfire autorun={{ speed: 15, duration: 2300 }} />}
     </Card>
   );
 }

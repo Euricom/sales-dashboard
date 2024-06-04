@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createDeal, getDeals, updateDealPhase, updateDeal, updateDealPhaseDate } from "./utils";
+import { createDeal, getDeals, updateDealPhase, updateDeal, updateDealPhaseDate, deleteDeal } from "./utils";
 import type { SimplifiedDealArray } from "./types";
 import { z } from "zod";
 import {
@@ -170,5 +170,24 @@ export const teamleaderRouter = createTRPCRouter({
       } catch (error) {
         console.error("Error in moveDeal:", error);
       }
+    }),
+
+    deleteDeal: protectedProcedure.input(z.object({ id: z.string() })).mutation(async (options) => {
+      const accessToken = options.ctx.session.token.accessToken;
+      const dealId = options.input.id;
+      try {
+        if (!accessToken) {
+          throw new Error("Access token not found");
+        }
+        const response = await deleteDeal(accessToken, dealId);
+        if (!response) {
+          throw new Error("Failed to delete deal in Teamleader");
+        }
+        return Promise.resolve({ data: { id: dealId, type: "delete" } });
+      } catch (error) {
+        console.error("Error in deal delete:", error);
+      }
     })
 });
+
+

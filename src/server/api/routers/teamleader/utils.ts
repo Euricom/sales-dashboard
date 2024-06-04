@@ -257,3 +257,28 @@ export const updateDealPhaseDate = async (
     console.error("Error in updateDealPhase:", error);
   }
 };
+
+export const deleteDeal = async (accessToken: string, dealId: string) => {
+  const url = `${env.TEAMLEADER_API_URL}/deals.delete`;
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: dealId,
+    })
+  }
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      console.error("Failed to delete deal in Teamleader");
+    }
+    const data = response;
+    return data;
+  } catch (error) {
+    console.error("Error in deleteDeal:", error);
+  }
+  };

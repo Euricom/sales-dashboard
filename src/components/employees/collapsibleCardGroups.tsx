@@ -90,7 +90,7 @@ const CollapsibleCardGroup: React.FC<CollapsibleCardGroupProps> = ({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex h-[4.75rem] justify-center bg-primary pl-3.5 pr-8 py-2 rounded-2xl relative">
-            <BoardRow row={{ rowId: "0" }} isHeader={true} rowStatus={status} />
+            <BoardRow row={{ rowId: "0" }} isHeader rowStatus={status} />
             <div className="absolute text-white top-[5px] right-[8px] text-[10px]">{data.length}</div>
           </div>
         </CollapsibleContent>
