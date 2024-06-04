@@ -118,3 +118,19 @@ export const updateDeal = async (groupedDeal: groupedDealFromDB) => {
     await client.close();
   }
 };
+
+export const deleteDeal = async (id: string) => {
+  const client = new MongoClient(env.DATABASE_URL);
+  const db = client.db();
+  try {
+    await client.connect();
+    const postResult = await db
+      .collection("Deals")
+      .deleteOne({ id: id });
+    return postResult;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await client.close();
+  }
+};

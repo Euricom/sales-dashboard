@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { createEmployee, getInitialEmployees, updateEmployee } from "./mongoEmployeeClient";
 import { z } from "zod";
-import { updateDeal } from "./mongoDealsClient";
+import { deleteDeal, updateDeal } from "./mongoDealsClient";
 import type { Employee } from "~/lib/types";
 
 export const mongodbRouter = createTRPCRouter({
@@ -53,5 +53,15 @@ export const mongodbRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await updateDeal(input);
+    }),
+
+    deleteDeal: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await deleteDeal(input);
     }),
 });
