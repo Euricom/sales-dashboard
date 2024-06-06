@@ -18,6 +18,7 @@ import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { DatePickerComponent } from "../ui/datePicker";
 import { ProbabilityPicker } from "../ui/probabilityPicker";
 import { employeeRoles } from "~/lib/constants";
+
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,

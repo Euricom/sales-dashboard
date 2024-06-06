@@ -67,7 +67,6 @@ export const simplifyDeals = async (
 
       const favicon = await getCompanyLogo(company?.website ?? "");
 
-      // return the simplified deal
       return {
         id: deal.id,
         title: deal.title,
@@ -78,7 +77,7 @@ export const simplifyDeals = async (
           id: phase?.id ?? null,
           name: phase?.name ?? null,
         },
-        // dit is voor de datums van phases aan te passen.
+        // update Phase date
         phase_history: dealInfo?.data.phase_history.map((history) => ({
           phase: {
             type: history.phase.type,
@@ -94,6 +93,8 @@ export const simplifyDeals = async (
           id: company?.id ?? null,
           name: company?.name ?? null,
           logo_url: favicon,
+          primary_address: company?.primary_address,
+          email: company?.emails[0].email,
         },
         PM: {
           id: user?.id ?? null,
@@ -112,7 +113,7 @@ export const simplifyDeals = async (
     }),
   );
 
-  // remove null values and sort the deals by estimated_closing_date
+  // Remove null values and sort the deals by estimated_closing_date
   const sortedDeals = simplifiedDeals
     .filter((deal) => deal !== null)
     .sort((a, b) => {

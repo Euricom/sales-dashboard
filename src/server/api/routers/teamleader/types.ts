@@ -280,6 +280,14 @@ export interface SimplifiedDeal {
     id: string;
     name: string;
     logo_url: string | null;
+    primary_address: {
+      line_1: string | null;
+      postal_code: string | null;
+      city: string | null;
+      country: string;
+      area_level_two: string | null;
+    } | null;
+    email: string | null;
   };
   PM: {
     id: string;
