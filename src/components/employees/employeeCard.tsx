@@ -34,7 +34,7 @@ export function EmployeeCardDragged({
   } = useContext(EmployeeContext);
   const { getCorrectDealId, deals, updateDealProbability, deleteDeal, addDealFilter, clearDealFilter } =
     useContext(DealContext);
-  const [filteringVariant, setFilteringVariant] = useState<"filtering" | "noFilterPossible" | null>();
+  const [filteringVariant, setFilteringVariant] = useState<"noFilterPossible" | null>();
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
@@ -184,7 +184,6 @@ export function EmployeeCardDragged({
       addDealFilter(dealIdsWithoutSuffix);
       addEmployeeFilter(employee.employeeId);
       setFiltering(true);
-      setFilteringVariant("filtering");
       return;
     }
     if (!isFilterPossible) setFilteringVariant("noFilterPossible");
@@ -298,7 +297,10 @@ export function EmployeeCardDragged({
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
-          filtering: employee.employeeId === employeeId ? "filtering" : filteringVariant
+          filtering:
+          employee.employeeId === employeeId
+            ? "filtering"
+            : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
         title={employee.fields.Title}
