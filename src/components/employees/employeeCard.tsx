@@ -167,12 +167,12 @@ export function EmployeeCardDragged({
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const TLDatumDate = new Date(TLDate);
-      TLDatumDate.setHours(0, 0, 0, 0); // remove time part
+      const TLPhaseDate = new Date(TLDate);
+      TLPhaseDate.setHours(0, 0, 0, 0); // remove time part
 
-      if (TLDatumDate.getTime() === today.getTime()) {
+      if (TLPhaseDate.getTime() === today.getTime()) {
         return "Vandaag";
-      } else if (TLDatumDate.getTime() === tomorrow.getTime()) {
+      } else if (TLPhaseDate.getTime() === tomorrow.getTime()) {
         return "Morgen";
       } else {
         return TLDate.toLocaleDateString("fr-BE", {

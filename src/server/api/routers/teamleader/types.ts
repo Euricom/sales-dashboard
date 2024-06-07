@@ -265,7 +265,7 @@ export interface SimplifiedDeal {
   estimated_probability: number | null;
   updated_at: string;
   deal_phase: {
-    id: string;
+    id: PhaseId;
     name: string;
   };
   phase_history: {

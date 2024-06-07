@@ -303,7 +303,7 @@ export const EmployeeContextProvider: React.FC<
 
     const dealInfo = {
       dealId: deal.id,
-      datum: new Date(),
+      date: new Date(),
     };
 
     return {
