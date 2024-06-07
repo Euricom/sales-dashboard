@@ -21,7 +21,7 @@ export type Employee = {
   rows: UniqueIdentifier[];
   deals: {
     dealId: string;
-    datum: Date | null;
+    date: Date | null;
   }[];
   weeksLeft: number;
   fields: {
@@ -46,7 +46,7 @@ export type EmployeeFromDB = {
 
 export type MongoEmployeeDeal = {
   dealId: string;
-  datum: Date | null;
+  date: Date | null;
 };
 
 export type DraggableEmployee = {
@@ -74,6 +74,14 @@ export type LoginProps = {
   };
 };
 
+export enum PhaseId {
+  Opportunities = "7c711ed5-1d69-012b-a341-4c1ed1f057cb",
+  Proposed = "1825bd2c-03bf-097c-8549-686bf8f96f4c",
+  Interview = "8125dec5-a0ed-0775-a643-774979b85e23",
+  Retained = "364b6867-54b9-0694-aa41-cf2ad6617028",
+  NonRetained = "7ec460c1-416a-03ce-8460-0299ae10bb38"
+}
+
 export enum DealName {
   Opportunities = "Opportunities",
   Proposed = "Proposed",
@@ -83,7 +91,7 @@ export enum DealName {
 }
 
 export type DealPhase = {
-  id: string | undefined;
+  id: PhaseId;
   name: DealName;
   label: string
 };

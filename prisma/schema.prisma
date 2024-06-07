@@ -20,5 +20,5 @@ model Deals {
 
 type Deal {
     id    String
-    datum DateTime
+    date DateTime
 }

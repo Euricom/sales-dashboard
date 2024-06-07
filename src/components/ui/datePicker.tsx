@@ -64,20 +64,12 @@ export function DatePickerComponent({
   const formatDate = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // remove time part
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
 
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0); // remove time part
 
     if (targetDate.getTime() === today.getTime()) {
       return "Vandaag";
-    } else if (targetDate.getTime() === tomorrow.getTime()) {
-      return "Morgen";
-    } else if (targetDate.getTime() === yesterday.getTime()) {
-      return "Gisteren";
     } else {
       return targetDate.toLocaleDateString("fr-BE", {
         day: "2-digit",

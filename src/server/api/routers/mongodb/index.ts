@@ -24,7 +24,7 @@ export const mongodbRouter = createTRPCRouter({
           rows: z.array(z.string()),
           deals: z.array(z.object({
             dealId: z.string(),
-            datum: z.date().nullable(),
+            date: z.date().nullable(),
           })),
           shouldCreate: z.boolean().optional(),
         }),

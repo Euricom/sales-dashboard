@@ -4,7 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { cva } from "class-variance-authority";
 import { EmployeeContext } from "~/contexts/employeesProvider";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { DealName, type EmployeeCardProps } from "~/lib/types";
 import Image from "next/image";
 import { DealContext } from "~/contexts/dealsProvider";
@@ -17,7 +17,8 @@ import "react-circular-progressbar/dist/styles.css";
 import type { SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import { DatePickerComponent } from "../ui/datePicker";
 import { ProbabilityPicker } from "../ui/probabilityPicker";
-import { employeeRoles } from "~/lib/constants";
+import { dealPhases, employeeRoles } from "~/lib/constants";
+
 export function EmployeeCardDragged({
   draggableEmployee,
   isOverlay,
@@ -34,12 +35,12 @@ export function EmployeeCardDragged({
   } = useContext(EmployeeContext);
   const { getCorrectDealId, deals, updateDealProbability, deleteDeal, addDealFilter, clearDealFilter } =
     useContext(DealContext);
-  const [filteringVariant, setFilteringVariant] = useState<"filtering" | "noFilterPossible" | null>();
+  const [filteringVariant, setFilteringVariant] = useState<"noFilterPossible" | null>();
   const [showDetailView, setShowDetailView] = useState(false);
   const [childLocation, setChildLocation] = useState({ top: 0, left: 0 });
   const [correctDealInfo, setCorrectDealInfo] = useState<SimplifiedDeal>();
   const [TLDate, setTLDate] = useState<Date | null>(null);
-  const [mongoDate, setMongoDate] = useState<Date | null>(null);
+  const [, setMongoDate] = useState<Date | null>(null);
 
   const groupedDealId= (draggableEmployee.dragId as string)
   .split("_")[1]
@@ -104,23 +105,16 @@ export function EmployeeCardDragged({
       const correctDealId = getCorrectDealId(groupedDealId, employee);
       setCorrectDealInfo(deals?.find((deal) => deal.id === correctDealId));
 
-      const empDeal = employee.deals.find(
-        (deal) => deal.dealId === correctDealId,
-      );
+      const empDeal = employee.deals.find((deal) => deal.dealId === correctDealId);
 
       if (correctDealInfo && employee) {
-        const lastIndex = correctDealInfo.phase_history.length - 1;
-        const lastDate = correctDealInfo.phase_history[lastIndex];
-        if (lastDate) {
-          const datum = new Date(lastDate.started_at);
-          if (!TLDate) {
-            // only set TLDatum if it hasn't been set yet
-            setTLDate(new Date(datum));
-          }
-        }
+        const phaseId = dealPhases.filter(p => p.name === phase)[0]?.id;
+        const phaseDate = correctDealInfo.phase_history.filter(h => h.phase.id === phaseId)[0]?.started_at;
+
+        setTLDate(phaseDate ? new Date(phaseDate) : new Date());
       }
 
-      setMongoDate(empDeal?.datum ?? null);
+      setMongoDate(empDeal?.date ?? null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -164,6 +158,34 @@ export function EmployeeCardDragged({
     };
   }, [setCurrentEmployeeDetailsId]);
 
+  const employeeDate = useMemo(() => {
+    const phase = (draggableEmployee.dragId as string).split("/")[1];
+    if (phase === DealName.Opportunities) return;
+    if (TLDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // remove time part
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const TLPhaseDate = new Date(TLDate);
+      TLPhaseDate.setHours(0, 0, 0, 0); // remove time part
+
+      if (TLPhaseDate.getTime() === today.getTime()) {
+        return "Vandaag";
+      } else if (TLPhaseDate.getTime() === tomorrow.getTime()) {
+        return "Morgen";
+      } else {
+        return TLDate.toLocaleDateString("fr-BE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
+    } else {
+      return "Geen datum";
+    }
+  },[TLDate, draggableEmployee.dragId]);
+
   if (!employee) return null;
   const employeeRole = employeeRoles.filter(e => e.name === employee.fields.Job_x0020_title)[0];
 
@@ -184,7 +206,6 @@ export function EmployeeCardDragged({
       addDealFilter(dealIdsWithoutSuffix);
       addEmployeeFilter(employee.employeeId);
       setFiltering(true);
-      setFilteringVariant("filtering");
       return;
     }
     if (!isFilterPossible) setFilteringVariant("noFilterPossible");
@@ -248,38 +269,6 @@ export function EmployeeCardDragged({
     };
   };
 
-  const employeeDate = () => {
-    const phase = (draggableEmployee.dragId as string).split("/")[1];
-    if (phase === DealName.Opportunities) return "No Date";
-    if (TLDate) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // remove time part
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      const TLDatumDate = new Date(TLDate);
-      TLDatumDate.setHours(0, 0, 0, 0); // remove time part
-
-      if (TLDatumDate.getTime() === today.getTime()) {
-        return "Vandaag";
-      } else if (TLDatumDate.getTime() === tomorrow.getTime()) {
-        return "Morgen";
-      } else if (TLDatumDate.getTime() === yesterday.getTime()) {
-        return "Gisteren";
-      } else {
-        return TLDate.toLocaleDateString("fr-BE", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      }
-    } else {
-      return "No Date";
-    }
-  };
-
   const weeksLeftData = weeksLeft();
 
   const handleDateChange = (date: Date) => {
@@ -298,7 +287,10 @@ export function EmployeeCardDragged({
         }}
         className={variants({
           dragging: isOverlay ? "overlay" : isDragging ? "over" : undefined,
-          filtering: employee.employeeId === employeeId ? "filtering" : filteringVariant
+          filtering:
+          employee.employeeId === employeeId
+            ? "filtering"
+            : (filteringVariant as "noFilterPossible" | null),
         })}
         size={"employee"}
         title={employee.fields.Title}
@@ -404,7 +396,7 @@ export function EmployeeCardDragged({
             </div>
           </div>
           <div className=" w-full truncate text-white text-[0.688rem] font-normal py-1">
-            {employeeDate()}
+            {employeeDate}
           </div>
         </Button>
         {showDetailView && (
@@ -437,13 +429,11 @@ export function EmployeeCardDragged({
 
               {correctDealInfo && groupedDealId && (
                 <div className="flex gap-1">
-                  {TLDate ? (
-                    <DatePickerComponent
-                      deal={correctDealInfo}
-                      date={TLDate}
-                      setTLDatum={handleDateChange}
-                    />
-                  ) : null}
+                  <DatePickerComponent
+                    deal={correctDealInfo}
+                    date={TLDate ?? new Date()}
+                    setTLDatum={handleDateChange}
+                  />
                   {phase !== DealName.Opportunities && (
                   <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
                     <Trash2 width={20}/>

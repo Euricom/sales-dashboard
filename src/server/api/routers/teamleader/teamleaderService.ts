@@ -67,10 +67,10 @@ export const simplifyDeals = async (
 
       const favicon = await getCompanyLogo(company?.website ?? "");
 
-      // return the simplified deal
       return {
         id: deal.id,
         title: deal.title,
+        created_at: deal.created_at,
         estimated_closing_date: deal.estimated_closing_date ?? "",
         estimated_probability: deal.estimated_probability ?? null,
         updated_at: deal.updated_at,
@@ -78,7 +78,6 @@ export const simplifyDeals = async (
           id: phase?.id ?? null,
           name: phase?.name ?? null,
         },
-        // dit is voor de datums van phases aan te passen.
         phase_history: dealInfo?.data.phase_history.map((history) => ({
           phase: {
             type: history.phase.type,
@@ -94,6 +93,8 @@ export const simplifyDeals = async (
           id: company?.id ?? null,
           name: company?.name ?? null,
           logo_url: favicon,
+          primary_address: company?.primary_address,
+          email:  company?.emails?.length ? company.emails[0]!.email : null,
         },
         PM: {
           id: user?.id ?? null,
@@ -112,15 +113,16 @@ export const simplifyDeals = async (
     }),
   );
 
-  // remove null values and sort the deals by estimated_closing_date
+  // Remove null values and sort the deals by estimated_closing_date
   const sortedDeals = simplifiedDeals
     .filter((deal) => deal !== null)
     .sort((a, b) => {
-      if (!a.estimated_closing_date) return 1; // a is put last
-      if (!b.estimated_closing_date) return -1; // b is put last
+      // TODO: Sort by date or name
+      if (!a.created_at) return 1; // a is put last
+      if (!b.created_at) return -1; // b is put last
       return (
-        new Date(b.estimated_closing_date).getTime() -
-        new Date(a.estimated_closing_date).getTime()
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
       );
     }) as SimplifiedDealArray;
 

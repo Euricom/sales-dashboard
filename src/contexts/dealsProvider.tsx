@@ -52,6 +52,8 @@ type DealContextType = {
       | undefined
     >
   >;
+  currentDealDetailsId: string;
+  setCurrentDealDetailsId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const DealContext = createContext<DealContextType>(
@@ -87,13 +89,12 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     },
     onError: () => toast({ title: "error", variant: "destructive" }),
   });
-  const dealProbabilityMutator =
-    api.teamleader.updateDealProbability.useMutation({
+  const dealProbabilityMutator = api.teamleader.updateDealProbability.useMutation({
       onSuccess: async () => {
         toast({ title: "success", variant: "success" });
       },
       onError: () => toast({ title: "error", variant: "destructive" }),
-    });
+  });
 
   const employeeUpdator = api.mongodb.updateEmployee.useMutation();
 
@@ -115,14 +116,14 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
 
   const mongoDealUpdator = api.mongodb.updateDeal.useMutation();
 
-  const mongoDealDeletor = api.mongodb.deleteDeal.useMutation();
-
   type MutateDealResponse = {
     data: {
       id: string;
       type: string;
     };
   };
+
+  const [currentDealDetailsId, setCurrentDealDetailsId] = useState<string>("");
 
   // this should refetch the deals every 5 minutes
   useEffect(() => {
@@ -162,7 +163,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         const updatedDealIds = [...employee.deals];
         const newDeal: MongoEmployeeDeal = {
           dealId: dealId,
-          datum: new Date(),
+          date: new Date(),
         };
 
         const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter(
@@ -217,7 +218,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           const updatedDealIds = [...employee.deals];
           const newDeal: MongoEmployeeDeal = {
             dealId: newId,
-            datum: new Date(),
+            date: new Date(),
           };
 
           const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) =>  deal.dealId !== dealId);
@@ -470,6 +471,8 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         getCorrectDealId,
         updateDealProbability,
         refetch,
+        currentDealDetailsId,
+        setCurrentDealDetailsId,
       }}
     >
       {children}
