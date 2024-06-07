@@ -91,7 +91,7 @@ export enum DealName {
 }
 
 export type DealPhase = {
-  id?: PhaseId;
+  id: PhaseId;
   name: DealName;
   label: string
 };
