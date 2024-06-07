@@ -94,7 +94,7 @@ export const simplifyDeals = async (
           name: company?.name ?? null,
           logo_url: favicon,
           primary_address: company?.primary_address,
-          email: company?.emails[0]?.email ?? null,
+          email:  company?.emails?.length ? company.emails[0]!.email : null,
         },
         PM: {
           id: user?.id ?? null,
