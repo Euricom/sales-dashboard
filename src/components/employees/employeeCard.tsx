@@ -110,15 +110,11 @@ export function EmployeeCardDragged({
       if (correctDealInfo && employee) {
         const phaseId = dealPhases.filter(p => p.name === phase)[0]?.id;
         const phaseDate = correctDealInfo.phase_history.filter(h => h.phase.id === phaseId)[0]?.started_at;
-        if (phaseDate) {
-          const date = new Date(phaseDate);
-          setTLDate(new Date(date));
-        } else {
-          setTLDate(new Date())
-        }
+
+        setTLDate(phaseDate ? new Date(phaseDate) : new Date());
       }
 
-      setMongoDate(empDeal?.datum ?? null);
+      setMongoDate(empDeal?.date ?? null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

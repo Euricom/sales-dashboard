@@ -21,7 +21,7 @@ export type Employee = {
   rows: UniqueIdentifier[];
   deals: {
     dealId: string;
-    datum: Date | null;
+    date: Date | null;
   }[];
   weeksLeft: number;
   fields: {
@@ -46,7 +46,7 @@ export type EmployeeFromDB = {
 
 export type MongoEmployeeDeal = {
   dealId: string;
-  datum: Date | null;
+  date: Date | null;
 };
 
 export type DraggableEmployee = {

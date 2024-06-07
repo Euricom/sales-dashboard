@@ -163,7 +163,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         const updatedDealIds = [...employee.deals];
         const newDeal: MongoEmployeeDeal = {
           dealId: dealId,
-          datum: new Date(),
+          date: new Date(),
         };
 
         const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter(
@@ -218,7 +218,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
           const updatedDealIds = [...employee.deals];
           const newDeal: MongoEmployeeDeal = {
             dealId: newId,
-            datum: new Date(),
+            date: new Date(),
           };
 
           const filteredDeals: MongoEmployeeDeal[] = updatedDealIds.filter((deal) =>  deal.dealId !== dealId);

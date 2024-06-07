@@ -222,7 +222,7 @@ export const EmployeeContextProvider: React.FC<
       ) {
         employee.deals?.push({
           dealId: deal.id,
-          datum: null,
+          date: null,
         });
       }
       // Update rows if necessary

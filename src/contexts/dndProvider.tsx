@@ -349,7 +349,7 @@ export const DropContextProvider: React.FC<DndContextProviderProps> = ({
             dealId:
               uniqueDeals?.find((deal) => deal.id === rowId.split("/")[0])
                 ?.value[0] ?? "",
-            datum: new Date(),
+            date: new Date(),
           });
           updateEmployeeInDB(emp, rowId); // Update the employee in the database
           return emp;
