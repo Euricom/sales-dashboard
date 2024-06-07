@@ -34,7 +34,9 @@ export default function DealCard({
       setShowDetailView(currentDealDetailsId === groupedDeal.groupedDealId);
   }, [currentDealDetailsId, groupedDeal.groupedDealId]);
 
-  const formatDate = (date: string) => {
+  const formatDate = (date?: string) => {
+    if (!date) return 'Geen datum';
+
     const today = new Date();
     today.setHours(0, 0, 0, 0); // remove time part
     const tomorrow = new Date(today);
@@ -45,19 +47,11 @@ export default function DealCard({
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0); // remove time part
 
-    if (targetDate.getTime() === today.getTime()) {
-      return "Vandaag";
-    } else if (targetDate.getTime() === tomorrow.getTime()) {
-      return "Morgen";
-    } else if (targetDate.getTime() === yesterday.getTime()) {
-      return "Gisteren";
-    } else {
-      return targetDate.toLocaleDateString("fr-BE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      });
-    }
+    return targetDate.toLocaleDateString("fr-BE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
   };
 
   const handleDetailView = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -176,11 +170,7 @@ export default function DealCard({
           {trimRole(groupedDeal.deal.title)}
         </div>
         <div className="flex items-center gap-2 justify-end font-normal text-sm">
-          {groupedDeal.deal.estimated_closing_date ? (
-            <div>{formatDate(groupedDeal.deal.estimated_closing_date)}</div>
-          ) : (
-            <div>no date</div>
-          )}
+          <div>{formatDate(groupedDeal.deal.created_at)}</div>
           <PmAvatar pm={groupedDeal.deal.PM} size={24} />
         </div>
       </CardContent>

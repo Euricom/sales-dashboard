@@ -1,3 +1,5 @@
+import type { PhaseId } from "~/lib/types";
+
 export interface Tokens {
   token_type: string;
   expires_in: number;
@@ -258,6 +260,7 @@ export interface dataObject {
 export interface SimplifiedDeal {
   id: string;
   title: string;
+  created_at: string;
   estimated_closing_date: string;
   estimated_probability: number | null;
   updated_at: string;
@@ -268,7 +271,7 @@ export interface SimplifiedDeal {
   phase_history: {
     phase: {
       type: string;
-      id: string;
+      id: PhaseId;
     };
     started_at: string;
     started_by: {
