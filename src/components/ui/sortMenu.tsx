@@ -64,7 +64,7 @@ export function SortMenu() {
                         onClick={() => addSortDeals(s.key)}
                         className={
                         sortDeals === s.key
-                            ? "outline outline-white-400 outline-offset-[-2px] flex justify-between"
+                            ? "flex justify-between bg-white bg-opacity-10"
                             : "flex justify-between"
                         }
                         >
