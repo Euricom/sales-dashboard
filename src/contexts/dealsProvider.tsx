@@ -15,6 +15,7 @@ import type {
 import { api } from "~/utils/api";
 import { dealPhases } from "~/lib/constants";
 import type { QueryObserverResult } from "@tanstack/react-query";
+import { SortKey } from "~/components/ui/sortMenu";
 
 type DealContextType = {
   deals: SimplifiedDeal[] | null | undefined; // Allow for null value to indicate loading state
@@ -41,6 +42,9 @@ type DealContextType = {
   addRoleFilter: (role: string) => void,
   removeRoleFilter: (role: string) => void,
   clearRoleFilter: () => void,
+  sortDeals: SortKey,
+  addSortDeals: (sort: SortKey) => void,
+  clearSortDeals: (sort: SortKey) => void,
   getCorrectDealId: (
     groupedDealid: string,
     employee: Employee,
@@ -295,6 +299,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     GroupedDeal[] | undefined | null
   >(null);
 
+  // Sorting deals
+  const [sortDeals, setSortDeals] = useState<SortKey>(SortKey.DateASC);
+
   useEffect(() => {
     if (
       !deals ||
@@ -340,15 +347,18 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     const rolesInStorage = localStorage.getItem("filterRoles");
     const roleIds =  rolesInStorage ? JSON.parse(rolesInStorage) as string[] : [] ;
 
+    const sortInStorage = localStorage.getItem("sortDeals");
+    const sort =  sortInStorage ? sortInStorage as SortKey : SortKey.DateASC ;
+
     setDealIds(dealids);
     setFilterPm(pmIds);
     setFilterRole(roleIds);
+    setSortDeals(sort);
   }, [deals, uniqueDeals]);
 
   useEffect(() => {
     if (!initialDeals) return;
-
-    if (dealIds.length === 0 && !filterPm.length && !filterRole.length) {
+    if (dealIds.length === 0 && !filterPm.length && !filterRole.length && !sortDeals) {
       setFilteredDeals(initialDeals); // No need to filter if no criteria are set
       return;
     }
@@ -364,8 +374,25 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       return matchesDealIds && matchesPMId && matchesCurrentRole;
     });
 
-    setFilteredDeals(filtered);
-  }, [dealIds, filterPm, filterRole, initialDeals]);
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortDeals) {
+        case SortKey.AlphASC:
+          return a.deal.company.name.localeCompare(b.deal.company.name);
+        case SortKey.AlphDESC:
+          return b.deal.company.name.localeCompare(a.deal.company.name);
+        case SortKey.DateDESC: 
+          return (
+            new Date(a.deal.created_at).getTime() -
+            new Date(b.deal.created_at).getTime()
+          );
+        default:
+          return 1;
+      }
+    })
+
+    setFilteredDeals(sorted);
+  }, [dealIds, filterPm, filterRole, initialDeals, sortDeals]);
 
   const getAllPMs = useMemo(() => {
     if (deals)
@@ -445,6 +472,16 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
     setFilterPm([]);
   }
 
+  const addSortDeals = (sort: SortKey) => {
+    localStorage.setItem("sortDeals", sort);
+    setSortDeals(sort);
+  }
+
+  const clearSortDeals = () => {
+    localStorage.setItem("sortDeals", SortKey.DateASC);
+    setSortDeals(SortKey.DateASC);
+  }
+
   return (
     <DealContext.Provider
       value={{
@@ -468,6 +505,9 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
         addRoleFilter,
         removeRoleFilter,
         clearRoleFilter,
+        sortDeals,
+        addSortDeals,
+        clearSortDeals,
         getCorrectDealId,
         updateDealProbability,
         refetch,

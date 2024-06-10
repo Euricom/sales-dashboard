@@ -23,7 +23,7 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
     useContext(EmployeeContext);
 
   const draggableEmployeesInThisRowColumn: DraggableEmployee[] = useMemo(() => {
-    return draggableEmployees
+    return [...draggableEmployees]
       .filter((draggableEmployee) => {
         const rowId = (draggableEmployee.dragId as string).split("_")[1];
         const status = (draggableEmployee.dragId as string).split("_")[2];

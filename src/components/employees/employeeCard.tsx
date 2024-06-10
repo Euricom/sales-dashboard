@@ -159,8 +159,6 @@ export function EmployeeCardDragged({
   }, [setCurrentEmployeeDetailsId]);
 
   const employeeDate = useMemo(() => {
-    const phase = (draggableEmployee.dragId as string).split("/")[1];
-    if (phase === DealName.Opportunities) return;
     if (TLDate) {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // remove time part
@@ -181,9 +179,9 @@ export function EmployeeCardDragged({
           year: "numeric",
         });
       }
-    } else {
-      return "Geen datum";
     }
+
+    return "Geen datum";
   },[TLDate, draggableEmployee.dragId]);
 
   if (!employee) return null;
