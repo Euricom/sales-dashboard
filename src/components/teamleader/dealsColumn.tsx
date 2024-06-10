@@ -5,6 +5,7 @@ import { DealContext } from "~/contexts/dealsProvider";
 import { type GroupedDeal } from "~/lib/types";
 import { X } from "lucide-react";
 import { FilterMenu } from "../ui/filterMenu";
+import { SortMenu } from "../ui/sortMenu";
 
 export default function DealsColumn() {
   const {
@@ -89,6 +90,7 @@ export default function DealsColumn() {
               </div>
             </div>
             <FilterMenu />
+            <SortMenu />
           </div>
         </CardTitle>
       </CardHeader>

@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Filter, FilterX } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { DealContext } from "~/contexts/dealsProvider";
 import {
   DropdownMenu,
@@ -25,22 +25,15 @@ export function FilterMenu() {
   } = useContext(DealContext);
   const [isOpenPMs, setIsOpenPMs] = useState(true);
   const [isOpenRoles, setIsOpenRoles] = useState(true);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const [clearFilterDisplay, setClearFilterDisplay] = useState(isFiltering);
-
-  useEffect(() => {
-    setIsFiltering(!!filterPm.length || !!filterRole.length);
-  }, [filterPm, filterRole]);
-
-  // handles ui bug when selecting a filter where the button would be displayed just before auto-closing
-  const handleFilter = (isOpen: boolean) => {
-    setClearFilterDisplay(isOpen && isFiltering);
-  };
+  const isFiltering = !!filterPm.length || !!filterRole.length;
 
   return (
-      <DropdownMenu onOpenChange={handleFilter}>
+      <DropdownMenu>
         <DropdownMenuTrigger>
           <Filter size={24} />
+          {isFiltering && (
+            <div className={`bg-green-500 absolute top-[0.45rem] right-[2.35rem] w-[0.50rem] h-[0.50rem] rounded-full`}/>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-56 p-2 -my-2 bg-primary border-0 text-white"
@@ -100,12 +93,11 @@ export function FilterMenu() {
               ))}
             </div>
           )}
-          {clearFilterDisplay && (
+          {isFiltering && (
             <DropdownMenuLabel
               onClick={() => {
                 clearPmFilter();
                 clearRoleFilter();
-                handleFilter(false);
               }}
               className="flex items-center justify-center w-full bg-primary rounded-14 py-2 px-3 my-2 text-white border-2"
             >
