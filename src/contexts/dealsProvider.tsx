@@ -374,6 +374,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       return matchesDealIds && matchesPMId && matchesCurrentRole;
     });
 
+
     const sorted = [...filtered].sort((a, b) => {
       switch (sortDeals) {
         case SortKey.AlphASC:
@@ -386,7 +387,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
             new Date(b.deal.created_at).getTime()
           );
         default:
-          return;
+          return 1;
       }
     })
 
