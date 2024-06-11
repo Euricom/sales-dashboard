@@ -55,7 +55,7 @@ export function FilterMenu() {
                   onClick={() => {filterPm.includes(pm.id) ? removePmFilter(pm.id): addPmFilter(pm.id);}}
                   className={
                     filterPm.includes(pm.id)
-                      ? "outline outline-white-400 outline-offset-[-2px] flex justify-between"
+                      ? "flex justify-between bg-white bg-opacity-10"
                       : "flex justify-between"
                   }
                 >
@@ -99,7 +99,7 @@ export function FilterMenu() {
                 clearPmFilter();
                 clearRoleFilter();
               }}
-              className="flex items-center justify-center w-full bg-primary rounded-14 py-2 px-3 my-2 text-white border-2"
+              className="flex items-center justify-center w-full bg-white bg-opacity-10 rounded-14 py-2 px-3 my-2 text-white"
             >
               <FilterX />
             </DropdownMenuLabel>
