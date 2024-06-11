@@ -227,12 +227,10 @@ export const updateDealPhase = async (
 };
 
 export const updateDealPhaseDate = async (
-  id: string,
-  phaseId: string,
-  date: string,
+  deal: DealInfo,
   accessToken: string,
 ) => {
-  const url = `${env.TEAMLEADER_API_URL}/deals.move`;
+  const url = `${env.TEAMLEADER_API_URL}/deals.update`;
   const options: RequestInit = {
     method: "POST",
     headers: {
@@ -240,9 +238,30 @@ export const updateDealPhaseDate = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      id: id,
-      phase_id: phaseId,
-      started_at: date,
+      id: deal.data.id,
+      lead: {
+        customer: {
+          type: deal.data.lead.customer.type,
+          id: deal.data.lead.customer.id,
+        },
+        constact_person: null,
+      },
+      title: deal.data.title,
+      summary: deal.data.summary,
+      source_id: deal.data.source?.id,
+      department_id: deal.data.department?.id,
+      responsible_user_id: deal.data.responsible_user.id,
+      estimated_value: {
+        amount: deal.data.estimated_value.amount,
+        currency: deal.data.estimated_value.currency,
+      },
+      estimated_probability: deal.data.estimated_probability,
+      estimated_closing_date: deal.data.estimated_closing_date,
+      phase_history: deal.data.phase_history,
+      custom_fields: deal.data.custom_fields.map((field) => ({
+        id: field.definition.id,
+        value: field.value,
+      })),
     }),
   };
 

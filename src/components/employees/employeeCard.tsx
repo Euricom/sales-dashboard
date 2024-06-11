@@ -182,7 +182,7 @@ export function EmployeeCardDragged({
     }
 
     return "Geen datum";
-  },[TLDate, draggableEmployee.dragId]);
+  },[TLDate]);
 
   if (!employee) return null;
   const employeeRole = employeeRoles.filter(e => e.name === employee.fields.Job_x0020_title)[0];
@@ -268,10 +268,6 @@ export function EmployeeCardDragged({
   };
 
   const weeksLeftData = weeksLeft();
-
-  const handleDateChange = (date: Date) => {
-    setTLDate(date);
-  };
 
   if (isHeader) {
     return (
@@ -430,7 +426,7 @@ export function EmployeeCardDragged({
                   <DatePickerComponent
                     deal={correctDealInfo}
                     date={TLDate ?? new Date()}
-                    setTLDatum={handleDateChange}
+                    setTLDatum={setTLDate}
                   />
                   {phase !== DealName.Opportunities && (
                   <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>

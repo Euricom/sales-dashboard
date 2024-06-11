@@ -22,6 +22,7 @@ import { api } from "~/utils/api";
 import { type SimplifiedDeal } from "~/server/api/routers/teamleader/types";
 import React from "react";
 import { useToast } from "~/components/ui/use-toast";
+import { PhaseId } from "~/lib/types";
 
 export function DatePickerComponent({
   deal,
@@ -31,6 +32,7 @@ export function DatePickerComponent({
   deal: SimplifiedDeal;
   date: Date;
   setTLDatum: (date: Date) => void;
+  phase: PhaseId
 }) {
   const dealDateUpdater = api.teamleader.updatePhaseDate.useMutation();
   const { toast } = useToast();
@@ -46,7 +48,7 @@ export function DatePickerComponent({
     ).toISOString();
     // remove seconds from the time and add timezone
     const isoString = dateObject.substring(0, dateObject.length - 5) + "+02:00";
-
+  
     const input = {
       id: deal.id,
       phaseId: deal.deal_phase.id,
