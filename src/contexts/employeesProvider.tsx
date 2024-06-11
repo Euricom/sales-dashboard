@@ -192,7 +192,7 @@ export const EmployeeContextProvider: React.FC<
 
       // Find employee by email
       const employee = employees.find(
-        (emp) => emp.fields.Euricom_x0020_email === emailValue,
+        (emp) => emp.fields.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
       );
       if (!employee) return;
 
@@ -269,11 +269,11 @@ export const EmployeeContextProvider: React.FC<
 
       // Find employee by email
       const employee = employees.find(
-        (emp) => emp.fields.Euricom_x0020_email === emailValue,
+        (emp) => emp.fields.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
       );
       if (!employee) {
         // Add the employee to the database
-        emailValues.push(emailValue);
+        emailValues.push(emailValue.toLowerCase());
       }
     });
     return emailValues;

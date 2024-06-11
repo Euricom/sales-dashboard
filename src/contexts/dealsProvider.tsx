@@ -412,7 +412,7 @@ export const DealContextProvider: React.FC<DealContextProviderProps> = ({
       if (deal) {
         // check if the email of the deal is the same as the email of the employee
         if (
-          deal.custom_fields[0]?.value === employee.fields.Euricom_x0020_email
+          deal.custom_fields[0]?.value?.toLowerCase() === employee.fields.Euricom_x0020_email?.toLowerCase()
         ) {
           const groupedDeal = uniqueDeals?.find((groupedDeal) =>
             groupedDeal.value.includes(EmployeeDeal.dealId),
