@@ -4,7 +4,6 @@ import { useState } from "react";
 import { api } from "~/utils/api";
 
 export function BugReport() {
-  const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const mailMutator = api.mailer.sendMail.useMutation();
 

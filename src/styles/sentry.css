@@ -1,0 +1,7 @@
+@media (min-width: 1024px) {
+  #sentry-feedback {
+    --left: auto;
+    --right: 6rem;
+    --bottom: 1.5rem;
+  }
+}
