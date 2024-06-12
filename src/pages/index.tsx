@@ -8,7 +8,6 @@ import { CollapsibleCardGroups } from "~/components/employees/collapsibleCardGro
 import { ActionMenu } from "~/components/ui/actionMenu";
 import { Toaster } from "~/components/ui/toaster";
 import Login from "./login";
-import { BugReport } from "~/components/ui/bugReport";
 import { dealPhases } from "~/lib/constants";
 import DealsColumn from "~/components/teamleader/dealsColumn";
 
@@ -38,7 +37,6 @@ export default function Home() {
                     {dealPhases.map((dealPhase) => <BoardColumn key={dealPhase.id} dealPhase={dealPhase} />)}
                   </div>
                 </div>
-                <BugReport />
                 <ActionMenu />
               </main>
               <Toaster />

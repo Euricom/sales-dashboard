@@ -154,40 +154,38 @@ export const teamleaderRouter = createTRPCRouter({
       }
     }),
 
-    updatePhaseDate: protectedProcedure.input(z.object({ id: z.string(), phaseId: z.string(), date: z.string() })).mutation(async (options) => {
-      const accessToken = options.ctx.session.token.accessToken;
-      const dealId = options.input.id;
-      const phaseId = options.input.phaseId;
-      const date = options.input.date;
-      try {
-        if (!accessToken) {
-          throw new Error("Access token not found");
-        }
-        const response = await updateDealPhaseDate(dealId, phaseId, date, accessToken);
-        if (!response) {
-          throw new Error("Failed to move deal in Teamleader");
-        }
-      } catch (error) {
-        console.error("Error in moveDeal:", error);
+  updatePhaseDate: protectedProcedure.input(z.object({ id: z.string(), phaseId: z.string(), date: z.string() })).mutation(async (options) => {
+    const accessToken = options.ctx.session.token.accessToken;
+    const dealId = options.input.id;
+    const phaseId = options.input.phaseId;
+    const date = options.input.date;
+    try {
+      if (!accessToken) {
+        throw new Error("Access token not found");
       }
-    }),
+      const response = await updateDealPhaseDate(dealId, phaseId, date, accessToken);
+      if (!response) {
+        throw new Error("Failed to move deal in Teamleader");
+      }
+    } catch (error) {
+      console.error("Error in moveDeal:", error);
+    }
+  }),
 
-    deleteDeal: protectedProcedure.input(z.object({ id: z.string() })).mutation(async (options) => {
-      const accessToken = options.ctx.session.token.accessToken;
-      const dealId = options.input.id;
-      try {
-        if (!accessToken) {
-          throw new Error("Access token not found");
-        }
-        const response = await deleteDeal(accessToken, dealId);
-        if (!response) {
-          throw new Error("Failed to delete deal in Teamleader");
-        }
-        return Promise.resolve({ data: { id: dealId, type: "delete" } });
-      } catch (error) {
-        console.error("Error in deal delete:", error);
+  deleteDeal: protectedProcedure.input(z.object({ id: z.string() })).mutation(async (options) => {
+    const accessToken = options.ctx.session.token.accessToken;
+    const dealId = options.input.id;
+    try {
+      if (!accessToken) {
+        throw new Error("Access token not found");
       }
-    })
+      const response = await deleteDeal(accessToken, dealId);
+      if (!response) {
+        throw new Error("Failed to delete deal in Teamleader");
+      }
+      return Promise.resolve({ data: { id: dealId, type: "delete" } });
+    } catch (error) {
+      console.error("Error in deal delete:", error);
+    }
+  })
 });
-
-
