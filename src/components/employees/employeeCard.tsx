@@ -438,6 +438,11 @@ export function EmployeeCardDragged({
                     date={TLDate ?? new Date()}
                     setTLDatum={handleDateChange}
                   />
+                  {phase !== DealName.Opportunities && (
+                    <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
+                      <Trash2 width={20}/>
+                    </Button>
+                  )}
                 </div>
               )} */}
 
