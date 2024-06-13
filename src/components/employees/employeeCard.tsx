@@ -422,10 +422,16 @@ export function EmployeeCardDragged({
               </div>
               <div className="px-2 flex gap-2">
                 <Home width={20} />
-                <p className="font-light text-nowrap">{employee.fields.City}</p>
+                <p className="font-light text-nowrap w-full">{employee.fields.City}</p>
+                {phase !== DealName.Opportunities && groupedDealId && (
+                  <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
+                    <Trash2 width={20}/>
+                  </Button>
+                  )}
               </div>
 
-              {correctDealInfo && groupedDealId && (
+              {/* TODO: enable once phase_history can be updated*/}
+              {/* {correctDealInfo && groupedDealId && (
                 <div className="flex gap-1">
                   <DatePickerComponent
                     deal={correctDealInfo}
@@ -433,12 +439,12 @@ export function EmployeeCardDragged({
                     setTLDatum={handleDateChange}
                   />
                   {phase !== DealName.Opportunities && (
-                  <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
-                    <Trash2 width={20}/>
-                  </Button>
+                    <Button variant={"destructive"} size={"iconSm"} onClick={() => deleteDeal(groupedDealId, employee)}>
+                      <Trash2 width={20}/>
+                    </Button>
                   )}
                 </div>
-              )}
+              )} */}
 
               {phase !== DealName.Opportunities && (
                 <ProbabilityPicker
