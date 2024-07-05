@@ -36,7 +36,7 @@ export interface Deal {
   estimated_probability: number | null;
   current_phase: {
     type: string;
-    id: string;
+    id: PhaseId;
   };
   responsible_user: {
     type: string;

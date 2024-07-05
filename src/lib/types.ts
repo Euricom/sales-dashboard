@@ -79,7 +79,8 @@ export enum PhaseId {
   Proposed = "1825bd2c-03bf-097c-8549-686bf8f96f4c",
   Interview = "8125dec5-a0ed-0775-a643-774979b85e23",
   Retained = "364b6867-54b9-0694-aa41-cf2ad6617028",
-  NonRetained = "7ec460c1-416a-03ce-8460-0299ae10bb38"
+  NonRetained = "7ec460c1-416a-03ce-8460-0299ae10bb38",
+  QuotationSend = "fd736e32-fb8a-092a-a242-01166d4c57cc"
 }
 
 export enum DealName {
