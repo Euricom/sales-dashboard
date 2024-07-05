@@ -1,5 +1,6 @@
 import { env } from "~/env";
 import type { Tokens, dataObject, DealInfo } from "./types";
+import { PhaseId } from "~/lib/types";
 
 export const refreshAccessToken = async (refreshToken: string) => {
   const url = `${env.TEAMLEADER_ACCESS_TOKEN_URL}`;
@@ -52,7 +53,14 @@ export const getDeals = async (accessToken: string) => {
       console.error("Failed to fetch data from Teamleader");
     }
     const data = (await response.json()) as dataObject;
-    return data;
+    
+    // Filter deals in phase Quotation_send
+    const filteredData = {
+      ...data, 
+      data: data.data.filter(deal => deal.current_phase.id.toString() !== PhaseId.QuotationSend.toString())
+    };
+
+    return filteredData;
   } catch (error) {
     console.error("Error in getDeals:", error);
   }
