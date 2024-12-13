@@ -80,7 +80,7 @@ export const EmployeeContextProvider: React.FC<
   const draggableEmployees: DraggableEmployee[] = useMemo(() => {
     if (!employees) return [];
     return employees.flatMap((employee) =>
-      employee.rows.map((row) => {
+      employee.rows?.map((row) => {
         if (row === "0") {
           const statusIndicator =
             employee.fields.Status === "Bench"
@@ -129,7 +129,7 @@ export const EmployeeContextProvider: React.FC<
 
     return dealsWithRetainedEmployees.map((retainedDeal) => {
       return employees.find((employee) => {
-        return employee.deals.some(
+        return employee.deals?.some(
           (employeeDeal) => employeeDeal.dealId === retainedDeal.id,
         );
       });
@@ -192,7 +192,7 @@ export const EmployeeContextProvider: React.FC<
 
       // Find employee by email
       const employee = employees.find(
-        (emp) => emp.fields.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
+        (emp) => emp.fields?.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
       );
       if (!employee) return;
 
@@ -269,7 +269,7 @@ export const EmployeeContextProvider: React.FC<
 
       // Find employee by email
       const employee = employees.find(
-        (emp) => emp.fields.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
+        (emp) => emp.fields?.Euricom_x0020_email?.toLowerCase() === emailValue.toLowerCase(),
       );
       if (!employee) {
         // Add the employee to the database
@@ -336,7 +336,6 @@ export const EmployeeContextProvider: React.FC<
     localStorage.setItem("employeeId", "");
     setEmployeeId("");
   }
-  
 
   return (
     <EmployeeContext.Provider
