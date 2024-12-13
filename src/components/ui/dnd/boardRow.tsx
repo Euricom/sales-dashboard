@@ -25,8 +25,8 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
   const draggableEmployeesInThisRowColumn: DraggableEmployee[] = useMemo(() => {
     return [...draggableEmployees]
       .filter((draggableEmployee) => {
-        const rowId = (draggableEmployee.dragId as string).split("_")[1];
-        const status = (draggableEmployee.dragId as string).split("_")[2];
+        const rowId = (draggableEmployee?.dragId as string)?.split("_")[1];
+        const status = (draggableEmployee?.dragId as string)?.split("_")[2];
 
         if (!isHeader && !status) {
           return rowId === row.rowId;
@@ -129,13 +129,13 @@ export function BoardRow({ row, isHeader, rowStatus }: BoardRowProps) {
           id={row.rowId}
           disabled={isFiltering && isHeader}
         >
-          {draggableEmployeesInThisRowColumn?.map(e =>!retainedEmployeeIds.includes((e.dragId as string).split("_")[0]) && (
-              <EmployeeCardDragged
-                key={e.dragId}
-                draggableEmployee={e}
-                isHeader={isHeader}
-              />
-            ),
+          {draggableEmployeesInThisRowColumn?.map(e => !retainedEmployeeIds.includes((e.dragId as string).split("_")[0]) && (
+            <EmployeeCardDragged
+              key={e.dragId}
+              draggableEmployee={e}
+              isHeader={isHeader}
+            />
+          ),
           )}
           {retainedDraggableEmployeesInThisRowColumn.length > 0 ? (
             <>
