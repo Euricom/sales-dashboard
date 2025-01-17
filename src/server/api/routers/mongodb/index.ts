@@ -1,5 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createEmployee, getInitialEmployees, updateEmployee } from "./mongoEmployeeClient";
+import {
+  createEmployee,
+  getInitialEmployees,
+  updateEmployee,
+} from "./mongoEmployeeClient";
 import { z } from "zod";
 import { deleteDeal, updateDeal } from "./mongoDealsClient";
 import type { Employee } from "~/lib/types";
@@ -22,25 +26,29 @@ export const mongodbRouter = createTRPCRouter({
         employee: z.object({
           employeeId: z.string(),
           rows: z.array(z.string()),
-          deals: z.array(z.object({
-            dealId: z.string(),
-            date: z.date().nullable(),
-          })),
+          deals: z.array(
+            z.object({
+              dealId: z.string(),
+              date: z.date().nullable(),
+            }),
+          ),
           shouldCreate: z.boolean().optional(),
         }),
         newRowId: z.string().optional(),
       }),
     )
-    
+
     .mutation(async ({ input }) => {
       if (input.employee.shouldCreate) {
         await createEmployee({
           employeeId: input.employee.employeeId,
           rows: input.employee.rows,
           deals: input.employee.deals,
-        })
+        });
+        console.log("CREATED EMPLOYEE: ", JSON.stringify(input));
       } else {
         await updateEmployee(input.employee, input.newRowId ?? undefined);
+        console.log("UPDATED EMPLOYEE: ", JSON.stringify(input));
       }
     }),
 
@@ -53,9 +61,10 @@ export const mongodbRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await updateDeal(input);
+      console.log("UPDATED DEAL: ", JSON.stringify(input));
     }),
 
-    deleteDeal: protectedProcedure
+  deleteDeal: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -63,5 +72,6 @@ export const mongodbRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await deleteDeal(input);
+      console.log("DELETED DEAL: ", JSON.stringify(input));
     }),
 });
